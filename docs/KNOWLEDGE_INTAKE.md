@@ -10,12 +10,12 @@
 |---|---|---|
 | Obsidian | raw note、仮説、悩み、リンク、探索 | intake |
 | local memory / prior run | 再利用できそうな失敗、判断、証跡 | candidate |
-| external docs / GitHub | 公式・一次情報、OSS 候補、先行事例 | source packet |
+| external docs / GitHub / X / Web | 公式・一次情報、OSS 候補、先行事例、他者の詰まり | source packet |
 | `engineering-brain` | 採用済み rule、gate、ADR、test、registry | SSOT |
 
 ## Intake flow
 
-1. 候補を拾う: Obsidian、local memory、repo issue、PR review、失敗ログ、既存 skill から候補を抽出する。
+1. 候補を拾う: Vision、Obsidian、local memory、repo issue、PR review、失敗ログ、既存 skill、GitHub、X、Web から候補を抽出する。
 2. 事実を分ける: source、推測、不明、古い可能性、current verification required を分離する。
 3. 採用単位へ畳む: rule、gate、ADR、test、registry item、runbook、skill entry のどれにするか決める。
 4. 既存を探す: repo-local、workspace shared、公式機能、GitHub / OSS を見て、車輪の再発明を避ける。
@@ -47,12 +47,12 @@
 - public 化、外部共有、release、告知。
 - merge、destructive delete、repo settings / auth 変更。
 
-## Obsidian 連携
+## Obsidian / community 連携
 
-Obsidian は「入口」として扱う。正本化する時は、Obsidian note をそのまま貼らず、次の短い packet へ圧縮してから repo へ入れる。
+Obsidian、Vision、GitHub、X、Web は「入口」として扱う。正本化する時は、raw note や外部投稿をそのまま貼らず、次の短い packet へ圧縮してから repo へ入れる。外部 source の詳しい扱いは [Community learning intake](COMMUNITY_LEARNING_INTAKE.md) を参照する。
 
 ```yaml
-source: obsidian|memory|pr_review|failure_log|official_docs|github
+source: vision|obsidian|memory|pr_review|failure_log|official_docs|github|x|web
 claim:
 evidence:
 adoption_target: adr|docs|registry|tests|skill

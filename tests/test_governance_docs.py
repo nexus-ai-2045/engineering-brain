@@ -59,3 +59,16 @@ def test_next_goal_design_defines_run_packet_sequence() -> None:
     assert "PR packet generator" in doc
     assert "candidate gate is advisory" in doc
 
+
+def test_community_learning_intake_keeps_external_sources_as_candidates() -> None:
+    doc = read_doc("docs/COMMUNITY_LEARNING_INTAKE.md")
+
+    for source in ["vision", "memory", "github", "x", "web", "official"]:
+        assert source in doc
+
+    assert "source pointer" in doc
+    assert "raw source" in doc
+    assert "hold" in doc
+    assert "adopt" in doc
+    assert "external write" in doc
+
