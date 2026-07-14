@@ -13,8 +13,8 @@
 | ADR | covered | `docs/adr/` | 後続の設計判断で継続追加 |
 | Obsidian intake | covered | `docs/KNOWLEDGE_INTAKE.md` | 自動候補抽出は別 slice |
 | Local learning absorption | partial | `docs/KNOWLEDGE_INTAKE.md` | `registry/local-learnings.yaml` を追加する |
-| Reinvention avoidance | covered | `docs/AUTOPILOT_GOAL_DESIGN.md` | run packet 実装で機械検査へ昇格 |
-| Research / GitHub method | covered | `docs/AUTOPILOT_GOAL_DESIGN.md` | source packet schema を追加する |
+| Reinvention avoidance | covered | `docs/AUTOPILOT_GOAL_DESIGN.md`, `registry/adoption-units.yaml` | run packet 実装で evidence 付き検査へ昇格 |
+| Research / GitHub method | covered | `docs/AUTOPILOT_GOAL_DESIGN.md`, `reinvention_candidate_research_gate` | source packet schema を追加する |
 | TDD / regression | covered | `README.md`, `tests/` | lifecycle command で選択可能にする |
 | Smoke / preflight / E2E | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | `registry/verification-profiles.yaml` を追加する |
 | Security / containment | covered | `docs/OPERATING_MODEL.md`, `SECURITY.md` | codex-security scan slice を追加する |

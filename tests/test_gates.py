@@ -39,3 +39,18 @@ def test_route_task_selects_public_path_gate() -> None:
 def test_route_task_selects_public_path_gate_from_japanese_phrase() -> None:
     result = route_task("絶対パスを公開候補に残さない")
     assert "public_path_redaction_gate" in result["selected_units"]
+
+
+def test_route_task_always_surfaces_reinvention_candidate_gate() -> None:
+    result = route_task("軽いドキュメント修正")
+
+    assert "reinvention_candidate_research_gate" in result["selected_units"]
+    assert "reinvention_check" in result["inferred_triggers"]
+
+
+def test_candidate_gate_is_advisory_not_blocking() -> None:
+    result = evaluate_triggers(["reinvention_check"])
+
+    assert result["overall"] == "ok"
+    assert result["units"][0]["id"] == "reinvention_candidate_research_gate"
+    assert result["units"][0]["status"] == "candidate"

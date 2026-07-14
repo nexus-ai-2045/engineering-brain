@@ -113,3 +113,24 @@ units:
     insufficient_if:
       - `<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` へ置換せず、実ユーザー名入り path を docs / registry / PR 文面に残している
       - scan が closeout に接続されていない
+
+  - id: reinvention_candidate_research_gate
+    status: candidate
+    source_refs:
+      - <REPO>/docs/AUTOPILOT_GOAL_DESIGN.md
+      - <REPO>/docs/KNOWLEDGE_INTAKE.md
+      - <REPO>/registry/technology-sources.yaml
+    applies_when: [reinvention_check, implementation, bug_fix, refactor, design, research, review, pr]
+    timing: [before_work, before_patch, before_pr_prepare]
+    boundary: 実装前に repo-local、workspace shared、公式機能、GitHub/OSS 候補を確認し、既存で足りるものを作り直さない。
+    route: candidate-research
+    guarantee_tier: G1 advisory
+    checks:
+      - level: L0 advisory
+        command: python -m devbrain catalog --domain <domain> --json
+      - level: L0 repo-search
+        command: rg <keyword> .
+    insufficient_if:
+      - 既存 helper / shared script / official capability を見ずに build を選ぶ
+      - candidate と adopted の区別がない
+      - GitHub / OSS 候補の maintenance / license / security posture が未確認
