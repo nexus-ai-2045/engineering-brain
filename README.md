@@ -36,6 +36,12 @@ python -m devbrain closeout --repo . --json
 
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。
 
+## ADR / knowledge intake
+
+設計判断は [ADR](docs/adr/README.md) に残します。Obsidian や local memory は正本ではなく入口として扱い、採用済みの知見だけを [Knowledge intake](docs/KNOWLEDGE_INTAKE.md) の流れで docs / registry / tests / ADR / skill source へ昇格します。
+
+必須概念がどこまで入っているかは [Concept coverage](docs/CONCEPT_COVERAGE.md) を参照します。
+
 ## 技術別ベスプラ catalog
 
 `registry/technology-sources.yaml` に Go、Bun、Vue/Nuxt、Azure、サーバー/API、コンテナ/Kubernetes、GitHub repo lifecycle の公式・一次情報 source を `candidate` として登録しています。
