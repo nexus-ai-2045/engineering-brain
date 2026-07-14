@@ -43,6 +43,7 @@ user task
 | 5 | local learnings registry | `registry/local-learnings.yaml`, schema, intake tests | local struggle を rule / failure pattern として吸収できる |
 | 6 | PR packet generator | `devbrain/review.py`, PR body template | visible scope / checks / unknown / stopline を日本語で生成できる |
 | 7 | community learning intake | `docs/COMMUNITY_LEARNING_INTAKE.md`, source packet importer | Vision / GitHub / X / Web の詰まりを candidate 化できる |
+| 8 | field review loop | `docs/FIELD_REVIEW_LOOP.md`, experiment packet | browser / Obsidian capture をローカルで試し、人間が実地レビューできる |
 
 ## PR 3: run packet MVP
 

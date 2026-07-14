@@ -44,6 +44,8 @@ Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` te
 
 Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community learning intake](docs/COMMUNITY_LEARNING_INTAKE.md) の source packet として扱います。
 
+ブラウズ中に良いと思ったものや Obsidian に落とした note を採用する時は、[Field review loop](docs/FIELD_REVIEW_LOOP.md) で local experiment と human field review を通します。
+
 必須概念がどこまで入っているかは [Concept coverage](docs/CONCEPT_COVERAGE.md) を参照します。
 
 ## 技術別ベスプラ catalog

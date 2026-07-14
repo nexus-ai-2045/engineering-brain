@@ -11,6 +11,7 @@
 | Obsidian | raw note、仮説、悩み、リンク、探索 | intake |
 | local memory / prior run | 再利用できそうな失敗、判断、証跡 | candidate |
 | external docs / GitHub / X / Web | 公式・一次情報、OSS 候補、先行事例、他者の詰まり | source packet |
+| browser / Obsidian capture | ブラウズ中に良いと思った情報、Web clipper note | candidate packet |
 | `engineering-brain` | 採用済み rule、gate、ADR、test、registry | SSOT |
 
 ## Intake flow
@@ -20,7 +21,8 @@
 3. 採用単位へ畳む: rule、gate、ADR、test、registry item、runbook、skill entry のどれにするか決める。
 4. 既存を探す: repo-local、workspace shared、公式機能、GitHub / OSS を見て、車輪の再発明を避ける。
 5. PR にする: 採用理由、非採用理由、停止線、検証結果を PR packet に入れる。
-6. 反映する: review comment や失敗を policy / gate / test に吸収する。
+6. 実地レビューする: local experiment と human field review で効果を見る。
+7. 反映する: review comment や失敗を policy / gate / test に吸収する。
 
 ## 採用形式
 
@@ -49,7 +51,7 @@
 
 ## Obsidian / community 連携
 
-Obsidian、Vision、GitHub、X、Web は「入口」として扱う。正本化する時は、raw note や外部投稿をそのまま貼らず、次の短い packet へ圧縮してから repo へ入れる。外部 source の詳しい扱いは [Community learning intake](COMMUNITY_LEARNING_INTAKE.md) を参照する。
+Obsidian、Vision、GitHub、X、Web は「入口」として扱う。正本化する時は、raw note や外部投稿をそのまま貼らず、次の短い packet へ圧縮してから repo へ入れる。外部 source の詳しい扱いは [Community learning intake](COMMUNITY_LEARNING_INTAKE.md)、実地レビューは [Field review loop](FIELD_REVIEW_LOOP.md) を参照する。
 
 ```yaml
 source: vision|obsidian|memory|pr_review|failure_log|official_docs|github|x|web

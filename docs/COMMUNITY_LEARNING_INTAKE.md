@@ -111,6 +111,17 @@ Web 上の blog、forum、Q&A は candidate として扱う。採用する時は
 - public 共有。
 - adopted への昇格。
 
+## Field review
+
+外部や Obsidian から拾った candidate は、採用前に [Field review loop](FIELD_REVIEW_LOOP.md) へ通す。
+
+最低限、次を確認する。
+
+- ローカルで小さく試せるか。
+- 実行手順が残っているか。
+- 実際の効果が観測できたか。
+- 人間が実地レビューして `adopt|hold|reject` を決めたか。
+
 ## Query families
 
 | target | query examples |
