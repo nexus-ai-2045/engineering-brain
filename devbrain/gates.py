@@ -15,7 +15,7 @@ PUBLIC_PATH_TRIGGERS = {"public_path", "path_redaction", "absolute_path", "perso
 def route_task(task: str) -> dict[str, Any]:
     normalized_task = task.lower()
     words = {part.strip(".,:/\\").lower() for part in task.split()}
-    inferred = set()
+    inferred = {"reinvention_check"}
     if {"bug", "fix", "regression"}.intersection(words):
         inferred.add("bug_fix")
     if {"implement", "implementation", "code", "refactor", "実装"}.intersection(words):
@@ -31,7 +31,7 @@ def route_task(task: str) -> dict[str, Any]:
     if not inferred:
         inferred.add("implementation")
 
-    selected = select_units(sorted(inferred))
+    selected = select_units(sorted(inferred), include_candidates=True)
     blocked = sorted(PUBLIC_TRIGGERS.intersection(inferred))
     if "public_release" in inferred:
         blocked.extend(["push", "pr", "github_visibility"])
@@ -52,7 +52,7 @@ def route_task(task: str) -> dict[str, Any]:
 
 
 def evaluate_triggers(triggers: list[str]) -> dict[str, Any]:
-    selected = select_units(triggers)
+    selected = select_units(triggers, include_candidates=True)
     requested_public_action = any(trigger in PUBLIC_TRIGGERS for trigger in triggers)
     return {
         "triggers": triggers,
