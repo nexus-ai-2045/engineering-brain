@@ -91,3 +91,18 @@ def test_field_review_loop_requires_local_trial_and_human_review() -> None:
     assert "external write" in doc
     assert "production mutation" in doc
 
+
+def test_pdca_feedback_loop_connects_execution_back_to_repo() -> None:
+    doc = read_doc("docs/PDCA_FEEDBACK_LOOP.md")
+
+    for term in ["Plan", "Do", "Check", "Act", "next Plan"]:
+        assert term in doc
+
+    for target in ["docs", "registry", "tests", "ADR", "skill"]:
+        assert target in doc
+
+    assert "human field review" in doc
+    assert "expected effect" in doc
+    assert "local-learnings.yaml" in doc
+    assert "Check なしに Act しない" in doc
+

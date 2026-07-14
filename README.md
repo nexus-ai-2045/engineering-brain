@@ -46,6 +46,8 @@ Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community lea
 
 ブラウズ中に良いと思ったものや Obsidian に落とした note を採用する時は、[Field review loop](docs/FIELD_REVIEW_LOOP.md) で local experiment と human field review を通します。
 
+実行結果とレビューを次の gate / docs / registry / tests へ戻す仕組みは [PDCA feedback loop](docs/PDCA_FEEDBACK_LOOP.md) を参照します。
+
 必須概念がどこまで入っているかは [Concept coverage](docs/CONCEPT_COVERAGE.md) を参照します。
 
 ## 技術別ベスプラ catalog

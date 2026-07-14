@@ -24,6 +24,7 @@
 | Human visual review | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | review state を run packet に入れる |
 | Merge / branch cleanup | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | finish planner を追加する |
 | Operation guarantee | covered | `devbrain closeout`, `docs/OPERATING_MODEL.md` | evidence-based closeout v2 を追加する |
+| PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
 | Runtime skill | partial | local installed skill only | `skills/engineering-autopilot/` を repo-owned thin skill として追加する |
 | Best-practice source catalog | covered | `registry/technology-sources.yaml` | adopted / candidate / hold status を強める |
 | Public readiness | partial | `PUBLIC_READY.md` | public 化時だけ review packet で再測定 |
