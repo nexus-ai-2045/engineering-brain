@@ -8,11 +8,11 @@ checked_at: 2026-07-15 JST
 
 `engineering-brain` was created as a private clean-history recreation of `nexus-ai-2045/dev-brain`.
 
-The legacy `dev-brain` repo remains private and acts as the migration reference for early PR history, including PR #2 through PR #7. The new repo starts from a reviewed snapshot instead of importing the entire work-in-progress history.
+The legacy `dev-brain` repo was kept private during migration verification, then deleted after current-turn approval on 2026-07-15 JST. The new repo starts from a reviewed snapshot instead of importing the entire work-in-progress history.
 
 ## Policy
 
-- `nexus-ai-2045/dev-brain` is not deleted or archived by this migration.
+- `nexus-ai-2045/dev-brain` was deleted after migration verification and explicit approval.
 - `nexus-ai-2045/engineering-brain` is private.
 - Public visibility remains out of scope.
 - Runtime skill installation is not switched until `engineering-autopilot` is a thin CLI-backed repo-owned skill.

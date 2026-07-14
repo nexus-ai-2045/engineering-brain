@@ -6,7 +6,7 @@ checked_at: 2026-07-15 JST
 
 ## 現在地
 
-`engineering-brain` は private clean-history recreation 後の live repo である。legacy `dev-brain` は private migration reference として残す。
+`engineering-brain` は private clean-history recreation 後の live repo である。legacy `dev-brain` は migration verification 後に削除済みであり、今後の正本はこの repo に一本化する。
 
 PR #1 は broad / conflicting / stale な draft として close 済み。採用する要素は [PR #1 migration ledger](PR1_MIGRATION_LEDGER.md) に従って小さい PR に分ける。
 

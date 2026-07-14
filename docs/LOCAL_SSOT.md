@@ -28,8 +28,8 @@ checked_at: 2026-07-15 JST
 |---|---|---|
 | `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain` | local source of truth / 実装・docs・tests・registry | yes |
 | `https://github.com/nexus-ai-2045/engineering-brain` | private GitHub mirror / review surface | no |
-| `<PROJECTS_ROOT>/Documents/repos/second-brain/dev-brain` | legacy private source / migration reference | no |
-| `https://github.com/nexus-ai-2045/dev-brain` | legacy private GitHub mirror / PR history reference | no |
+| `<PROJECTS_ROOT>/Documents/repos/second-brain/dev-brain` | deleted legacy private source | no |
+| `https://github.com/nexus-ai-2045/dev-brain` | deleted legacy private GitHub repo | no |
 | `<PROJECTS_ROOT>/dev-brain` | stale / non-canonical clone with later experimental commits | no |
 | `<USER_HOME>/.codex/skills/dev-brain-autopilot` | runtime install copy, if present | no |
 | `<USER_HOME>/.codex/skills/engineering-autopilot` | future runtime install candidate | no |
@@ -50,7 +50,7 @@ checked_at: 2026-07-15 JST
 ## Guard
 
 - 変更はまず canonical path に入れる。
-- legacy `dev-brain` の commit は、採用前に canonical repo へ cherry-pick / patch として評価する。
+- legacy `dev-brain` 由来の未採用知見が見つかった場合は、canonical repo へ直接取り込まず、knowledge intake packet として評価する。
 - GitHub push / PR / repo create / visibility public は current-turn explicit approval まで実行しない。
 - GitHub write 前に `gh auth status` と commit identity を確認する。
 - `engineering-autopilot` を live runtime skill と呼ぶのは、repo-owned skill と runtime install copy の cutover が完了してからにする。

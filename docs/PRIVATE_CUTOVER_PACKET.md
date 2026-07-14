@@ -12,7 +12,7 @@ checked_at: 2026-07-15 JST
 
 - `dev-brain` は作業区間として始まり、将来 public 化する名前と責務があとから固まった。
 - public 前に repo 名、local directory、repo-owned skill、runtime skill を揃える方が、後続の説明と運用が単純になる。
-- 既存 PR history は `dev-brain` private repo に残せる。公開候補 repo には、整理済み snapshot と migration notes だけを持ち込める。
+- 既存 PR history は clean-history 方針により新 repo へ持ち込まない。公開候補 repo には、整理済み snapshot と migration notes だけを持ち込める。
 - GitHub rename は便利だが、redirect、Actions、external reference、local remote の更新が残る。作業区間を clean に閉じたい今回の目的には recreate が合う。
 
 ## Decision
@@ -69,7 +69,7 @@ After the new private repo is verified, update the SSOT registry and runtime poi
 - personal path / old identity scan
 - GitHub identity probe for `nexus-ai-2045`
 - target repo availability check: `gh repo view nexus-ai-2045/engineering-brain`
-- source repo remains private: `gh repo view nexus-ai-2045/dev-brain --json visibility`
+- source repo was deleted after migration verification and explicit approval.
 - review of `PUBLIC_READY.md`, `SECURITY.md`, README, docs, registry, and commit-history policy
 
 ## Human Approval Text
@@ -91,8 +91,8 @@ The execution approval was provided for private repo creation and local target c
 
 If any cutover step fails:
 
-- keep `nexus-ai-2045/dev-brain` as the private migration reference
-- do not delete or archive `dev-brain`
+- keep migration notes and ADR as the durable reference
+- do not recreate `dev-brain`
 - remove the incomplete local target directory only after confirming it contains no unique work
 - if the target private GitHub repo was created but not adopted, leave it private and mark it as blocked, or delete it only after explicit confirmation
 
@@ -101,5 +101,5 @@ If any cutover step fails:
 - no public visibility change
 - no external announcement
 - no release
-- no automatic deletion of `dev-brain`
+- no automatic deletion of unrelated repositories
 - no runtime skill install switch until the repo-owned skill is thin and CLI-backed
