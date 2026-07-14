@@ -48,3 +48,14 @@ def test_concept_coverage_tracks_required_gaps() -> None:
     assert "devbrain run" in doc
     assert "registry/local-learnings.yaml" in doc
 
+
+def test_next_goal_design_defines_run_packet_sequence() -> None:
+    doc = read_doc("docs/NEXT_GOAL_DESIGN.md")
+
+    assert "run packet" in doc
+    assert "reinvention_check" in doc
+    assert "research packet" in doc
+    assert "registry/local-learnings.yaml" in doc
+    assert "PR packet generator" in doc
+    assert "candidate gate is advisory" in doc
+

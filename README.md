@@ -36,6 +36,8 @@ python -m devbrain closeout --repo . --json
 
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。
 
+直近の実装順序は [Next goal design](docs/NEXT_GOAL_DESIGN.md) を参照します。
+
 ## ADR / knowledge intake
 
 設計判断は [ADR](docs/adr/README.md) に残します。Obsidian や local memory は正本ではなく入口として扱い、採用済みの知見だけを [Knowledge intake](docs/KNOWLEDGE_INTAKE.md) の流れで docs / registry / tests / ADR / skill source へ昇格します。
