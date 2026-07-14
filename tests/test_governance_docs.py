@@ -72,3 +72,22 @@ def test_community_learning_intake_keeps_external_sources_as_candidates() -> Non
     assert "adopt" in doc
     assert "external write" in doc
 
+
+def test_field_review_loop_requires_local_trial_and_human_review() -> None:
+    doc = read_doc("docs/FIELD_REVIEW_LOOP.md")
+
+    for term in [
+        "browser discovery",
+        "Obsidian capture",
+        "candidate packet",
+        "local experiment plan",
+        "local trial",
+        "human field review",
+        "adopt|hold|reject",
+    ]:
+        assert term in doc
+
+    assert "raw dump" in doc
+    assert "external write" in doc
+    assert "production mutation" in doc
+
