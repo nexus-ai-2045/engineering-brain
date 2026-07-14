@@ -189,4 +189,5 @@ field review loop が機能していると言えるのは、次を満たす時�
 - local trial の実行手順と効果が記録される。
 - human field review が `adopt|hold|reject` を決める。
 - adopted の場合は docs / registry / tests / ADR のどれかに接続される。
+- Field review の結果は [PDCA feedback loop](PDCA_FEEDBACK_LOOP.md) の `Check` と `Act` に戻す。
 

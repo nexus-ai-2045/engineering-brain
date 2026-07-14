@@ -44,6 +44,7 @@ user task
 | 6 | PR packet generator | `devbrain/review.py`, PR body template | visible scope / checks / unknown / stopline を日本語で生成できる |
 | 7 | community learning intake | `docs/COMMUNITY_LEARNING_INTAKE.md`, source packet importer | Vision / GitHub / X / Web の詰まりを candidate 化できる |
 | 8 | field review loop | `docs/FIELD_REVIEW_LOOP.md`, experiment packet | browser / Obsidian capture をローカルで試し、人間が実地レビューできる |
+| 9 | PDCA feedback loop | `docs/PDCA_FEEDBACK_LOOP.md`, learning ledger | 実行結果とレビューを次の gate / docs / registry / tests へ戻せる |
 
 ## PR 3: run packet MVP
 
