@@ -30,8 +30,8 @@ user task
 2. candidate は広く拾うが、adopted とは分ける。
 3. AI は `reuse / wrap / extend / adopt_oss / build / hold` を提案してよい。
 4. 採用・公開・merge・設定変更・credential・production 変更は human stopline を越えない。
-5. raw chat log や Obsidian note はそのまま入れず、採用 packet に圧縮する。
-6. 公式 docs / primary source / repo-local truth / GitHub evidence を source として区別する。
+5. raw chat log、Obsidian note、X post、GitHub issue、Web 記事はそのまま入れず、採用 packet に圧縮する。
+6. Vision / memory / official docs / primary source / repo-local truth / GitHub / X / Web evidence を source として区別する。
 7. まずは local-first。cloud / external mutation は計画だけ作り、実行は別承認。
 
 ## 次の PR sequence
@@ -42,6 +42,7 @@ user task
 | 4 | research packet | `schemas/research-packet.schema.json`, `devbrain/research.py` | candidate source と decision が `hold` 可能になる |
 | 5 | local learnings registry | `registry/local-learnings.yaml`, schema, intake tests | local struggle を rule / failure pattern として吸収できる |
 | 6 | PR packet generator | `devbrain/review.py`, PR body template | visible scope / checks / unknown / stopline を日本語で生成できる |
+| 7 | community learning intake | `docs/COMMUNITY_LEARNING_INTAKE.md`, source packet importer | Vision / GitHub / X / Web の詰まりを candidate 化できる |
 
 ## PR 3: run packet MVP
 
@@ -105,7 +106,7 @@ AI が判断してよい範囲:
 
 ```yaml
 - id:
-  source: memory|obsidian|pr_review|failure_log|manual
+  source: vision|memory|obsidian|github|x|web|pr_review|failure_log|manual
   problem:
   reusable_rule:
   applies_when:
