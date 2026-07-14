@@ -17,6 +17,7 @@ The legacy `dev-brain` repo was kept private during migration verification, then
 - Public visibility remains out of scope.
 - Runtime skill installation is not switched until `engineering-autopilot` is a thin CLI-backed repo-owned skill.
 - The Python package and CLI keep the `devbrain` import / command name during the first cutover to avoid breaking tests and local muscle memory.
+- Local-only commits later found in a stale `<PROJECTS_ROOT>/dev-brain` clone are evaluated through `docs/LEGACY_DEV_BRAIN_ABSORPTION.md` before any local deletion.
 
 ## First Snapshot Checks
 
@@ -35,3 +36,4 @@ The source snapshot was accepted only after:
 2. Add a repo-owned `skills/engineering-autopilot` thin entry.
 3. Decide whether to keep `devbrain` as the CLI name or add `engineering-brain` as an alias.
 4. Continue the roadmap from identity gate, run packet, lifecycle FSM, PR packet, and skill sync.
+5. Delete stale local legacy clones only after their local-only commits are represented in `docs/LEGACY_DEV_BRAIN_ABSORPTION.md`.
