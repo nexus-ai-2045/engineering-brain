@@ -1,0 +1,53 @@
+name: Research intake
+description: 公式/一次情報、GitHub evidence、OSS候補を dev-brain の source catalog へ入れる
+title: "[research] "
+labels: ["research", "candidate"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+      description: 何を判断するための調査かを書く。
+    validations:
+      required: true
+  - type: textarea
+    id: official_sources
+    attributes:
+      label: Official / primary sources
+      description: URL、version、更新日、適用範囲、公式性を書く。
+    validations:
+      required: true
+  - type: textarea
+    id: github_evidence
+    attributes:
+      label: GitHub evidence
+      description: repo、releases、issues、PR activity、SECURITY、license、tests/CI、maintenance signal を書く。
+    validations:
+      required: true
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Decision
+      options:
+        - reuse
+        - wrap
+        - extend
+        - adopt_oss
+        - build
+        - hold
+    validations:
+      required: true
+  - type: textarea
+    id: gate_hint
+    attributes:
+      label: Gate hint
+      description: 実プロジェクトで何を確認すればよいかを書く。
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Known risks / stop reason
+      description: 最新性不足、security、license、Windows、public/credential/production 境界などを書く。
+    validations:
+      required: true

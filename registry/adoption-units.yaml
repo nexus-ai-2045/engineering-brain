@@ -1,0 +1,115 @@
+version: 1
+updated_at: "2026-07-09"
+units:
+  - id: fact_source_gate
+    status: adopted
+    source_refs:
+      - <PROJECTS_ROOT>/Documents/brain/pre-execution-fact-check-gate.md
+      - <PROJECTS_ROOT>/shared/scripts/fact_scope_output_gate.py
+    applies_when: [user_visible_judgment, done_claim, source_claim, implementation]
+    timing: [before_work, before_final]
+    boundary: ユーザー可視の判断・完了報告・採用宣言は source と fact label なしに完了扱いしない。
+    route: devbrain-lite
+    guarantee_tier: G2 checked
+    checks:
+      - level: L0 lint
+        command: python shared/scripts/fact_scope_output_gate.py --help
+      - level: L1 unit
+        command: python -m pytest -q shared/scripts/tests/test_fact_scope_output_gate.py
+    insufficient_if:
+      - source が会話記憶だけ
+      - 確認済みと推測が同じ bullet に混ざる
+
+  - id: scope_write_boundary_gate
+    status: adopted
+    source_refs:
+      - <PROJECTS_ROOT>/Documents/brain/scope-routing-gate.md
+      - <PROJECTS_ROOT>/shared/scripts/scope_closure_gate.py
+    applies_when: [multi_file, shared_script, implementation, unknown_owner, type1]
+    timing: [before_work]
+    boundary: 作業範囲・owner・write scope・collision risk・Type1 risk が閉じないまま実装しない。
+    route: scope-route
+    guarantee_tier: G2 checked
+    checks:
+      - level: L1 unit
+        command: python -m pytest -q shared/scripts/tests/test_scope_closure_gate.py
+    insufficient_if:
+      - selected_scope だけで why/write_scope/collision_risk がない
+
+  - id: tdd_regression_gate
+    status: adopted
+    source_refs:
+      - <PROJECTS_ROOT>/Documents/brain/ai-development-living-harness.md
+      - <PROJECTS_ROOT>/Documents/brain/development-pipeline-template.md
+      - <PROJECTS_ROOT>/FDE/ops-best-practice-inventory.md
+    applies_when: [bug_fix, implementation, shared_script]
+    timing: [before_patch, after_patch, before_done]
+    boundary: bug fix と実装は regression test または対象 smoke なしに修正済みとしない。
+    route: shared-script-gate
+    guarantee_tier: G4 operational
+    checks:
+      - level: L1 unit
+        command: python -m pytest -q <targeted tests>
+      - level: L5 regression
+        command: <known failure regression>
+    insufficient_if:
+      - 表面修正だけ
+      - root cause と regression evidence がない
+
+  - id: agent_containment_gate
+    status: adopted
+    source_refs:
+      - <PROJECTS_ROOT>/sop/agent-containment.md
+      - <PROJECTS_ROOT>/sop/claude-security-guidance.md
+      - <PROJECTS_ROOT>/shared/scripts/agent_containment_guarantee.py
+    applies_when: [security, agent, mcp, browser, connector, hook, settings, credential]
+    timing: [before_work, before_done]
+    boundary: 権限境界・credential・外部送信・hook/settings を人間の注意だけに依存させない。
+    route: security-guidance-guarantee
+    guarantee_tier: G4 operational
+    checks:
+      - level: L3 smoke
+        command: python shared/scripts/claude_security_guidance_guarantee.py --json
+      - level: L3 smoke
+        command: python shared/scripts/agent_containment_guarantee.py --json
+    insufficient_if:
+      - SECURITY_GUIDANCE_DISABLE=1
+      - overall=ok でない
+      - hook 有効化を current-turn approval なしに実行する
+
+  - id: human_publication_review_gate
+    status: adopted
+    source_refs:
+      - <PROJECTS_ROOT>/AGENTS.md
+      - <PROJECTS_ROOT>/Documents/brain/public-identity-policy.md
+    applies_when: [public_release, external_send, github_visibility, announcement, publish, push, pr]
+    timing: [before_external_action]
+    boundary: 公開・外部送信・GitHub public 化・push・PR は、何が見えるかを示して current conversation の明示 yes まで停止する。
+    route: human-review-type1
+    guarantee_tier: G6 human-accepted
+    checks:
+      - level: L6 acceptance
+        command: null
+    insufficient_if:
+      - 過去の一般的 OK
+      - publish という単語だけ
+      - README/secret/PUBLIC_READY 未確認
+
+  - id: public_path_redaction_gate
+    status: adopted
+    source_refs:
+      - <REPO>/docs/PUBLIC_PATH_POLICY.md
+      - <REPO>/devbrain/path_safety.py
+    applies_when: [public_release, publish, push, pr, public_path, absolute_path, personal_path, path_redaction]
+    timing: [before_external_action, before_done]
+    boundary: 公開候補 artifact に `C:/Users/<name>` / `C:\Users\<name>` / `/Users/<name>` 形式の個人ホーム絶対パスを残さない。
+    route: public-path-redaction
+    guarantee_tier: G4 operational
+    checks:
+      - level: L1 unit
+        command: python -m pytest -q tests/test_path_safety.py
+      - level: L3 smoke
+        command: python -m devbrain closeout --repo . --json
+    insufficient_if:
+      - `<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` へ置換せず、実ユーザー名入り path を docs / registry / PR 文面に残している
+      - scan が closeout に接続されていない

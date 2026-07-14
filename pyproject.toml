@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "engineering-brain"
+version = "0.1.0"
+description = "Local-first development decision and assurance gates."
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.scripts]
+devbrain = "devbrain.cli:main"
+engineering-brain = "devbrain.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

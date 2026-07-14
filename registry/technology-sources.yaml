@@ -1,0 +1,221 @@
+version: 1
+updated_at: "2026-07-11"
+sources:
+  - id: go_official_engineering_gate
+    domain: go
+    status: candidate
+    source_refs:
+      - https://go.dev/doc/effective_go
+      - https://go.dev/wiki/CodeReviewComments
+      - https://go.dev/wiki/TestComments
+      - https://go.dev/doc/security/vuln/
+      - https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck
+    use_when: [go, golang, server, cli, backend]
+    adoption_route: docs-to-smoke
+    gate_hint: gofmt/go vet/go test ./.../govulncheck ./... を候補にし、プロジェクトに go.mod がある時だけ有効化する。
+    insufficient_if:
+      - Go 公式文書を読んだだけで go test / govulncheck を実行していない
+      - Effective Go と CodeReviewComments を style lint なしに主観レビューへ混ぜる
+
+  - id: bun_toolchain_gate
+    domain: bun
+    status: candidate
+    source_refs:
+      - https://bun.sh/docs
+      - https://bun.sh/docs/test
+      - https://bun.sh/docs/pm/cli/install
+      - https://bun.sh/docs/bundler
+      - https://bun.sh/docs/installation
+    use_when: [bun, javascript, typescript, runtime, package_manager, test_runner]
+    adoption_route: docs-to-smoke
+    gate_hint: bun --version / bun test / bun install --frozen-lockfile 相当を候補にし、Node互換性とBun固有APIのロックインを分けて判断する。
+    insufficient_if:
+      - 速いという理由だけで Node.js 互換性や既存CIを確認していない
+      - Bun 固有APIを採用したのに fallback / migration boundary がない
+
+  - id: vue_nuxt_frontend_gate
+    domain: vue-nuxt
+    status: candidate
+    source_refs:
+      - https://vuejs.org/guide/best-practices/security
+      - https://vuejs.org/v2/style-guide/
+      - https://nuxt.com/docs/4.x/guide/best-practices/performance
+      - https://nuxt.com/modules/security
+      - https://nuxt-security.vercel.app/advanced/good-practices
+    use_when: [vue, nuxt, frontend, ssr, spa]
+    adoption_route: product-design-audit
+    gate_hint: npm/pnpm/bun test、typecheck、lint、Nuxt build、SSR state leakage review、security headers review を候補にする。
+    insufficient_if:
+      - 古い Vue 2 style guide を Vue 3/Nuxt 4 の唯一正本として扱う
+      - SSR の cross-request state pollution や non-trusted template 禁止を確認していない
+
+  - id: azure_well_architected_gate
+    domain: azure
+    status: candidate
+    source_refs:
+      - https://learn.microsoft.com/en-us/azure/well-architected/
+      - https://learn.microsoft.com/en-us/azure/architecture/
+      - https://learn.microsoft.com/en-us/azure/architecture/best-practices/index-best-practices
+      - https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/principles
+    use_when: [azure, az, cloud, server, infrastructure]
+    adoption_route: architecture-review
+    gate_hint: Azure Well-Architected の Reliability/Security/Cost/Operational Excellence/Performance を design review checklist に落とす。az/gcloud/terraform apply は別承認。
+    insufficient_if:
+      - Azure portal / az / Terraform で外部状態を変える前に current-turn approval がない
+      - Well-Architected の pillar を読んだだけで workload-specific review に落としていない
+
+  - id: server_api_security_gate
+    domain: server-api
+    status: candidate
+    source_refs:
+      - https://owasp.org/www-project-application-security-verification-standard/
+      - https://owasp.org/API-Security/editions/2023/en/0x11-t10/
+      - https://owasp.org/www-project-top-ten/
+      - https://12factor.net/
+    use_when: [server, api, backend, webapp, saas]
+    adoption_route: security-guidance-guarantee
+    gate_hint: authz/authn/input validation/rate limit/secret config/logging/process model を API と deploy の両面で見る。
+    insufficient_if:
+      - OWASP Top 10 を awareness だけにして ASVS/API Security の検証項目へ落としていない
+      - config を環境分離せず repo や artifact に混ぜる
+
+  - id: container_kubernetes_production_gate
+    domain: container-kubernetes
+    status: candidate
+    source_refs:
+      - https://kubernetes.io/docs/setup/production-environment/
+      - https://kubernetes.io/docs/home/
+      - https://slsa.dev/
+      - https://scorecard.dev/
+    use_when: [container, docker, kubernetes, k8s, supply_chain]
+    adoption_route: architecture-review
+    gate_hint: production cluster readiness、health checks、logging、resource limits、supply-chain provenance、Scorecard を候補にする。
+    insufficient_if:
+      - local container が起動しただけで production-ready と言っている
+      - image provenance / dependency / secret / runtime policy を見ていない
+
+  - id: node_express_security_gate
+    domain: node-express
+    status: candidate
+    source_refs:
+      - https://nodejs.org/learn/getting-started/security-best-practices
+      - https://expressjs.com/en/advanced/best-practice-security/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
+    use_when: [node, nodejs, express, javascript, server, api]
+    adoption_route: security-guidance-guarantee
+    gate_hint: dependency audit、input validation、TLS/security headers、cookie/session設定、event loop blocking review を候補にする。
+    insufficient_if:
+      - Node/Express の production security を OWASP/official docs へ接続していない
+      - request size / auth / cookie / dependency / error handling を確認していない
+
+  - id: nextjs_production_gate
+    domain: nextjs
+    status: candidate
+    source_refs:
+      - https://nextjs.org/docs/app/guides/production-checklist
+      - https://nextjs.org/docs/app/guides/data-security
+      - https://vercel.com/docs/production-checklist
+    use_when: [next, nextjs, react, frontend, fullstack, vercel]
+    adoption_route: product-design-audit
+    gate_hint: production checklist、data security、server/client boundary、build、performance、hosting checklist を候補にする。
+    insufficient_if:
+      - Server Components / Server Actions の data security 境界を見ていない
+      - hosting production checklist を通さず launch-ready と言う
+
+  - id: python_packaging_testing_gate
+    domain: python
+    status: candidate
+    source_refs:
+      - https://packaging.python.org/
+      - https://docs.python.org/
+      - https://docs.pytest.org/en/stable/explanation/goodpractices.html
+      - https://best.openssf.org/Secure-Coding-Guide-for-Python/
+    use_when: [python, pytest, package, cli, backend]
+    adoption_route: docs-to-smoke
+    gate_hint: pyproject、venv、editable install、pytest layout、secure coding guide、dependency audit を候補にする。
+    insufficient_if:
+      - local import path だけで動いて package install/test を確認していない
+      - Python security を依存関係 scan だけに寄せて secure coding を見ていない
+
+  - id: rust_security_dependency_gate
+    domain: rust
+    status: candidate
+    source_refs:
+      - https://doc.rust-lang.org/book/
+      - https://rust-lang.github.io/api-guidelines/
+      - https://rustsec.org/
+      - https://github.com/RustSec/advisory-db
+    use_when: [rust, cargo, systems, cli, server]
+    adoption_route: docs-to-smoke
+    gate_hint: cargo test、clippy、fmt、unsafe review、RustSec/cargo-audit 相当を候補にする。
+    insufficient_if:
+      - unsafe block の理由とレビュー境界がない
+      - Cargo.lock の advisory check をしていない
+
+  - id: terraform_iac_gate
+    domain: terraform
+    status: candidate
+    source_refs:
+      - https://developer.hashicorp.com/terraform/language/style
+      - https://developer.hashicorp.com/terraform/cloud-docs/recommended-practices
+      - https://www.hashicorp.com/en/blog/terraform-security-5-foundational-practices
+    use_when: [terraform, iac, infrastructure, azure, cloud]
+    adoption_route: architecture-review
+    gate_hint: terraform fmt/validate/plan、state/secret/provider/module verification、apply承認境界を候補にする。
+    insufficient_if:
+      - plan/apply 境界がなく外部状態を変える
+      - state/credential/module/provider trust を確認していない
+
+  - id: github_actions_ci_security_gate
+    domain: github-actions
+    status: candidate
+    source_refs:
+      - https://docs.github.com/actions/security-for-github-actions
+      - https://docs.github.com/en/actions/reference/security/secure-use
+    use_when: [github_actions, ci, cd, workflow, supply_chain]
+    adoption_route: security-guidance-guarantee
+    gate_hint: workflow permissions、OIDC、artifact attestation、third-party action trust、untrusted checkout を候補にする。
+    insufficient_if:
+      - workflow permissions が broad のまま
+      - third-party actions / untrusted PR / secrets exposure を確認していない
+
+  - id: docker_container_security_gate
+    domain: docker
+    status: candidate
+    source_refs:
+      - https://docs.docker.com/engine/security/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
+    use_when: [docker, container, image, server, deployment]
+    adoption_route: security-guidance-guarantee
+    gate_hint: daemon attack surface、non-root、capabilities、minimal image、secret in image、SBOM/provenance を候補にする。
+    insufficient_if:
+      - Dockerfile が build できるだけで secure image と言う
+      - root user / secrets / daemon exposure / image scan を見ていない
+
+  - id: postgresql_security_gate
+    domain: postgresql
+    status: candidate
+    source_refs:
+      - https://www.postgresql.org/support/security/
+      - https://www.postgresql.org/docs/current/
+    use_when: [postgres, postgresql, database, db, server]
+    adoption_route: security-guidance-guarantee
+    gate_hint: auth/roles/least privilege/TLS/backup/extension update/RLS/audit を候補にし、production DB destructive ops は明示承認まで止める。
+    insufficient_if:
+      - production DB の DROP/TRUNCATE/権限変更に current-turn approval がない
+      - role / auth / network / backup / audit を見ていない
+
+  - id: github_repo_lifecycle_gate
+    domain: github-repo-lifecycle
+    status: candidate
+    source_refs:
+      - https://docs.github.com/en/repositories/creating-and-managing-repositories/renaming-a-repository
+      - https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository
+      - https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template
+      - https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-template-repository
+    use_when: [github, repo, repository, rename, recreate, duplicate, template, archive, visibility, cutover]
+    adoption_route: human-review-type1
+    gate_hint: repo rename/recreate は local remote、redirect、Actions、Pages、runtime skill、history、visibility、rollback を review packet にしてから current-turn approval を取る。
+    insufficient_if:
+      - repo create / rename / archive / visibility 変更を current-turn approval なしに実行する
+      - 旧 repo URL redirect、local remote、Actions、runtime skill、commit history の見える範囲を確認していない
