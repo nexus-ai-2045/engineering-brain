@@ -106,3 +106,18 @@ def test_pdca_feedback_loop_connects_execution_back_to_repo() -> None:
     assert "local-learnings.yaml" in doc
     assert "Check なしに Act しない" in doc
 
+
+def test_legacy_dev_brain_absorption_blocks_lossy_cleanup() -> None:
+    doc = read_doc("docs/LEGACY_DEV_BRAIN_ABSORPTION.md")
+    migration = read_doc("docs/MIGRATION_NOTES.md")
+
+    for term in [
+        "local-only commits",
+        "approval-gated lifecycle runner",
+        "current live surface",
+        "target candidate",
+        "Delete gate",
+    ]:
+        assert term in doc
+
+    assert "LEGACY_DEV_BRAIN_ABSORPTION.md" in migration
