@@ -28,7 +28,8 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source |
 | K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | done: runtime copy synced |
 | L | autopilot run packet MVP | route / gate / catalog / skill-sync / closeout を 1 packet にまとめる | done: MVP |
-| M | research packet / PR packet | source / candidate / decision / PR body を evidence 付きで生成する | next |
+| M | public readiness packet | LICENSE / README / SECURITY / scan / exact operation を整理する | done: ready-for-human-review |
+| N | research packet / PR packet | source / candidate / decision / PR body を evidence 付きで生成する | next |
 
 ## Cutover policy
 

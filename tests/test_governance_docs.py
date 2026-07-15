@@ -136,3 +136,16 @@ def test_engineering_autopilot_repo_owned_skill_exists() -> None:
     assert "human stopline" in lifecycle
     assert "skills/engineering-autopilot/" in docs_roadmap
     assert "repo-owned source" in coverage
+
+
+def test_public_release_review_packet_names_exact_stopline() -> None:
+    public_ready = read_doc("PUBLIC_READY.md")
+    packet = read_doc("docs/PUBLIC_RELEASE_REVIEW_PACKET.md")
+    license_text = read_doc("LICENSE")
+
+    assert "status: ready-for-human-review" in public_ready
+    assert "gh repo edit nexus-ai-2045/engineering-brain --visibility public" in public_ready
+    assert "current conversation" in public_ready
+    assert "status: ready-for-human-review" in packet
+    assert "visibility 変更そのものは未実行" in packet
+    assert "MIT License" in license_text
