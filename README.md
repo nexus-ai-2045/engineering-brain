@@ -14,6 +14,46 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 
 具体的には、作る前に既存実装・公式機能・OSS 候補を確認し、local trial や Obsidian / memory / web / GitHub 由来の学びを docs / registry / tests / ADR へ吸収します。
 
+## 開発ライフサイクル
+
+engineering-brain が目指すのは、コードを書く部分だけの自動化ではありません。相談から後片付けまでを 1 本の run として扱い、各段階で「次へ進める証拠」と「人間が判断する停止線」を残します。
+
+```mermaid
+flowchart LR
+  A["1. 設計<br/>必要なら壁打ち"] --> B["2. リサーチ<br/>既存・公式・OSS"]
+  B --> C["3. TDD計画<br/>失敗条件を先に固定"]
+  C --> D["4. 実装<br/>最小差分"]
+  D --> E["5. テスト<br/>unit / integration"]
+  E --> F["6. 運用保証<br/>Smoke / E2E / security / closeout"]
+  F --> G["7. PR準備・作成<br/>見える差分と証拠"]
+  G --> H{{"8. 人間目視レビュー<br/>コメント吸収"}}
+  H -->|"修正が必要"| C
+  H -->|"mergeを明示承認"| I["9. マージ<br/>mainへ統合"]
+  I --> J{{"10. 後片付け<br/>branch / worktree"}}
+  J --> K["学びを docs / registry / tests / ADR へ吸収"]
+  K -. "次のrunへ" .-> A
+
+  classDef human stroke-width:3px;
+  class H,J human;
+```
+
+`四角` はローカルで証拠を揃えながら進める工程、`二重枠` は current conversation の人間承認が必要な工程です。公開、外部送信、credential、production、visibility 変更も同じく自動では越えません。
+
+| 工程 | まず確認すること | 成果物・証拠 | 次へ進めない条件 |
+|---|---|---|---|
+| 1. 設計・壁打ち | Why、非目標、SSOT、owner、write scope、ADR要否 | task / design packet | repo・責任者・境界が不明 |
+| 2. リサーチ | repo-local → workspace共有 → 公式 → OSS → local fit | research packet、`reuse / wrap / extend / adopt_oss / build / hold` | 最新性・license・securityが不明 |
+| 3. TDD計画 | 期待する失敗、対象Smoke、回帰範囲 | failing test、verification plan | 成功条件をテストできない |
+| 4. 実装 | 既存helper、shared script、最小差分 | implementation diff | secret・credential・production変更が未承認 |
+| 5. テスト | unit、integration、compile、negative path | test log | 必須testが未実行または失敗 |
+| 6. 運用保証 | riskに応じた preflight、Smoke、E2E、security、closeout | verification matrix、既知の残リスク | 未確認を「保証済み」と呼ぶ状態 |
+| 7. PR準備・作成 | visible scope、checks、unknown、personal path、secret | 日本語PR packet、Draft PR | 外から見える内容が不明、作成承認なし |
+| 8. 人間目視レビュー | diff、動作、文言、review comment | 承認または修正指示 | unresolved comment、目視未完了 |
+| 9. マージ | latest head、checks、review、merge可否 | merge commit | current conversation のmerge承認なし |
+| 10. 後片付け | merged proof、dirty state、他者worktree | main同期、cleanup plan | 未merge・dirty・削除承認なし |
+
+現在のCLIはこのうち run packet、research packet、gate、closeout、skill drift check、version、merge後cleanup planを実装済みです。PR packet generatorやverification profileの拡張はロードマップ上の次段階です。
+
 ## Quick Start
 
 ```powershell
@@ -27,6 +67,7 @@ python -m devbrain closeout --repo . --json
 | command | 目的 |
 |---|---|
 | `python -m devbrain run --task "<task>" --json` | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる |
+| `python -m devbrain research --task "<question>" --domain python --decision hold --json` | 候補sourceと採否・保留理由を research packet にする |
 | `python -m devbrain route --task "<task>" --json` | task から必要 gate を推定する |
 | `python -m devbrain gate --trigger implementation --json` | trigger から採用済み / candidate gate を確認する |
 | `python -m devbrain catalog --domain python --json` | 技術別の一次情報 / best-practice candidate を見る |
@@ -45,7 +86,7 @@ python -m devbrain closeout --repo . --json
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
 | release / GitHub tag | not created; separate approval |
-| primary next work | finish planner / research packet / PR packet generator |
+| primary next work | PR packet generator / verification profile |
 
 ## Local SSOT
 

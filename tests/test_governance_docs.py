@@ -60,6 +60,26 @@ def test_next_goal_design_defines_run_packet_sequence() -> None:
     assert "candidate gate is advisory" in doc
 
 
+def test_readme_visualizes_full_human_gated_lifecycle() -> None:
+    readme = read_doc("README.md")
+
+    for label in (
+        "1. 設計",
+        "2. リサーチ",
+        "3. TDD計画",
+        "4. 実装",
+        "5. テスト",
+        "6. 運用保証",
+        "7. PR準備・作成",
+        "8. 人間目視レビュー",
+        "9. マージ",
+        "10. 後片付け",
+    ):
+        assert label in readme
+    assert 'H -->|"修正が必要"| C' in readme
+    assert "current conversation の人間承認" in readme
+
+
 def test_community_learning_intake_keeps_external_sources_as_candidates() -> None:
     doc = read_doc("docs/COMMUNITY_LEARNING_INTAKE.md")
 
