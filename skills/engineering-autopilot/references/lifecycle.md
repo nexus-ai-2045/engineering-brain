@@ -14,6 +14,7 @@ owner: nexus_ai
 | route | task の種類と必要 gate を決める | `python -m devbrain route --task "<task>" --json` |
 | gate | trigger から必要な採用 unit を確認する | `python -m devbrain gate --trigger implementation --json` |
 | catalog | 技術・既存例・公式 source を候補として確認する | `python -m devbrain catalog --domain <domain> --json` |
+| skill-sync | repo-owned skill source と runtime install copy の drift を確認する | `python -m devbrain skill-sync --json` |
 | implement | 対象 repo の既存パターンに沿って最小差分で実装する | repo-local tests / docs |
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m devbrain closeout --repo . --json` |
 | review packet | 外部操作前に見える範囲と未実施を分ける | PR body / closeout |
@@ -33,4 +34,3 @@ owner: nexus_ai
 ## roadmap reference
 
 詳細な移行順は `references/roadmap.md` と repo 側 `docs/ROADMAP.md` を使います。矛盾した場合は repo 側 `docs/ROADMAP.md` を優先し、この reference を更新します。
-

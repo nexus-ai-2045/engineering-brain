@@ -17,6 +17,7 @@ description: engineering-brain を通して開発作業を設計、既存調査�
 python -m devbrain route --task "<task>" --json
 python -m devbrain gate --trigger implementation --json
 python -m devbrain catalog --domain <domain> --json
+python -m devbrain skill-sync --json
 python -m devbrain closeout --repo . --json
 ```
 
@@ -28,6 +29,7 @@ python -m devbrain closeout --repo . --json
 - local で悩んだことは raw chat ではなく、docs / registry / test / ADR のどれかへ薄く吸収する。
 - push、PR作成、merge、remote branch削除、公開、visibility変更、credential変更は current-turn explicit approval まで止める。
 - runtime install copy への同期は、この repo-owned skill が検証された後の別承認作業にする。
+- runtime install copy との差分確認は `python -m devbrain skill-sync --json` で dry-run する。
 
 ## 現在の範囲
 
@@ -35,7 +37,7 @@ python -m devbrain closeout --repo . --json
 
 - 作る: `skills/engineering-autopilot/`
 - 作る: skill-facing roadmap / lifecycle reference
-- しない: `<USER_HOME>/.codex/skills/engineering-autopilot` への install
+- しない: `<USER_HOME>/.codex/skills/engineering-autopilot` への `--apply` install
 - しない: runtime skill 切替
 - しない: GitHub visibility 変更
 
@@ -49,4 +51,3 @@ python -m devbrain closeout --repo . --json
 ```
 
 外部操作が必要な場合は、実行前に「何が外から見えるか」「何をレビュー済みか」「何をまだしていないか」を分けて、人間の明示 yes を待ちます。
-

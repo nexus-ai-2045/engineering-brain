@@ -7,6 +7,7 @@ from typing import Any
 
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
+from .skill_sync import compare_skill, default_runtime_root, sync_skill
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -32,6 +33,12 @@ def main(argv: list[str] | None = None) -> int:
     catalog_parser.add_argument("--domain")
     catalog_parser.add_argument("--json", action="store_true")
 
+    skill_sync_parser = sub.add_parser("skill-sync", help="Check or sync the engineering-autopilot runtime skill.")
+    skill_sync_parser.add_argument("--source", default="skills/engineering-autopilot")
+    skill_sync_parser.add_argument("--runtime-root")
+    skill_sync_parser.add_argument("--apply", action="store_true")
+    skill_sync_parser.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     if args.command == "route":
         return emit(route_task(args.task), as_json=args.json)
@@ -44,6 +51,12 @@ def main(argv: list[str] | None = None) -> int:
         return emit({"units": [unit.id for unit in adoption_units()]}, as_json=args.json)
     if args.command == "catalog":
         return emit({"sources": [serialize_source(source) for source in select_technology_sources(args.domain)]}, as_json=args.json)
+    if args.command == "skill-sync":
+        runtime_root = Path(args.runtime_root).resolve() if args.runtime_root else default_runtime_root()
+        source = Path(args.source).resolve()
+        payload = sync_skill(source_dir=source, runtime_root=runtime_root, apply=True) if args.apply else compare_skill(source_dir=source, runtime_root=runtime_root)
+        payload["mode"] = "apply" if args.apply else "dry-run"
+        return emit(payload, as_json=args.json)
     parser.error("unknown command")
     return 2
 

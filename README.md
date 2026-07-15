@@ -10,6 +10,7 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 python -m devbrain route --task "bug fix with public release risk" --json
 python -m devbrain gate --trigger implementation --trigger security --json
 python -m devbrain catalog --domain go --json
+python -m devbrain skill-sync --json
 python -m devbrain closeout --repo . --json
 ```
 
@@ -34,7 +35,7 @@ python -m devbrain closeout --repo . --json
 
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
-Repo-owned skill source は `skills/engineering-autopilot/` にあります。現時点では runtime install copy へは同期していません。
+Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy との差分は `python -m devbrain skill-sync --json` で dry-run 確認します。実際の home runtime 書き込みは `--apply` と current-turn approval が必要です。
 
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。
 
