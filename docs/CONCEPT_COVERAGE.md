@@ -27,7 +27,7 @@
 | PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
 | Runtime skill | covered | `skills/engineering-autopilot/` repo-owned source, `<USER_HOME>/.codex/skills/engineering-autopilot`, `devbrain skill-sync` | runtime drift を継続監視する |
 | Best-practice source catalog | covered | `registry/technology-sources.yaml` | adopted / candidate / hold status を強める |
-| Public readiness | partial | `PUBLIC_READY.md` | public 化時だけ review packet で再測定 |
+| Public readiness | partial | `PUBLIC_READY.md`, `docs/PUBLIC_RELEASE_REVIEW_PACKET.md` | visibility 変更直前に再測定する |
 
 ## ローカル概念 inventory
 

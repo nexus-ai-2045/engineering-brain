@@ -1,6 +1,6 @@
 # Security
 
-engineering-brain はローカル-first の開発ゲート repo です。public 化、外部送信、release、広範な共有は current conversation の明示承認まで行いません。
+engineering-brain はローカル-first の開発ゲート repo です。visibility 変更、外部送信、release、広範な共有は current conversation の明示承認まで行いません。
 
 ## 扱う境界
 
@@ -11,3 +11,5 @@ engineering-brain はローカル-first の開発ゲート repo です。public 
 ## 報告
 
 ローカル運用中の問題は、再現手順、対象 gate、期待した判定、実際の判定を添えて issue またはローカル report に残す。
+
+public visibility 後の vulnerability report は GitHub Security Advisory または issue で受けます。secret、credential、private URL、個人情報を issue 本文に貼らないでください。

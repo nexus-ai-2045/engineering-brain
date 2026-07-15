@@ -17,7 +17,7 @@ python -m devbrain closeout --repo . --json
 
 ## Local SSOT
 
-現行 engineering-brain の local SSOT は `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain` です。`nexus-ai-2045/engineering-brain` は private GitHub mirror / review surface です。詳しくは [Local SSOT](docs/LOCAL_SSOT.md) を参照します。
+現行 engineering-brain の local SSOT は `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain` です。`nexus-ai-2045/engineering-brain` は GitHub review surface です。詳しくは [Local SSOT](docs/LOCAL_SSOT.md) を参照します。
 
 `dev-brain` からの private recreate については [Migration notes](docs/MIGRATION_NOTES.md)、[engineering-brain cutover plan](docs/ENGINEERING_CUTOVER_PLAN.md)、[private cutover packet](docs/PRIVATE_CUTOVER_PACKET.md) を参照します。
 
@@ -74,4 +74,4 @@ Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community lea
 
 ## 公開境界
 
-この repo は private-first です。public 化、release、外部告知、広範な共有は実行しません。実行する場合は、対象 repo、見える内容、secret scan、README、LICENSE、SECURITY.md、公開可否を提示して current conversation の明示承認を取ります。
+この repo は local-first です。visibility 変更、release、外部告知、広範な共有はそれぞれ別の承認境界として扱います。public 化を行う場合は、対象 repo、exact operation、見える内容、secret scan、README、LICENSE、SECURITY.md、公開可否を提示して current conversation の明示承認を取ります。
