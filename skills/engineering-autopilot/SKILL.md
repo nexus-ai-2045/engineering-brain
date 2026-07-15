@@ -28,17 +28,16 @@ python -m devbrain closeout --repo . --json
 - TDD または対象 smoke なしに実装完了と言わない。
 - local で悩んだことは raw chat ではなく、docs / registry / test / ADR のどれかへ薄く吸収する。
 - push、PR作成、merge、remote branch削除、公開、visibility変更、credential変更は current-turn explicit approval まで止める。
-- runtime install copy への同期は、この repo-owned skill が検証された後の別承認作業にする。
-- runtime install copy との差分確認は `python -m devbrain skill-sync --json` で dry-run する。
+- runtime install copy は repo-owned source から同期する projection として扱う。
+- runtime install copy との差分確認は `python -m devbrain skill-sync --json` で行う。
 
 ## 現在の範囲
 
-この PR では repo-owned source を作るだけです。
+現在の runtime scope は次の通りです。
 
-- 作る: `skills/engineering-autopilot/`
-- 作る: skill-facing roadmap / lifecycle reference
-- しない: `<USER_HOME>/.codex/skills/engineering-autopilot` への `--apply` install
-- しない: runtime skill 切替
+- 正本: `skills/engineering-autopilot/`
+- projection: `<USER_HOME>/.codex/skills/engineering-autopilot`
+- 確認: `python -m devbrain skill-sync --json`
 - しない: GitHub visibility 変更
 
 ## Closeout
