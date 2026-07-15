@@ -25,13 +25,19 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | G | research packet | source / candidate / decision を packet 化する | planned |
 | H | local learnings registry | local struggle を rule / failure pattern として蓄積 | planned |
 | I | PR packet generator | 日本語 PR body、visible scope、checks、stopline を生成 | planned |
-| J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | planned |
+| J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source / runtime install pending |
 
 ## Cutover policy
 
 private recreate の履歴は [Migration notes](MIGRATION_NOTES.md)、[engineering-brain cutover plan](ENGINEERING_CUTOVER_PLAN.md)、[private cutover packet](PRIVATE_CUTOVER_PACKET.md) を参照する。
 
 public 化はこの roadmap の完了条件ではない。visibility 変更は別 review packet と current conversation の明示 yes が必要。
+
+## Skill roadmap
+
+`engineering-autopilot` の repo-owned source は `skills/engineering-autopilot/` に置く。skill-facing roadmap は `skills/engineering-autopilot/references/roadmap.md` を参照する。
+
+runtime install copy (`<USER_HOME>/.codex/skills/engineering-autopilot`) はまだ切り替えない。repo-owned source の検証後、別PR/別承認で同期する。
 
 ## Done for current private phase
 

@@ -15,7 +15,7 @@ cutover では次の 4 層を同じ packet で切り替える。
 1. local directory: `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain`
 2. GitHub repo: `nexus-ai-2045/engineering-brain`
 3. repo-owned skill: `skills/engineering-autopilot`
-4. runtime install copy: `<USER_HOME>/.codex/skills/engineering-autopilot`
+4. runtime install copy: `<USER_HOME>/.codex/skills/engineering-autopilot` (未切替)
 
 ## Rename と recreate の判断
 
@@ -57,10 +57,11 @@ result: private recreate / clean history / legacy repo kept private.
 
 1. initial engineering-brain snapshot を push する。
 2. `<PROJECTS_ROOT>/ssot-registry.yaml` を更新する。
-3. repo-owned `skills/engineering-autopilot` を薄い CLI 入口として追加する。
-4. PR D-G 相当の CLI / lifecycle / skill 実装は、新 live SSOT で続行する。
-5. 旧 `dev-brain` 由来の未採用知見が後から見つかった場合は、raw copy ではなく knowledge intake packet として評価する。
-6. public 化はさらに別の review packet と明示 yes まで止める。
+3. repo-owned `skills/engineering-autopilot` は薄い CLI 入口として追加済み。
+4. runtime install copy への同期手順と drift check を追加する。
+5. PR D-G 相当の CLI / lifecycle / skill 実装は、新 live SSOT で続行する。
+6. 旧 `dev-brain` 由来の未採用知見が後から見つかった場合は、raw copy ではなく knowledge intake packet として評価する。
+7. public 化はさらに別の review packet と明示 yes まで止める。
 
 ## Source notes
 

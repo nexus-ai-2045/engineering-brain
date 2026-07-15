@@ -121,3 +121,18 @@ def test_legacy_dev_brain_absorption_blocks_lossy_cleanup() -> None:
         assert term in doc
 
     assert "LEGACY_DEV_BRAIN_ABSORPTION.md" in migration
+
+
+def test_engineering_autopilot_repo_owned_skill_exists() -> None:
+    skill = read_doc("skills/engineering-autopilot/SKILL.md")
+    lifecycle = read_doc("skills/engineering-autopilot/references/lifecycle.md")
+    roadmap = read_doc("skills/engineering-autopilot/references/roadmap.md")
+    docs_roadmap = read_doc("docs/ROADMAP.md")
+    coverage = read_doc("docs/CONCEPT_COVERAGE.md")
+
+    assert "薄い入口" in skill
+    assert "python -m devbrain closeout --repo . --json" in skill
+    assert "runtime install copy" in roadmap
+    assert "human stopline" in lifecycle
+    assert "skills/engineering-autopilot/" in docs_roadmap
+    assert "repo-owned source" in coverage

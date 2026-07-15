@@ -44,7 +44,7 @@ checked_at: 2026-07-15 JST
 |---|---|---|
 | local repo | `Documents/repos/second-brain/dev-brain` | `Documents/repos/engineering/engineering-brain` |
 | GitHub repo | `nexus-ai-2045/dev-brain` | `nexus-ai-2045/engineering-brain` |
-| runtime skill source | repo 内 skill source 未導入 | `skills/engineering-autopilot` |
+| runtime skill source | `skills/engineering-autopilot` repo-owned source | `skills/engineering-autopilot` |
 | runtime install copy | `.codex/skills/dev-brain-autopilot` if synced | `.codex/skills/engineering-autopilot` |
 
 ## Guard
@@ -53,7 +53,7 @@ checked_at: 2026-07-15 JST
 - legacy `dev-brain` 由来の未採用知見が見つかった場合は、canonical repo へ直接取り込まず、knowledge intake packet として評価する。
 - GitHub push / PR / repo create / visibility public は current-turn explicit approval まで実行しない。
 - GitHub write 前に `gh auth status` と commit identity を確認する。
-- `engineering-autopilot` を live runtime skill と呼ぶのは、repo-owned skill と runtime install copy の cutover が完了してからにする。
+- `engineering-autopilot` を live runtime skill と呼ぶのは、runtime install copy の cutover が完了してからにする。
 
 ## Placement decision
 
