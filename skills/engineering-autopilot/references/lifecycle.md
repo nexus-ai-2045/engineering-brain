@@ -15,6 +15,7 @@ owner: nexus_ai
 | gate | trigger から必要な採用 unit を確認する | `python -m devbrain gate --trigger implementation --json` |
 | catalog | 技術・既存例・公式 source を候補として確認する | `python -m devbrain catalog --domain <domain> --json` |
 | skill-sync | repo-owned skill source と runtime install copy の drift を確認する | `python -m devbrain skill-sync --json` |
+| run packet | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる | `python -m devbrain run --task "<task>" --json` |
 | implement | 対象 repo の既存パターンに沿って最小差分で実装する | repo-local tests / docs |
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m devbrain closeout --repo . --json` |
 | review packet | 外部操作前に見える範囲と未実施を分ける | PR body / closeout |

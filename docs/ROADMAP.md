@@ -21,13 +21,14 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | C | private cutover packet | `engineering-brain` へ private recreate する packet | done in legacy PR #7 |
 | D | ADR / knowledge intake | ADR、Obsidian intake、concept coverage を正本化 | done: PR #1 |
 | E | reinvention candidate gate | 毎回 candidate research gate を出す | done: PR #2 |
-| F | run packet MVP | route / gate / closeout / stopline を run packet に統合する | next |
+| F | run packet MVP | route / gate / closeout / stopline を run packet に統合する | done: MVP |
 | G | research packet | source / candidate / decision を packet 化する | planned |
 | H | local learnings registry | local struggle を rule / failure pattern として蓄積 | planned |
 | I | PR packet generator | 日本語 PR body、visible scope、checks、stopline を生成 | planned |
 | J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source |
 | K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | done: runtime copy synced |
-| L | autopilot run packet MVP | route / gate / catalog / skill-sync / closeout を 1 packet にまとめる | next |
+| L | autopilot run packet MVP | route / gate / catalog / skill-sync / closeout を 1 packet にまとめる | done: MVP |
+| M | research packet / PR packet | source / candidate / decision / PR body を evidence 付きで生成する | next |
 
 ## Cutover policy
 

@@ -33,7 +33,7 @@ The source snapshot was accepted only after:
 ## Next Work
 
 1. Add / update `<PROJECTS_ROOT>/ssot-registry.yaml` for `engineering-brain`.
-2. Add the autopilot run packet MVP.
+2. Add research packet and PR packet generation.
 3. Decide whether to keep `devbrain` as the CLI name or add `engineering-brain` as an alias.
-4. Continue the roadmap from identity gate, run packet, lifecycle FSM, PR packet, and skill sync.
+4. Continue the roadmap from identity gate, lifecycle FSM, PR packet, and skill sync.
 5. Delete stale local legacy clones only after their local-only commits are represented in `docs/LEGACY_DEV_BRAIN_ABSORPTION.md`.

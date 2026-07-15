@@ -7,6 +7,7 @@ from typing import Any
 
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
+from .run_packet import build_run_packet
 from .skill_sync import compare_skill, default_runtime_root, sync_skill
 
 
@@ -39,6 +40,13 @@ def main(argv: list[str] | None = None) -> int:
     skill_sync_parser.add_argument("--apply", action="store_true")
     skill_sync_parser.add_argument("--json", action="store_true")
 
+    run_parser = sub.add_parser("run", help="Build an engineering-autopilot run packet.")
+    run_parser.add_argument("--task", required=True)
+    run_parser.add_argument("--repo", default=".")
+    run_parser.add_argument("--domain")
+    run_parser.add_argument("--closeout", action="store_true")
+    run_parser.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     if args.command == "route":
         return emit(route_task(args.task), as_json=args.json)
@@ -57,6 +65,16 @@ def main(argv: list[str] | None = None) -> int:
         payload = sync_skill(source_dir=source, runtime_root=runtime_root, apply=True) if args.apply else compare_skill(source_dir=source, runtime_root=runtime_root)
         payload["mode"] = "apply" if args.apply else "dry-run"
         return emit(payload, as_json=args.json)
+    if args.command == "run":
+        return emit(
+            build_run_packet(
+                task=args.task,
+                repo=Path(args.repo).resolve(),
+                domain=args.domain,
+                closeout=args.closeout,
+            ),
+            as_json=args.json,
+        )
     parser.error("unknown command")
     return 2
 
