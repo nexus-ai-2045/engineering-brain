@@ -10,12 +10,16 @@ commands:
   - python -m devbrain route --task "<task>" --json
   - python -m devbrain gate --trigger implementation --json
   - python -m devbrain catalog --domain <domain> --json
+  - python -m devbrain finish --json
+  - python -m devbrain hooks install --json
   - python -m devbrain closeout --repo . --json
 stoplines:
   - push
   - pr_create
   - merge
   - remote_branch_delete
+  - local_branch_delete
+  - hook_install
   - visibility_change
   - credential_change
   - runtime_install

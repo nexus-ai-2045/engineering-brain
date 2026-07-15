@@ -31,6 +31,8 @@ python -m devbrain closeout --repo . --json
 | `python -m devbrain catalog --domain python --json` | 技術別の一次情報 / best-practice candidate を見る |
 | `python -m devbrain skill-sync --json` | repo-owned skill source と runtime projection の drift を見る |
 | `python -m devbrain version --json` | version surface と release policy を見る |
+| `python -m devbrain finish --json` | merge 後の local / remote branch cleanup 候補を plan する |
+| `python -m devbrain hooks install --json` | repo 同梱の opt-in Git hook をローカル `.git/hooks/` へ入れる |
 | `python -m devbrain closeout --repo . --json` | test / compile / path redaction / external boundary を検証する |
 
 ## Current Status
@@ -42,7 +44,7 @@ python -m devbrain closeout --repo . --json
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
 | release / GitHub tag | not created; separate approval |
-| primary next work | research packet / PR packet generator |
+| primary next work | finish planner / research packet / PR packet generator |
 
 ## Local SSOT
 
@@ -66,6 +68,10 @@ python -m devbrain closeout --repo . --json
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
 `devbrain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
+
+`devbrain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。既定は plan-only です。local branch 削除は `--apply-local`、remote branch 削除は別途 current conversation approval が必要です。
+
+repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m devbrain hooks install --json` で opt-in install すると、merge 後に `devbrain finish --json` の plan だけを表示します。hook は branch を自動削除しません。
 
 Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は `<USER_HOME>/.codex/skills/engineering-autopilot` へ同期済みです。差分は `python -m devbrain skill-sync --json` で確認します。
 
