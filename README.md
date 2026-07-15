@@ -34,6 +34,8 @@ python -m devbrain closeout --repo . --json
 
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
+Repo-owned skill source は `skills/engineering-autopilot/` にあります。現時点では runtime install copy へは同期していません。
+
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。
 
 直近の実装順序は [Next goal design](docs/NEXT_GOAL_DESIGN.md) を参照します。

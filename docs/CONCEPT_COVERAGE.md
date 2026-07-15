@@ -25,7 +25,7 @@
 | Merge / branch cleanup | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | finish planner を追加する |
 | Operation guarantee | covered | `devbrain closeout`, `docs/OPERATING_MODEL.md` | evidence-based closeout v2 を追加する |
 | PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
-| Runtime skill | partial | local installed skill only | `skills/engineering-autopilot/` を repo-owned thin skill として追加する |
+| Runtime skill | partial | `skills/engineering-autopilot/` repo-owned source | runtime install copy への同期は別承認で行う |
 | Best-practice source catalog | covered | `registry/technology-sources.yaml` | adopted / candidate / hold status を強める |
 | Public readiness | partial | `PUBLIC_READY.md` | public 化時だけ review packet で再測定 |
 
@@ -50,7 +50,7 @@
 ## Gaps
 
 1. `devbrain lifecycle` / `devbrain run` は設計済みだが未実装。
-2. `skills/engineering-autopilot/` の repo-owned source は未導入。
+2. `skills/engineering-autopilot/` の repo-owned source は導入済み。runtime install copy は未切替。
 3. `registry/local-learnings.yaml` がまだない。
 4. GitHub identity gate は local skill に依存しており、repo-owned command ではない。
 5. PR packet / finish planner は docs 設計であり、CLI 実装は未着手。
@@ -59,6 +59,6 @@
 
 1. `registry/local-learnings.yaml` と schema を追加する。
 2. `devbrain run` を追加し、route / gate / closeout / research / TDD plan を 1 packet にまとめる。
-3. `skills/engineering-autopilot/` を薄い CLI wrapper として repo に置く。
+3. runtime install copy への同期手順と drift check を追加する。
 4. PR packet generator と finish planner を追加する。
 5. Obsidian / memory から候補 packet を作る read-only importer を追加する。
