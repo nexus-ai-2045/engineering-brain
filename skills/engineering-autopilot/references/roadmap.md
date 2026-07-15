@@ -16,11 +16,11 @@ owner: nexus_ai
 | run packet MVP | `devbrain run` で route / gate / closeout を統合 | planned |
 | research packet | source / candidate / decision を packet 化 | planned |
 | PR packet generator | 日本語 PR body と stopline を生成 | planned |
-| runtime install sync | `<USER_HOME>/.codex/skills/engineering-autopilot` へ同期 | blocked until approval |
+| runtime drift check | repo-owned source と runtime install copy の差分を dry-run で検出 | current |
+| runtime install sync | `<USER_HOME>/.codex/skills/engineering-autopilot` へ `--apply` 同期 | blocked until approval |
 
 ## 採用しないこと
 
 - skill script に repo logic を複製しない。
 - 未実装 command を live 手順として書かない。
-- runtime copy をこの PR で切り替えない。
-
+- runtime copy を approval なしに切り替えない。
