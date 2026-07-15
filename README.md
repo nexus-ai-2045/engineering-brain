@@ -18,6 +18,7 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 
 ```powershell
 python -m devbrain run --task "implement small python CLI feature and prepare PR" --domain python --json
+python -m devbrain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --json
 python -m devbrain closeout --repo . --json
 ```
 
