@@ -25,8 +25,9 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | G | research packet | source / candidate / decision を packet 化する | planned |
 | H | local learnings registry | local struggle を rule / failure pattern として蓄積 | planned |
 | I | PR packet generator | 日本語 PR body、visible scope、checks、stopline を生成 | planned |
-| J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source / runtime install pending |
-| K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | current |
+| J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source |
+| K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | done: runtime copy synced |
+| L | autopilot run packet MVP | route / gate / catalog / skill-sync / closeout を 1 packet にまとめる | next |
 
 ## Cutover policy
 
@@ -38,7 +39,7 @@ public 化はこの roadmap の完了条件ではない。visibility 変更は�
 
 `engineering-autopilot` の repo-owned source は `skills/engineering-autopilot/` に置く。skill-facing roadmap は `skills/engineering-autopilot/references/roadmap.md` を参照する。
 
-runtime install copy (`<USER_HOME>/.codex/skills/engineering-autopilot`) はまだ切り替えない。`python -m devbrain skill-sync --json` で dry-run drift を確認し、実書き込みは `--apply` と current-turn approval が必要。
+runtime install copy (`<USER_HOME>/.codex/skills/engineering-autopilot`) は同期済み。`python -m devbrain skill-sync --json` が `status: ok` を返すことを維持条件にする。
 
 ## Done for current private phase
 

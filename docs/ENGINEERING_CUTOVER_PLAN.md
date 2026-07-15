@@ -15,7 +15,7 @@ cutover では次の 4 層を同じ packet で切り替える。
 1. local directory: `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain`
 2. GitHub repo: `nexus-ai-2045/engineering-brain`
 3. repo-owned skill: `skills/engineering-autopilot`
-4. runtime install copy: `<USER_HOME>/.codex/skills/engineering-autopilot` (未切替 / `devbrain skill-sync` で dry-run drift check)
+4. runtime install copy: `<USER_HOME>/.codex/skills/engineering-autopilot` (同期済み / `devbrain skill-sync` で drift check)
 
 ## Rename と recreate の判断
 
@@ -43,7 +43,7 @@ legacy PR #6 / #7 に「全部の実行」を入れなかった理由は、GitHu
 次は current conversation の明示承認まで実行しない。
 
 - `gh repo rename engineering-brain`
-- runtime skill の install copy を `engineering-autopilot` へ切り替える
+- runtime skill の install copy を `engineering-autopilot` へ切り替える (done)
 - `dev-brain` repo の visibility 変更
 - public visibility 変更
 
@@ -59,7 +59,7 @@ result: private recreate / clean history / legacy repo kept private.
 2. `<PROJECTS_ROOT>/ssot-registry.yaml` を更新する。
 3. repo-owned `skills/engineering-autopilot` は薄い CLI 入口として追加済み。
 4. runtime install copy への dry-run drift check は `devbrain skill-sync` で追加済み。
-5. runtime install copy への `--apply` と post-apply validation を、明示承認後に実施する。
+5. runtime install copy への `--apply` と post-apply validation は実施済み。
 6. PR D-G 相当の CLI / lifecycle / skill 実装は、新 live SSOT で続行する。
 7. 旧 `dev-brain` 由来の未採用知見が後から見つかった場合は、raw copy ではなく knowledge intake packet として評価する。
 8. public 化はさらに別の review packet と明示 yes まで止める。

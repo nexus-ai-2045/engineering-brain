@@ -26,7 +26,7 @@ owner: nexus_ai
 
 - GitHub push / PR create / merge / branch cleanup
 - repository visibility 変更
-- runtime install copy への同期
+- runtime install copy を正本として直接編集すること
 - credential / auth / hook / settings 変更
 - production DB / cloud mutation
 - public release / publish / external share
