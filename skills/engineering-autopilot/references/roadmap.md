@@ -15,8 +15,8 @@ owner: nexus_ai
 | thin command contract | 現行 `devbrain` CLI だけを呼ぶ | done |
 | runtime drift check | repo-owned source と runtime install copy の差分を dry-run で検出 | done |
 | runtime install sync | `<USER_HOME>/.codex/skills/engineering-autopilot` へ `--apply` 同期 | done |
-| run packet MVP | `devbrain run` で route / gate / closeout を統合 | next |
-| research packet | source / candidate / decision を packet 化 | planned |
+| run packet MVP | `devbrain run` で route / gate / closeout を統合 | done |
+| research packet | source / candidate / decision を packet 化 | next |
 | PR packet generator | 日本語 PR body と stopline を生成 | planned |
 
 ## 採用しないこと

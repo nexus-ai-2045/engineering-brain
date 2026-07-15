@@ -21,7 +21,7 @@
 | Public path redaction | covered | `docs/PUBLIC_PATH_POLICY.md`, `tests/test_path_safety.py` | PR body generator に接続する |
 | GitHub identity gate | partial | local skill + docs | repo-owned identity command を追加する |
 | PR lifecycle | partial | `.github/`, `CONTRIBUTING.md` | PR packet generator を追加する |
-| Human visual review | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | review state を run packet に入れる |
+| Human visual review | partial | `devbrain run`, `docs/AUTOPILOT_GOAL_DESIGN.md` | review state を PR packet に接続する |
 | Merge / branch cleanup | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | finish planner を追加する |
 | Operation guarantee | covered | `devbrain closeout`, `docs/OPERATING_MODEL.md` | evidence-based closeout v2 を追加する |
 | PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
@@ -49,7 +49,7 @@
 
 ## Gaps
 
-1. `devbrain lifecycle` / `devbrain run` は設計済みだが未実装。
+1. `devbrain lifecycle` は設計済みだが未実装。`devbrain run` は MVP 実装済み。
 2. runtime install copy は同期済み。継続的な drift check を運用に入れる。
 3. `registry/local-learnings.yaml` がまだない。
 4. GitHub identity gate は local skill に依存しており、repo-owned command ではない。
@@ -58,7 +58,7 @@
 ## Next slices
 
 1. `registry/local-learnings.yaml` と schema を追加する。
-2. `devbrain run` を追加し、route / gate / closeout / research / TDD plan を 1 packet にまとめる。
-3. autopilot run packet MVP を追加する。
+2. research packet と PR packet generator を追加する。
+3. `devbrain run --closeout` の evidence schema を強化する。
 4. PR packet generator と finish planner を追加する。
 5. Obsidian / memory から候補 packet を作る read-only importer を追加する。

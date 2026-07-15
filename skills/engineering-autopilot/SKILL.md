@@ -18,6 +18,7 @@ python -m devbrain route --task "<task>" --json
 python -m devbrain gate --trigger implementation --json
 python -m devbrain catalog --domain <domain> --json
 python -m devbrain skill-sync --json
+python -m devbrain run --task "<task>" --domain <domain> --json
 python -m devbrain closeout --repo . --json
 ```
 
@@ -30,6 +31,7 @@ python -m devbrain closeout --repo . --json
 - push、PR作成、merge、remote branch削除、公開、visibility変更、credential変更は current-turn explicit approval まで止める。
 - runtime install copy は repo-owned source から同期する projection として扱う。
 - runtime install copy との差分確認は `python -m devbrain skill-sync --json` で行う。
+- `devbrain run` は既定では計画 packet を返す。verification を実行する時は `--closeout` を明示する。
 
 ## 現在の範囲
 
@@ -38,6 +40,7 @@ python -m devbrain closeout --repo . --json
 - 正本: `skills/engineering-autopilot/`
 - projection: `<USER_HOME>/.codex/skills/engineering-autopilot`
 - 確認: `python -m devbrain skill-sync --json`
+- run packet: `python -m devbrain run --task "<task>" --json`
 - しない: GitHub visibility 変更
 
 ## Closeout

@@ -11,6 +11,7 @@ python -m devbrain route --task "bug fix with public release risk" --json
 python -m devbrain gate --trigger implementation --trigger security --json
 python -m devbrain catalog --domain go --json
 python -m devbrain skill-sync --json
+python -m devbrain run --task "implement small python CLI feature and prepare PR" --domain python --json
 python -m devbrain closeout --repo . --json
 ```
 
@@ -34,6 +35,8 @@ python -m devbrain closeout --repo . --json
 ## Autopilot goal design
 
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
+
+`devbrain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
 
 Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は `<USER_HOME>/.codex/skills/engineering-autopilot` へ同期済みです。差分は `python -m devbrain skill-sync --json` で確認します。
 
