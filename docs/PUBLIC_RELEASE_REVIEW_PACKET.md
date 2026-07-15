@@ -1,17 +1,14 @@
 # Public release review packet
 
-status: ready-for-human-review
+status: public
 checked_at: 2026-07-15 JST
 target_repo: nexus-ai-2045/engineering-brain
-current_visibility: PRIVATE
-requested_visibility: PUBLIC
-exact_operation: `gh repo edit nexus-ai-2045/engineering-brain --visibility public`
+current_visibility: PUBLIC
+completed_operation: `gh repo edit nexus-ai-2045/engineering-brain --visibility public --accept-visibility-change-consequences`
 
 ## 判定
 
-この repo は public 化の人間レビューに進める状態です。visibility 変更そのものは、この packet の merge 後に対象 repo と exact operation を再提示し、current conversation の明示 yes を受けてから実行します。
-
-visibility 変更そのものは未実行です。
+この repo は public visibility へ変更済みです。変更前に対象 repo、見える内容、scan、LICENSE、SECURITY.md、exact operation を確認し、current conversation の明示 yes を受けました。
 
 ## 外から見えるもの
 
@@ -31,7 +28,7 @@ visibility 変更そのものは未実行です。
 
 | check | result |
 |---|---|
-| repo visibility | `PRIVATE` |
+| repo visibility | `PUBLIC` |
 | open PRs before this packet | none |
 | `python -m pytest -q` | 34 passed |
 | `python -m devbrain closeout --repo . --json` | overall ok |
@@ -44,7 +41,6 @@ visibility 変更そのものは未実行です。
 
 ## 残す停止線
 
-- GitHub visibility 変更は未実行。
-- `gh repo edit nexus-ai-2045/engineering-brain --visibility public` は、この packet が merge されても自動実行しない。
+- GitHub visibility 変更は実行済み。
 - public release / announcement / external share は別承認。
-- merge 後、public 化直前に `PUBLIC_READY.md`、secret/path scan、repo visibility、open PRs を再測定する。
+- 今後も公開候補 artifact には実ユーザー名入り絶対パス、secret、private URL を残さない。
