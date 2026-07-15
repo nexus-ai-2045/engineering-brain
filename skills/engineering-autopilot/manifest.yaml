@@ -3,7 +3,7 @@ version: 0.1.0
 status: repo-owned-source
 owner: nexus_ai
 language: ja
-runtime_install: pending
+runtime_install: synced
 entrypoint: SKILL.md
 description: engineering-brain CLI と docs/registry を使う approval-gated development lifecycle skill。
 commands:
@@ -19,4 +19,3 @@ stoplines:
   - visibility_change
   - credential_change
   - runtime_install
-
