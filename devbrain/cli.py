@@ -8,6 +8,7 @@ from typing import Any
 from .finish import apply_local_cleanup, finish_plan, install_hooks
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
+from .research import DECISIONS, build_research_packet
 from .run_packet import build_run_packet
 from .skill_sync import compare_skill, default_runtime_root, sync_skill
 from .versioning import version_packet
@@ -48,6 +49,13 @@ def main(argv: list[str] | None = None) -> int:
     run_parser.add_argument("--domain")
     run_parser.add_argument("--closeout", action="store_true")
     run_parser.add_argument("--json", action="store_true")
+
+    research_parser = sub.add_parser("research", help="Build a candidate research and decision packet.")
+    research_parser.add_argument("--task", required=True)
+    research_parser.add_argument("--domain", required=True)
+    research_parser.add_argument("--decision", choices=DECISIONS, default="hold")
+    research_parser.add_argument("--rationale", default="")
+    research_parser.add_argument("--json", action="store_true")
 
     version_parser = sub.add_parser("version", help="Show version surfaces and release policy.")
     version_parser.add_argument("--repo", default=".")
@@ -90,6 +98,16 @@ def main(argv: list[str] | None = None) -> int:
                 repo=Path(args.repo).resolve(),
                 domain=args.domain,
                 closeout=args.closeout,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "research":
+        return emit(
+            build_research_packet(
+                task=args.task,
+                domain=args.domain,
+                decision=args.decision,
+                rationale=args.rationale,
             ),
             as_json=args.json,
         )

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/research-packet.schema.json",
+  "title": "Engineering Brain Research Packet",
+  "type": "object",
+  "required": ["packet_type", "version", "task", "repo", "domain", "candidates", "decision", "human_stoplines", "unknowns"],
+  "properties": {
+    "packet_type": {"const": "engineering_brain_research"},
+    "version": {"const": 1},
+    "task": {"type": "string", "minLength": 1},
+    "repo": {"const": "<REPO>"},
+    "domain": {"type": "string", "minLength": 1},
+    "candidates": {"type": "array", "items": {"type": "object"}},
+    "decision": {
+      "type": "object",
+      "required": ["status", "rationale", "rule"],
+      "properties": {
+        "status": {"enum": ["reuse", "wrap", "extend", "adopt_oss", "build", "hold", "rejected"]},
+        "rationale": {"type": "string"},
+        "rule": {"type": "string"}
+      }
+    },
+    "human_stoplines": {"type": "array", "items": {"type": "string"}},
+    "unknowns": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
