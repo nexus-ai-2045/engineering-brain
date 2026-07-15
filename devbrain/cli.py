@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .finish import apply_local_cleanup, finish_plan, install_hooks
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .run_packet import build_run_packet
@@ -52,6 +53,18 @@ def main(argv: list[str] | None = None) -> int:
     version_parser.add_argument("--repo", default=".")
     version_parser.add_argument("--json", action="store_true")
 
+    finish_parser = sub.add_parser("finish", help="Plan or apply post-merge branch cleanup.")
+    finish_parser.add_argument("--repo", default=".")
+    finish_parser.add_argument("--apply-local", action="store_true")
+    finish_parser.add_argument("--json", action="store_true")
+
+    hooks_parser = sub.add_parser("hooks", help="Install repo-provided local Git hooks.")
+    hooks_sub = hooks_parser.add_subparsers(dest="hooks_command", required=True)
+    hooks_install = hooks_sub.add_parser("install", help="Install opt-in local Git hooks.")
+    hooks_install.add_argument("--repo", default=".")
+    hooks_install.add_argument("--force", action="store_true")
+    hooks_install.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     if args.command == "route":
         return emit(route_task(args.task), as_json=args.json)
@@ -82,6 +95,13 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "version":
         return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
+    if args.command == "finish":
+        repo = Path(args.repo).resolve()
+        payload = apply_local_cleanup(repo) if args.apply_local else finish_plan(repo)
+        return emit(payload, as_json=args.json)
+    if args.command == "hooks":
+        if args.hooks_command == "install":
+            return emit(install_hooks(Path(args.repo).resolve(), force=args.force), as_json=args.json)
     parser.error("unknown command")
     return 2
 

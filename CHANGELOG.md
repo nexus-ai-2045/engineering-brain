@@ -15,3 +15,5 @@ public seed.
 
 - version sync guard を追加。
 - `devbrain version --json` を追加。
+- `devbrain finish --json` を追加し、merge 後の branch cleanup 候補を plan できるようにした。
+- `tools/hooks/post-merge` と `devbrain hooks install --json` を追加し、opt-in hook で finish plan を表示できるようにした。

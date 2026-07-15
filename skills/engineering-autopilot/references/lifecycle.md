@@ -20,6 +20,8 @@ owner: nexus_ai
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m devbrain closeout --repo . --json` |
 | review packet | 外部操作前に見える範囲と未実施を分ける | PR body / closeout |
 | human stopline | push / PR / merge / cleanup / visibility を止める | current-turn explicit approval |
+| finish | merge 後の main 同期、local / remote branch cleanup 候補を plan する | `python -m devbrain finish --json` |
+| hook install | repo 同梱 hook を opt-in で local `.git/hooks/` へ入れる | `python -m devbrain hooks install --json` |
 
 ## 停止線
 
@@ -31,6 +33,14 @@ owner: nexus_ai
 - credential / auth / hook / settings 変更
 - production DB / cloud mutation
 - public release / publish / external share
+
+## post-merge hook 方針
+
+repo に含める hook は `tools/hooks/` の template だけです。`python -m devbrain hooks install --json` を実行したローカル checkout だけに入ります。
+
+`post-merge` hook は `python -m devbrain finish --repo . --json` の plan を表示するだけです。local branch / remote branch / worktree は自動削除しません。
+
+cleanup を実行する場合は、まず `python -m devbrain finish --json` で候補を見ます。local branch cleanup は `--apply-local` を明示します。remote branch cleanup は GitHub write なので current-turn approval と GitHub identity probe を通します。
 
 ## roadmap reference
 
