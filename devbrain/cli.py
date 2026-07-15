@@ -9,6 +9,7 @@ from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .run_packet import build_run_packet
 from .skill_sync import compare_skill, default_runtime_root, sync_skill
+from .versioning import version_packet
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -47,6 +48,10 @@ def main(argv: list[str] | None = None) -> int:
     run_parser.add_argument("--closeout", action="store_true")
     run_parser.add_argument("--json", action="store_true")
 
+    version_parser = sub.add_parser("version", help="Show version surfaces and release policy.")
+    version_parser.add_argument("--repo", default=".")
+    version_parser.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     if args.command == "route":
         return emit(route_task(args.task), as_json=args.json)
@@ -75,6 +80,8 @@ def main(argv: list[str] | None = None) -> int:
             ),
             as_json=args.json,
         )
+    if args.command == "version":
+        return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
     parser.error("unknown command")
     return 2
 

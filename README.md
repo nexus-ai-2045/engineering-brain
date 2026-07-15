@@ -1,19 +1,48 @@
 # engineering-brain
 
-engineering-brain は、開発判断・実装・検証・運用保証を「読んで終わり」にせず、作業前後に通せる形へ落とすローカル-first repo です。
+engineering-brain は、開発判断・実装・検証・運用保証を「読んで終わり」にせず、作業前後に通せる形へ落とす local-first engineering autopilot です。
 
 Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の OS だとすると、engineering-brain は開発実装の保証 OS です。ここでの「100%」はバグゼロ断定ではありません。保証できること、未確認、残リスク、人間承認が必要な境界を、毎回 100% 分離して返すという意味です。
 
-## 使い方
+## What This Does
+
+| question | answer |
+|---|---|
+| Why | 開発のたびに判断、調査、実装、検証、PR、公開判断が散らばる問題を解く。嬉しいことは、毎回同じ入口で「作るべきか」「既存で足りるか」「何をテストしたか」「何は人間承認か」まで確認できること。 |
+| How | task を `route / gate / catalog / skill-sync / closeout` の run packet にまとめ、TDD、既存調査、公開前 redaction、GitHub visibility などの停止線を分ける。 |
+| What | `devbrain` CLI、`engineering-autopilot` runtime skill、docs / registry / tests / ADR を使う local-first な開発保証 repo。 |
+
+具体的には、作る前に既存実装・公式機能・OSS 候補を確認し、local trial や Obsidian / memory / web / GitHub 由来の学びを docs / registry / tests / ADR へ吸収します。
+
+## Quick Start
 
 ```powershell
-python -m devbrain route --task "bug fix with public release risk" --json
-python -m devbrain gate --trigger implementation --trigger security --json
-python -m devbrain catalog --domain go --json
-python -m devbrain skill-sync --json
 python -m devbrain run --task "implement small python CLI feature and prepare PR" --domain python --json
 python -m devbrain closeout --repo . --json
 ```
+
+## Core Commands
+
+| command | 目的 |
+|---|---|
+| `python -m devbrain run --task "<task>" --json` | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる |
+| `python -m devbrain route --task "<task>" --json` | task から必要 gate を推定する |
+| `python -m devbrain gate --trigger implementation --json` | trigger から採用済み / candidate gate を確認する |
+| `python -m devbrain catalog --domain python --json` | 技術別の一次情報 / best-practice candidate を見る |
+| `python -m devbrain skill-sync --json` | repo-owned skill source と runtime projection の drift を見る |
+| `python -m devbrain version --json` | version surface と release policy を見る |
+| `python -m devbrain closeout --repo . --json` | test / compile / path redaction / external boundary を検証する |
+
+## Current Status
+
+| item | status |
+|---|---|
+| version | `0.1.0` public seed |
+| visibility | public |
+| license | MIT |
+| runtime skill | `engineering-autopilot` synced projection |
+| release / GitHub tag | not created; separate approval |
+| primary next work | research packet / PR packet generator |
 
 ## Local SSOT
 
@@ -21,7 +50,7 @@ python -m devbrain closeout --repo . --json
 
 `dev-brain` からの private recreate については [Migration notes](docs/MIGRATION_NOTES.md)、[engineering-brain cutover plan](docs/ENGINEERING_CUTOVER_PLAN.md)、[private cutover packet](docs/PRIVATE_CUTOVER_PACKET.md) を参照します。
 
-## 初期ゲート
+## Guardrails
 
 | gate | 目的 |
 |---|---|
@@ -32,7 +61,7 @@ python -m devbrain closeout --repo . --json
 | publication/GitHub visibility | 公開、外部送信、repo public 化、push/PR を人間確認まで止める |
 | public path redaction | 実ユーザー名を含むローカル絶対パスを公開候補 artifact に残さない |
 
-## Autopilot goal design
+## Engineering Autopilot
 
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
@@ -47,6 +76,8 @@ Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` te
 ## ADR / knowledge intake
 
 設計判断は [ADR](docs/adr/README.md) に残します。Obsidian や local memory は正本ではなく入口として扱い、採用済みの知見だけを [Knowledge intake](docs/KNOWLEDGE_INTAKE.md) の流れで docs / registry / tests / ADR / skill source へ昇格します。
+
+version 管理は [Versioning](docs/VERSIONING.md) を参照します。public seed は `0.1.0` で、tag / GitHub Release は別承認です。
 
 Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community learning intake](docs/COMMUNITY_LEARNING_INTAKE.md) の source packet として扱います。
 
