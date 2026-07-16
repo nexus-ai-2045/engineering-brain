@@ -45,12 +45,12 @@ public 化は完了済み。release、tag、announcement、visibility 再変更�
 
 `engineering-autopilot` の repo-owned source は `skills/engineering-autopilot/` に置く。skill-facing roadmap は `skills/engineering-autopilot/references/roadmap.md` を参照する。
 
-runtime install copy (`<USER_HOME>/.codex/skills/engineering-autopilot`) は同期済み。`python -m devbrain skill-sync --json` が `status: ok` を返すことを維持条件にする。
+runtime install copy (`<USER_HOME>/.codex/skills/engineering-autopilot`) は同期済み。`python -m engineering_brain skill-sync --json` が `status: ok` を返すことを維持条件にする。
 
 ## Done for current public seed phase
 
 - `python -m pytest -q` が通る。
-- `python -m devbrain closeout --repo . --json` が `overall=ok` を返す。
+- `python -m engineering_brain closeout --repo . --json` が `overall=ok` を返す。
 - 個人ホーム絶対パスが公開候補 artifact に残っていない。
 - GitHub write 前に identity probe が `status=ok` を返す。
 - PR ごとに採用、未採用、残リスク、人間停止線が分かれている。

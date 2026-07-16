@@ -10,8 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 [project.scripts]
-devbrain = "devbrain.cli:main"
-engineering-brain = "devbrain.cli:main"
+engineering-brain = "engineering_brain.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

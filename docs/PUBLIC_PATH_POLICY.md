@@ -29,7 +29,7 @@ C:/Users/<name>/Projects/...
 
 ## 運用保証
 
-`python -m devbrain closeout --repo . --json` は `public_path_redaction_gate` を実行する。
+`python -m engineering_brain closeout --repo . --json` は `public_path_redaction_gate` を実行する。
 
 この gate は repo 内の Markdown / YAML / JSON / TOML / Python / shell / PowerShell / JavaScript / TypeScript / config / `Dockerfile` / `.env.example` などの公開候補 text file を走査し、次の形式を検出したら `overall=blocked` にする。
 

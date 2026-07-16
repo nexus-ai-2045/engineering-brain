@@ -10,9 +10,9 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 |---|---|
 | `engineering-brain` | この repository 名。docs / registry / tests / skill source を持つ開発保証 repo。 |
 | `engineering-autopilot` | Codex などから呼ぶ runtime skill 名。repo 内の `skills/engineering-autopilot/` が正本。 |
-| `devbrain` | この repo が提供する Python package / CLI 名。短く叩ける実行入口として残している。 |
+| `engineering_brain` | この repo が提供する Python module 名。`python -m engineering_brain ...` で実行する。 |
 
-つまり、`engineering-autopilot` skill が `engineering-brain` repo の正本を参照し、実行時は `python -m devbrain ...` を呼びます。
+つまり、`engineering-autopilot` skill が `engineering-brain` repo の正本を参照し、実行時は `python -m engineering_brain ...` を呼びます。
 
 ## What This Does
 
@@ -20,7 +20,7 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 |---|---|
 | Why | 開発のたびに判断、調査、実装、検証、PR、公開判断が散らばる問題を解く。嬉しいことは、毎回同じ入口で「作るべきか」「既存で足りるか」「何をテストしたか」「何は人間承認か」まで確認できること。 |
 | How | task を `route / gate / catalog / skill-sync / closeout` の run packet にまとめ、TDD、既存調査、公開前 redaction、GitHub visibility などの停止線を分ける。 |
-| What | `devbrain` CLI、`engineering-autopilot` runtime skill、docs / registry / tests / ADR を使う local-first な開発保証 repo。 |
+| What | `engineering-brain` CLI、`engineering-autopilot` runtime skill、docs / registry / tests / ADR を使う local-first な開発保証 repo。 |
 
 具体的には、作る前に既存実装・公式機能・OSS 候補を確認し、local trial や Obsidian / memory / web / GitHub 由来の学びを docs / registry / tests / ADR へ吸収します。
 
@@ -67,9 +67,9 @@ flowchart LR
 ## Quick Start
 
 ```powershell
-python -m devbrain run --task "implement small python CLI feature and prepare PR" --domain python --json
-python -m devbrain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --json
-python -m devbrain closeout --repo . --json
+python -m engineering_brain run --task "implement small python CLI feature and prepare PR" --domain python --json
+python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --json
+python -m engineering_brain closeout --repo . --json
 ```
 
 ## Core Commands
@@ -77,23 +77,30 @@ python -m devbrain closeout --repo . --json
 まず使う入口:
 
 ```powershell
-python -m devbrain run --task "<task>" --json
-python -m devbrain closeout --repo . --json
+engineering-brain run --task "<task>" --json
+engineering-brain closeout --repo . --json
+```
+
+module として実行する場合:
+
+```powershell
+python -m engineering_brain run --task "<task>" --json
+python -m engineering_brain closeout --repo . --json
 ```
 
 調査と判断:
 
-- `python -m devbrain route --task "<task>" --json`: task から必要 gate を推定する。
-- `python -m devbrain gate --trigger implementation --json`: trigger から採用済み / candidate gate を確認する。
-- `python -m devbrain catalog --domain python --json`: 技術別の一次情報 / best-practice candidate を見る。
-- `python -m devbrain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
+- `python -m engineering_brain route --task "<task>" --json`: task から必要 gate を推定する。
+- `python -m engineering_brain gate --trigger implementation --json`: trigger から採用済み / candidate gate を確認する。
+- `python -m engineering_brain catalog --domain python --json`: 技術別の一次情報 / best-practice candidate を見る。
+- `python -m engineering_brain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
 
 運用と後片付け:
 
-- `python -m devbrain skill-sync --json`: repo-owned skill source と runtime projection の drift を見る。
-- `python -m devbrain version --json`: version surface と release policy を見る。
-- `python -m devbrain finish --json`: merge 後の local / remote branch cleanup 候補を plan する。
-- `python -m devbrain hooks install --json`: repo 同梱の opt-in Git hook をローカル `.git/hooks/` へ入れる。
+- `python -m engineering_brain skill-sync --json`: repo-owned skill source と runtime projection の drift を見る。
+- `python -m engineering_brain version --json`: version surface と release policy を見る。
+- `python -m engineering_brain finish --json`: merge 後の local / remote branch cleanup 候補を plan する。
+- `python -m engineering_brain hooks install --json`: repo 同梱の opt-in Git hook をローカル `.git/hooks/` へ入れる。
 
 ## Current Status
 
@@ -127,13 +134,13 @@ python -m devbrain closeout --repo . --json
 
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
-`devbrain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
+`engineering_brain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
 
-`devbrain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。既定は plan-only です。local branch 削除は `--apply-local`、remote branch 削除は別途 current conversation approval が必要です。
+`engineering_brain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。既定は plan-only です。local branch 削除は `--apply-local`、remote branch 削除は別途 current conversation approval が必要です。
 
-repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m devbrain hooks install --json` で opt-in install すると、merge 後に `devbrain finish --json` の plan だけを表示します。hook は branch を自動削除しません。
+repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m engineering_brain hooks install --json` で opt-in install すると、merge 後に `engineering_brain finish --json` の plan だけを表示します。hook は branch を自動削除しません。
 
-Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は `<USER_HOME>/.codex/skills/engineering-autopilot` へ同期済みです。差分は `python -m devbrain skill-sync --json` で確認します。
+Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は `<USER_HOME>/.codex/skills/engineering-autopilot` へ同期済みです。差分は `python -m engineering_brain skill-sync --json` で確認します。
 
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。
 
@@ -157,7 +164,7 @@ Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community lea
 
 `registry/technology-sources.yaml` に Go、Bun、Vue/Nuxt、Azure、サーバー/API、コンテナ/Kubernetes、GitHub repo lifecycle の公式・一次情報 source を `candidate` として登録しています。
 
-これは「採用済み保証」ではなく、実プロジェクトへ入る前の source catalog です。`devbrain catalog --domain <domain> --json` で対象 domain の source と gate hint を確認します。
+これは「採用済み保証」ではなく、実プロジェクトへ入る前の source catalog です。`engineering_brain catalog --domain <domain> --json` で対象 domain の source と gate hint を確認します。
 
 ## 完了判定
 

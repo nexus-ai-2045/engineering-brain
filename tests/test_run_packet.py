@@ -1,8 +1,8 @@
 from pathlib import Path
 
-import devbrain.run_packet as run_packet
-from devbrain.cli import main
-from devbrain.run_packet import build_run_packet
+import engineering_brain.run_packet as run_packet
+from engineering_brain.cli import main
+from engineering_brain.run_packet import build_run_packet
 
 
 ROOT = Path(__file__).resolve().parents[1]

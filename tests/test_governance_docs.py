@@ -45,7 +45,7 @@ def test_concept_coverage_tracks_required_gaps() -> None:
     for concept in required_concepts:
         assert concept in doc
 
-    assert "devbrain run" in doc
+    assert "engineering_brain run" in doc
     assert "registry/local-learnings.yaml" in doc
 
 
@@ -65,8 +65,8 @@ def test_readme_visualizes_full_human_gated_lifecycle() -> None:
 
     assert "`engineering-brain`" in readme
     assert "`engineering-autopilot`" in readme
-    assert "`devbrain`" in readme
-    assert "Python package / CLI 名" in readme
+    assert "`engineering_brain`" in readme
+    assert "Python module 名" in readme
 
     for label in (
         "1. 設計",
@@ -100,8 +100,8 @@ def test_concept_coverage_tracks_post_public_seed_reality() -> None:
     doc = read_doc("docs/CONCEPT_COVERAGE.md")
 
     assert "Public GitHub surface" in doc
-    assert "devbrain research" in doc
-    assert "devbrain finish" in doc
+    assert "engineering_brain research" in doc
+    assert "engineering_brain finish" in doc
     assert "PR packet generator は未実装" in doc
 
 
@@ -176,7 +176,7 @@ def test_engineering_autopilot_repo_owned_skill_exists() -> None:
     coverage = read_doc("docs/CONCEPT_COVERAGE.md")
 
     assert "薄い入口" in skill
-    assert "python -m devbrain closeout --repo . --json" in skill
+    assert "python -m engineering_brain closeout --repo . --json" in skill
     assert "runtime install copy" in roadmap
     assert "human stopline" in lifecycle
     assert "skills/engineering-autopilot/" in docs_roadmap

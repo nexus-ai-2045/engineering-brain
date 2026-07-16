@@ -7,12 +7,12 @@ runtime_install: synced
 entrypoint: SKILL.md
 description: engineering-brain CLI と docs/registry を使う approval-gated development lifecycle skill。
 commands:
-  - python -m devbrain route --task "<task>" --json
-  - python -m devbrain gate --trigger implementation --json
-  - python -m devbrain catalog --domain <domain> --json
-  - python -m devbrain finish --json
-  - python -m devbrain hooks install --json
-  - python -m devbrain closeout --repo . --json
+  - python -m engineering_brain route --task "<task>" --json
+  - python -m engineering_brain gate --trigger implementation --json
+  - python -m engineering_brain catalog --domain <domain> --json
+  - python -m engineering_brain finish --json
+  - python -m engineering_brain hooks install --json
+  - python -m engineering_brain closeout --repo . --json
 stoplines:
   - push
   - pr_create

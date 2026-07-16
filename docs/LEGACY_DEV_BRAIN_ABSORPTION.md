@@ -56,4 +56,4 @@ git -C <PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain status --sh
 
 Deletion remains blocked if any legacy file contains a source, rule, test, or migration fact not represented in this repo.
 
-Current known state: the legacy GitHub repo, stale local clones, and legacy `dev-brain-autopilot` runtime skill copy are deleted. Remaining `dev-brain` references in this repo are historical migration records or the `devbrain` CLI/package name.
+Current known state: the legacy GitHub repo, stale local clones, and legacy `dev-brain-autopilot` runtime skill copy are deleted. Remaining `dev-brain` references in this repo are historical migration records. The current Python module is `engineering_brain`.

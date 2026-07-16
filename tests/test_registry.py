@@ -1,6 +1,6 @@
 import pytest
 
-from devbrain.registry import (
+from engineering_brain.registry import (
     adoption_units,
     select_technology_sources,
     select_units,

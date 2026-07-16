@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from devbrain.gates import evaluate_triggers, route_task
+from engineering_brain.gates import evaluate_triggers, route_task
 
 
 def test_route_task_blocks_public_release_actions() -> None:

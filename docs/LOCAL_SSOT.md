@@ -53,7 +53,7 @@ checked_at: 2026-07-16 JST
 - legacy `dev-brain` 由来の未採用知見が見つかった場合は、canonical repo へ直接取り込まず、knowledge intake packet として評価する。
 - GitHub push / PR / repo create / visibility change は current-turn explicit approval まで実行しない。
 - GitHub write 前に `gh auth status` と commit identity を確認する。
-- `engineering-autopilot` を live runtime skill と呼べる。維持条件は `python -m devbrain skill-sync --json` が `status: ok` を返すこと。
+- `engineering-autopilot` を live runtime skill と呼べる。維持条件は `python -m engineering_brain skill-sync --json` が `status: ok` を返すこと。
 
 ## Placement decision
 
