@@ -4,6 +4,16 @@ engineering-brain は、開発判断・実装・検証・運用保証を「読�
 
 Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の OS だとすると、engineering-brain は開発実装の保証 OS です。ここでの「100%」はバグゼロ断定ではありません。保証できること、未確認、残リスク、人間承認が必要な境界を、毎回 100% 分離して返すという意味です。
 
+## 名前の整理
+
+| name | 意味 |
+|---|---|
+| `engineering-brain` | この repository 名。docs / registry / tests / skill source を持つ開発保証 repo。 |
+| `engineering-autopilot` | Codex などから呼ぶ runtime skill 名。repo 内の `skills/engineering-autopilot/` が正本。 |
+| `devbrain` | この repo が提供する Python package / CLI 名。短く叩ける実行入口として残している。 |
+
+つまり、`engineering-autopilot` skill が `engineering-brain` repo の正本を参照し、実行時は `python -m devbrain ...` を呼びます。
+
 ## What This Does
 
 | question | answer |
@@ -64,18 +74,26 @@ python -m devbrain closeout --repo . --json
 
 ## Core Commands
 
-| command | 目的 |
-|---|---|
-| `python -m devbrain run --task "<task>" --json` | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる |
-| `python -m devbrain research --task "<question>" --domain python --decision hold --json` | 候補sourceと採否・保留理由を research packet にする |
-| `python -m devbrain route --task "<task>" --json` | task から必要 gate を推定する |
-| `python -m devbrain gate --trigger implementation --json` | trigger から採用済み / candidate gate を確認する |
-| `python -m devbrain catalog --domain python --json` | 技術別の一次情報 / best-practice candidate を見る |
-| `python -m devbrain skill-sync --json` | repo-owned skill source と runtime projection の drift を見る |
-| `python -m devbrain version --json` | version surface と release policy を見る |
-| `python -m devbrain finish --json` | merge 後の local / remote branch cleanup 候補を plan する |
-| `python -m devbrain hooks install --json` | repo 同梱の opt-in Git hook をローカル `.git/hooks/` へ入れる |
-| `python -m devbrain closeout --repo . --json` | test / compile / path redaction / external boundary を検証する |
+まず使う入口:
+
+```powershell
+python -m devbrain run --task "<task>" --json
+python -m devbrain closeout --repo . --json
+```
+
+調査と判断:
+
+- `python -m devbrain route --task "<task>" --json`: task から必要 gate を推定する。
+- `python -m devbrain gate --trigger implementation --json`: trigger から採用済み / candidate gate を確認する。
+- `python -m devbrain catalog --domain python --json`: 技術別の一次情報 / best-practice candidate を見る。
+- `python -m devbrain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
+
+運用と後片付け:
+
+- `python -m devbrain skill-sync --json`: repo-owned skill source と runtime projection の drift を見る。
+- `python -m devbrain version --json`: version surface と release policy を見る。
+- `python -m devbrain finish --json`: merge 後の local / remote branch cleanup 候補を plan する。
+- `python -m devbrain hooks install --json`: repo 同梱の opt-in Git hook をローカル `.git/hooks/` へ入れる。
 
 ## Current Status
 

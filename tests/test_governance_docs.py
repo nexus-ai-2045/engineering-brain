@@ -63,6 +63,11 @@ def test_next_goal_design_defines_run_packet_sequence() -> None:
 def test_readme_visualizes_full_human_gated_lifecycle() -> None:
     readme = read_doc("README.md")
 
+    assert "`engineering-brain`" in readme
+    assert "`engineering-autopilot`" in readme
+    assert "`devbrain`" in readme
+    assert "Python package / CLI 名" in readme
+
     for label in (
         "1. 設計",
         "2. リサーチ",
@@ -78,6 +83,26 @@ def test_readme_visualizes_full_human_gated_lifecycle() -> None:
         assert label in readme
     assert 'H -->|"修正が必要"| C' in readme
     assert "current conversation の人間承認" in readme
+
+
+def test_local_ssot_reflects_public_repo_and_deleted_legacy_runtime() -> None:
+    doc = read_doc("docs/LOCAL_SSOT.md")
+
+    assert "public GitHub review / distribution surface" in doc
+    assert "deleted legacy runtime install copy" in doc
+    assert "visibility: public" in doc
+    assert "repo_class: own_public" in doc
+    assert "visibility: private" not in doc
+    assert "private GitHub mirror / review surface" not in doc
+
+
+def test_concept_coverage_tracks_post_public_seed_reality() -> None:
+    doc = read_doc("docs/CONCEPT_COVERAGE.md")
+
+    assert "Public GitHub surface" in doc
+    assert "devbrain research" in doc
+    assert "devbrain finish" in doc
+    assert "PR packet generator は未実装" in doc
 
 
 def test_community_learning_intake_keeps_external_sources_as_candidates() -> None:

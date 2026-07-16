@@ -2,7 +2,7 @@
 
 status: active
 owner: nexus_ai
-checked_at: 2026-07-15 JST
+checked_at: 2026-07-16 JST
 
 ## 結論
 
@@ -27,11 +27,11 @@ checked_at: 2026-07-15 JST
 | location | role | SSOT |
 |---|---|---|
 | `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain` | local source of truth / 実装・docs・tests・registry | yes |
-| `https://github.com/nexus-ai-2045/engineering-brain` | private GitHub mirror / review surface | no |
+| `https://github.com/nexus-ai-2045/engineering-brain` | public GitHub review / distribution surface | no |
 | `<PROJECTS_ROOT>/Documents/repos/second-brain/dev-brain` | deleted legacy private source | no |
 | `https://github.com/nexus-ai-2045/dev-brain` | deleted legacy private GitHub repo | no |
-| `<PROJECTS_ROOT>/dev-brain` | stale / non-canonical clone with later experimental commits | no |
-| `<USER_HOME>/.codex/skills/dev-brain-autopilot` | runtime install copy, if present | no |
+| `<PROJECTS_ROOT>/dev-brain` | deleted stale / non-canonical clone | no |
+| `<USER_HOME>/.codex/skills/dev-brain-autopilot` | deleted legacy runtime install copy | no |
 | `<USER_HOME>/.codex/skills/engineering-autopilot` | runtime install copy synced from repo source | yes, projection only |
 
 ## engineering-brain / engineering-autopilot の扱い
@@ -45,13 +45,13 @@ checked_at: 2026-07-15 JST
 | local repo | `Documents/repos/second-brain/dev-brain` | `Documents/repos/engineering/engineering-brain` |
 | GitHub repo | `nexus-ai-2045/dev-brain` | `nexus-ai-2045/engineering-brain` |
 | runtime skill source | `skills/engineering-autopilot` repo-owned source | `skills/engineering-autopilot` |
-| runtime install copy | `.codex/skills/dev-brain-autopilot` if synced | `.codex/skills/engineering-autopilot` synced projection |
+| runtime install copy | deleted `.codex/skills/dev-brain-autopilot` | `.codex/skills/engineering-autopilot` synced projection |
 
 ## Guard
 
 - 変更はまず canonical path に入れる。
 - legacy `dev-brain` 由来の未採用知見が見つかった場合は、canonical repo へ直接取り込まず、knowledge intake packet として評価する。
-- GitHub push / PR / repo create / visibility public は current-turn explicit approval まで実行しない。
+- GitHub push / PR / repo create / visibility change は current-turn explicit approval まで実行しない。
 - GitHub write 前に `gh auth status` と commit identity を確認する。
 - `engineering-autopilot` を live runtime skill と呼べる。維持条件は `python -m devbrain skill-sync --json` が `status: ok` を返すこと。
 
@@ -64,7 +64,7 @@ private recreate の履歴は [Migration notes](MIGRATION_NOTES.md) と [private
 この候補を正式化する時は、同じ変更で `ssot-registry.yaml` の `repos:` 節へ次の形で追加または更新する。
 
 ```yaml
-- {path: Documents/repos/engineering/engineering-brain, remote: nexus-ai-2045/engineering-brain, visibility: private, repo_class: own_private, case: engineering, identity: 273569186+nexus-ai-2045@users.noreply.github.com, wave: keep, note: dev-brain clean cutover candidate; public化は別承認}
+- {path: Documents/repos/engineering/engineering-brain, remote: nexus-ai-2045/engineering-brain, visibility: public, repo_class: own_public, case: engineering, identity: 273569186+nexus-ai-2045@users.noreply.github.com, wave: keep, note: dev-brain clean cutover completed; release/tag/announcement は別承認}
 ```
 
-GitHub visibility を public に変える場合は、`visibility: public` / `repo_class: own_public` への更新も同じ review packet で扱う。
+GitHub visibility は public 済み。今後の visibility 変更、release、tag、外部告知は別 review packet と current conversation の明示 yes で扱う。
