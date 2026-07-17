@@ -1,5 +1,5 @@
 version: 1
-updated_at: "2026-07-11"
+updated_at: "2026-07-18"
 sources:
   - id: go_official_engineering_gate
     domain: go
@@ -219,3 +219,42 @@ sources:
     insufficient_if:
       - repo create / rename / archive / visibility 変更を current-turn approval なしに実行する
       - 旧 repo URL redirect、local remote、Actions、runtime skill、commit history の見える範囲を確認していない
+
+  - id: gcp_ai_orchestration_assurance_sources
+    domain: gcp-ai-orchestration
+    status: adopted
+    source_refs:
+      - https://docs.cloud.google.com/run/docs/authenticating/service-to-service
+      - https://docs.cloud.google.com/run/docs/securing/service-identity
+      - https://docs.cloud.google.com/workflows/docs/reference/syntax/retrying
+      - https://docs.cloud.google.com/workflows/docs/reference/syntax/parallel-steps
+      - https://docs.cloud.google.com/workflows/docs/creating-callback-endpoints
+      - https://docs.cloud.google.com/billing/docs/how-to/budgets
+      - https://github.com/GoogleCloudPlatform/workflows-samples
+      - https://github.com/GoogleCloudPlatform/vertex-ai-samples
+    use_when: [gcp, google_cloud, vertex_ai, cloud_run, cloud_workflows, orchestration, async_job]
+    adoption_route: async-orchestration-assurance
+    gate_hint: OIDC最小権限、固定audience、idempotency ledger、marker v2、費用予約、全体semaphore、cancel saga、失敗注入E2Eを同一run証拠鎖で確認する。
+    insufficient_if:
+      - deploy/ACTIVE/HTTP 2xx/job SUCCEEDED/marker存在の単独確認でE2E成功とする
+      - callback URLをログへ出す
+      - retry前にidempotency keyと既存job IDを永続化しない
+
+  - id: ocr_structured_evaluation_sources
+    domain: ocr-document-ai
+    status: adopted
+    source_refs:
+      - https://github.com/microsoft/visionmetrics
+      - https://github.com/rossumai/docile
+      - https://github.com/ibm-aur-nlp/PubTabNet
+      - https://github.com/microsoft/table-transformer
+      - https://proceedings.mlr.press/v70/guo17a
+      - https://arxiv.org/abs/1503.02531
+      - https://arxiv.org/abs/1802.05668
+    use_when: [ocr, document_ai, structured_output, model_eval, distillation, quantization]
+    adoption_route: structured-model-evaluation
+    gate_hint: syntax/schema/field semantics/table alignment/calibration/worst-sliceを分離し、generatorまたは人手GTを独立anchorにしてartifact digest別Paretoを残す。
+    insufficient_if:
+      - JSON valid率だけでOCR精度を表す
+      - teacher一致を独立GTとして扱う
+      - aggregate平均だけでcritical fieldとworst-sliceを隠す

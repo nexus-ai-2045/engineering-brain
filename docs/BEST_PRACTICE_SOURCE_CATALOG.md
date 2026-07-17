@@ -28,6 +28,8 @@ Go、Bun、Vue/Nuxt、Azure、サーバー/API、コンテナ/Kubernetes など�
 | Docker | Docker Engine security / OWASP Docker Security Cheat Sheet | `docker_container_security_gate` |
 | PostgreSQL | PostgreSQL security info / current docs | `postgresql_security_gate` |
 | GitHub repo lifecycle | GitHub rename / duplicate / template repository docs | `github_repo_lifecycle_gate` |
+| GCP AI orchestration | Cloud Run identity / Workflows retry・parallel・callback / Vertex cancel / GoogleCloudPlatform samples | `async_orchestration_evidence_gate` |
+| OCR・Document AI評価 | VisionMetrics / DocILE / PubTabNet / Table Transformer / calibration・distillation論文 | `structured_model_evaluation_gate` |
 
 ## 採用ルール
 

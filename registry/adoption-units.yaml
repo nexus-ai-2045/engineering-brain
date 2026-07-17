@@ -1,5 +1,5 @@
 version: 1
-updated_at: "2026-07-09"
+updated_at: "2026-07-18"
 units:
   - id: fact_source_gate
     status: adopted
@@ -134,3 +134,51 @@ units:
       - 既存 helper / shared script / official capability を見ずに build を選ぶ
       - candidate と adopted の区別がない
       - GitHub / OSS 候補の maintenance / license / security posture が未確認
+
+  - id: async_orchestration_evidence_gate
+    status: adopted
+    source_refs:
+      - <REPO>/docs/GCP_AI_ORCHESTRATION_ASSURANCE.md
+      - https://docs.cloud.google.com/run/docs/authenticating/service-to-service
+      - https://docs.cloud.google.com/workflows/docs/reference/syntax/retrying
+      - https://docs.cloud.google.com/workflows/docs/reference/syntax/parallel-steps
+      - https://docs.cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.customJobs/cancel
+    applies_when: [gcp, google_cloud, cloud_run, cloud_workflows, vertex_ai, async_job, orchestration]
+    timing: [before_patch, before_deploy, after_smoke, before_done]
+    boundary: deploy済み・HTTP 2xx・job SUCCEEDED・marker存在を単独の成功条件にせず、executionから成果物・評価・費用・停止補償まで同一runへ束縛する。
+    route: async-orchestration-assurance
+    guarantee_tier: G2 checked
+    checks:
+      - level: L1 unit
+        command: python -m pytest -q tests/test_assurance.py
+    insufficient_if:
+      - Workflow ACTIVEだがexecutionが0件
+      - HTTP 2xxを非同期operationの成功と同一視する
+      - concurrency_limitだけで全階層のGPU合計数を保証する
+      - Billing Budgetをhard capとして扱う
+      - Workflow cancel後に発射済みjobのterminal状態を確認しない
+      - markerがrun/candidate/attempt/input/output generationへ束縛されていない
+
+  - id: structured_model_evaluation_gate
+    status: adopted
+    source_refs:
+      - <REPO>/docs/GCP_AI_ORCHESTRATION_ASSURANCE.md
+      - https://github.com/microsoft/visionmetrics
+      - https://github.com/rossumai/docile
+      - https://github.com/microsoft/table-transformer
+      - https://proceedings.mlr.press/v70/guo17a
+    applies_when: [ocr, document_ai, structured_output, model_eval, distillation, quantization]
+    timing: [before_training, after_inference, before_selection, before_done]
+    boundary: JSON構文、schema、field意味精度、明細構造、confidence校正、劣化耐性、artifact実測を独立評価し、teacher自己評価やvalidation反復を成功根拠にしない。
+    route: structured-model-evaluation
+    guarantee_tier: G2 checked
+    checks:
+      - level: L1 unit
+        command: python -m pytest -q tests/test_assurance.py
+    insufficient_if:
+      - JSON parse可能だけでschema validとする
+      - schema validだけでsemantic correctとする
+      - teacherがlabel生成・採否・judgeを兼ねる
+      - confidence自己申告を校正せずacceptanceへ使う
+      - hard subsetを反復最適化しfinal heldout同等に扱う
+      - 元modelを測り量子化artifactの速度・精度と呼ぶ

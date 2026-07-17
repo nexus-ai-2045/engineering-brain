@@ -27,11 +27,15 @@ python -m devbrain closeout --repo . --json
 - 作る前に、repo-local / workspace shared / 公式機能 / OSS 候補を確認する。
 - source catalog は採用ではない。`candidate` / `adopted` / `hold` / `rejected` を分ける。
 - TDD または対象 smoke なしに実装完了と言わない。
+- 非同期cloud処理では deploy、HTTP 2xx、job成功、marker存在を完了の代用にせず、executionから成果物・評価・費用・停止補償まで同一runへ束縛する。
+- OCR/structured outputでは JSON構文、schema、field意味精度、表構造、校正、劣化耐性、量子化artifact実測を分離する。
+- 実行開始を期待するrunで execution 0件は idle ではなく preflight failure とする。
 - local で悩んだことは raw chat ではなく、docs / registry / test / ADR のどれかへ薄く吸収する。
 - push、PR作成、merge、remote branch削除、公開、visibility変更、credential変更は current-turn explicit approval まで止める。
 - runtime install copy は repo-owned source から同期する projection として扱う。
 - runtime install copy との差分確認は `python -m devbrain skill-sync --json` で行う。
 - `devbrain run` は既定では計画 packet を返す。verification を実行する時は `--closeout` を明示する。
+- GCP/Vertex/Cloud Run/Workflowsでは `async_orchestration_evidence_gate`、OCR/蒸留/量子化では `structured_model_evaluation_gate` を確認する。
 
 ## 現在の範囲
 

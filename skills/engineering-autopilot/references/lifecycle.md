@@ -17,6 +17,8 @@ owner: nexus_ai
 | skill-sync | repo-owned skill source と runtime install copy の drift を確認する | `python -m devbrain skill-sync --json` |
 | run packet | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる | `python -m devbrain run --task "<task>" --json` |
 | implement | 対象 repo の既存パターンに沿って最小差分で実装する | repo-local tests / docs |
+| async proof | 非同期runのexecution/job/artifact/evaluation/cost/cancel証拠を結ぶ | `async_orchestration_evidence_gate` |
+| model proof | syntax/schema/semantic/table/calibration/robustness/artifactを分離評価する | `structured_model_evaluation_gate` |
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m devbrain closeout --repo . --json` |
 | review packet | 外部操作前に見える範囲と未実施を分ける | PR body / closeout |
 | human stopline | push / PR / merge / cleanup / visibility を止める | current-turn explicit approval |

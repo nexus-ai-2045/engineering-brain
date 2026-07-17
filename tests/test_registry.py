@@ -45,6 +45,8 @@ def test_technology_sources_include_requested_domains() -> None:
         "docker",
         "postgresql",
         "github-repo-lifecycle",
+        "gcp-ai-orchestration",
+        "ocr-document-ai",
     }.issubset(domains)
 
 
@@ -56,3 +58,11 @@ def test_select_technology_sources_matches_alias() -> None:
 def test_validate_technology_source_rejects_missing_fields() -> None:
     with pytest.raises(ValueError, match="missing fields"):
         validate_technology_source({"id": "broken"})
+
+
+def test_gcp_and_ocr_sources_are_adopted_not_merely_catalogued() -> None:
+    gcp = select_technology_sources("gcp")
+    ocr = select_technology_sources("ocr")
+    assert {source.id for source in gcp} == {"gcp_ai_orchestration_assurance_sources"}
+    assert {source.id for source in ocr} == {"ocr_structured_evaluation_sources"}
+    assert all(source.status == "adopted" for source in gcp + ocr)

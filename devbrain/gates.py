@@ -22,6 +22,18 @@ def route_task(task: str) -> dict[str, Any]:
         inferred.add("implementation")
     if {"security", "credential", "secret", "agent", "browser", "connector", "hook"}.intersection(words):
         inferred.add("security")
+    orchestration_tokens = (
+        "gcp", "gcloud", "google cloud", "vertex", "cloud run", "cloud workflow",
+        "workflow", "ワークフロー", "cloud build", "custom job", "gce", "gke", "gpu", "wif",
+    )
+    model_tokens = (
+        "ocr", "帳票", "document ai", "structured output", "構造化出力", "distillation",
+        "蒸留", "quantization", "quantized", "量子化", "schema", "teacher",
+    )
+    if any(token in normalized_task for token in orchestration_tokens):
+        inferred.add("orchestration")
+    if any(token in normalized_task for token in model_tokens):
+        inferred.add("model_eval")
     if {"publish", "public", "release", "github", "push", "pr", "公開"}.intersection(words):
         inferred.add("public_release")
     if {"path", "paths", "absolute", "redaction", "personal", "user", "home", "絶対パス"}.intersection(words):

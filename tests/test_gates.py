@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from devbrain.gates import evaluate_triggers, route_task
 
 
@@ -54,3 +56,24 @@ def test_candidate_gate_is_advisory_not_blocking() -> None:
     assert result["overall"] == "ok"
     assert result["units"][0]["id"] == "reinvention_candidate_research_gate"
     assert result["units"][0]["status"] == "candidate"
+
+
+def test_route_task_selects_async_orchestration_assurance() -> None:
+    result = route_task("Google Cloud WorkflowsでVertex AIを非同期実行する")
+    assert "async_orchestration_evidence_gate" in result["selected_units"]
+
+
+def test_route_task_selects_structured_model_evaluation() -> None:
+    result = route_task("OCR蒸留モデルの構造化出力と量子化を評価する")
+    assert "structured_model_evaluation_gate" in result["selected_units"]
+
+
+@pytest.mark.parametrize("task", [
+    "GCE GPUで学習", "TerraformでVertexを構築", "帳票OCRモデル評価", "蒸留モデル",
+    "ワークフローを起動", "Cloud BuildでCustom Jobを作る", "WIFでCloud Runへ接続",
+])
+def test_route_task_covers_cloud_and_model_aliases(task: str) -> None:
+    result = route_task(task)
+    assert {"async_orchestration_evidence_gate", "structured_model_evaluation_gate"}.intersection(
+        result["selected_units"]
+    )
