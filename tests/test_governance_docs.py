@@ -90,10 +90,15 @@ def test_local_ssot_reflects_public_repo_and_deleted_legacy_runtime() -> None:
 
     assert "public GitHub review / distribution surface" in doc
     assert "deleted legacy runtime install copy" in doc
+    assert "完了済み cutover の記録" in doc
+    assert "Legacy `dev-brain` repo、stale clone、runtime skill copy は削除済み" in doc
     assert "visibility: public" in doc
     assert "repo_class: own_public" in doc
     assert "visibility: private" not in doc
     assert "private GitHub mirror / review surface" not in doc
+    assert "将来の cutover 候補" not in doc
+    assert "target candidate" not in doc
+    assert "`Documents/repos/second-brain/dev-brain` | `Documents/repos/engineering/engineering-brain`" not in doc
 
 
 def test_concept_coverage_tracks_post_public_seed_reality() -> None:

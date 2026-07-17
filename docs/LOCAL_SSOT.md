@@ -38,14 +38,16 @@ checked_at: 2026-07-16 JST
 
 `engineering-brain` は live repo 名である。`engineering-autopilot` は repo-owned / runtime skill 名であり、runtime install copy は repo source から同期する projection として扱う。
 
-将来の cutover 候補:
+完了済み cutover の記録:
 
-| layer | current | target candidate |
+| layer | live surface | role |
 |---|---|---|
-| local repo | `Documents/repos/second-brain/dev-brain` | `Documents/repos/engineering/engineering-brain` |
-| GitHub repo | `nexus-ai-2045/dev-brain` | `nexus-ai-2045/engineering-brain` |
-| runtime skill source | `skills/engineering-autopilot` repo-owned source | `skills/engineering-autopilot` |
-| runtime install copy | deleted `.codex/skills/dev-brain-autopilot` | `.codex/skills/engineering-autopilot` synced projection |
+| local repo | `Documents/repos/engineering/engineering-brain` | live local SSOT |
+| GitHub repo | `nexus-ai-2045/engineering-brain` | public review / distribution surface |
+| runtime skill source | `skills/engineering-autopilot` repo-owned source | live source |
+| runtime install copy | `.codex/skills/engineering-autopilot` synced projection | live projection |
+
+Legacy `dev-brain` repo、stale clone、runtime skill copy は削除済みであり、現行作業や cleanup の対象にはしない。
 
 ## Guard
 
@@ -61,7 +63,7 @@ checked_at: 2026-07-16 JST
 
 private recreate の履歴は [Migration notes](MIGRATION_NOTES.md) と [private cutover packet](PRIVATE_CUTOVER_PACKET.md) を参照する。
 
-この候補を正式化する時は、同じ変更で `ssot-registry.yaml` の `repos:` 節へ次の形で追加または更新する。
+`ssot-registry.yaml` の `repos:` 節は次の現行形で管理する。
 
 ```yaml
 - {path: Documents/repos/engineering/engineering-brain, remote: nexus-ai-2045/engineering-brain, visibility: public, repo_class: own_public, case: engineering, identity: 273569186+nexus-ai-2045@users.noreply.github.com, wave: keep, note: dev-brain clean cutover completed; release/tag/announcement は別承認}
