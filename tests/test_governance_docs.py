@@ -99,6 +99,10 @@ def test_local_ssot_reflects_public_repo_and_deleted_legacy_runtime() -> None:
     assert "将来の cutover 候補" not in doc
     assert "target candidate" not in doc
     assert "`Documents/repos/second-brain/dev-brain` | `Documents/repos/engineering/engineering-brain`" not in doc
+    assert "identity probe と PR readiness preflight" in doc
+    assert "active `gh` login が `nexus-ai-2045` 以外" in doc
+    assert "gh auth switch --hostname github.com --user nexus-ai-2045" in doc
+    assert "auth / credential state 変更" in doc
 
 
 def test_concept_coverage_tracks_post_public_seed_reality() -> None:
