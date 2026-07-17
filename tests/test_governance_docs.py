@@ -183,6 +183,17 @@ def test_engineering_autopilot_repo_owned_skill_exists() -> None:
     assert "repo-owned source" in coverage
 
 
+def test_current_entrypoints_do_not_reintroduce_dev_brain_branding() -> None:
+    issue_template = read_doc(".github/ISSUE_TEMPLATE/research-intake.yml")
+    autopilot_design = read_doc("docs/AUTOPILOT_GOAL_DESIGN.md")
+    gitignore = read_doc(".gitignore")
+
+    assert "engineering-brain の source catalog" in issue_template
+    assert "dev-brain の source catalog" not in issue_template
+    assert "互換入口と rollback を残す" not in autopilot_design
+    assert ".codex/" in gitignore
+
+
 def test_public_release_review_packet_names_exact_stopline() -> None:
     public_ready = read_doc("PUBLIC_READY.md")
     packet = read_doc("docs/PUBLIC_RELEASE_REVIEW_PACKET.md")

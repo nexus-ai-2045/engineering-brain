@@ -321,7 +321,7 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 ### Slice 7: engineering cutover packet
 
 - directory、GitHub repo、runtime skill、registry の 4 層移行案を作る。
-- `dev-brain` 互換入口と rollback を残す。
+- legacy `dev-brain` 互換入口は残さず、移行判断と rollback 記録は historical docs に閉じる。
 - public 化はこの slice に含めない。visibility 変更は別 review packet と明示 yes が必要。
 - rename と private recreate の判断は [engineering-brain cutover plan](ENGINEERING_CUTOVER_PLAN.md) に従う。
 
