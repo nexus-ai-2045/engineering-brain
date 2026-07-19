@@ -1,5 +1,8 @@
 version: 1
-updated_at: "2026-07-18"
+updated_at: "2026-07-19"
+# NOTE: public_path_redaction_gate の insufficient_if にあった backtick 始まりスカラー(元 pre-existing で
+# 標準 YAML 不正=PyYAML/yamllint がパース不能だった)を quote 済み。実 consumer(devbrain/registry.py)と
+# 標準 PyYAML/yamllint の両方で読めるようにした。
 units:
   - id: fact_source_gate
     status: adopted
@@ -111,7 +114,7 @@ units:
       - level: L3 smoke
         command: python -m devbrain closeout --repo . --json
     insufficient_if:
-      - `<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` へ置換せず、実ユーザー名入り path を docs / registry / PR 文面に残している
+      - "`<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` へ置換せず、実ユーザー名入り path を docs / registry / PR 文面に残している"
       - scan が closeout に接続されていない
 
   - id: reinvention_candidate_research_gate
@@ -182,3 +185,23 @@ units:
       - confidence自己申告を校正せずacceptanceへ使う
       - hard subsetを反復最適化しfinal heldout同等に扱う
       - 元modelを測り量子化artifactの速度・精度と呼ぶ
+
+  - id: ai_adoption_maturity_advisory
+    status: candidate
+    source_refs:
+      - <REPO>/docs/BORIS_CHERNY_AI_ADOPTION_AND_CC_TIPS.md
+      - <REPO>/registry/local-learnings.yaml
+      - https://x.com/bcherny/status/2077929379661844559
+    applies_when: [ai_adoption_review, tooling_migration, orchestration_design, team_scaling]
+    timing: [before_work, periodic_review]
+    boundary: AI 定着を step 0-4 で自己評価し、前進は tokens 増でなく「次ボトルネック除去 + 次ガードレール構築」を対で挙げてから進める。
+    route: candidate-research
+    guarantee_tier: G1 advisory
+    checks:
+      - level: L0 advisory
+        command: null
+    # 機械 check なし: digest を読み、現 step / 次ボトルネック / 次ガードレールを対で明記
+    insufficient_if:
+      - step だけ宣言しボトルネックとガードレールを対で挙げない
+      - 0-4 表の二次由来細部を一次 artifact 突合なしに確定扱いする
+      - verification-loop を新規 gate 化する(既存 tdd_regression_gate を再利用しない=reinvention)
