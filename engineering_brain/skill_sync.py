@@ -14,6 +14,10 @@ def default_runtime_root() -> Path:
     return Path.home() / ".codex" / "skills"
 
 
+def default_skill_source() -> Path:
+    return Path(__file__).resolve().parents[1] / "skills" / SKILL_NAME
+
+
 def compare_skill(*, source_dir: Path, runtime_root: Path) -> dict[str, Any]:
     source = source_dir.resolve()
     target = (runtime_root / source.name).resolve()

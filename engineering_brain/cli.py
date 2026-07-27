@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,12 @@ from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
 from .run_packet import build_run_packet
-from .skill_sync import compare_skill, default_runtime_root, sync_skill
+from .skill_sync import (
+    compare_skill,
+    default_runtime_root,
+    default_skill_source,
+    sync_skill,
+)
 from .versioning import version_packet
 
 
@@ -38,7 +44,7 @@ def main(argv: list[str] | None = None) -> int:
     catalog_parser.add_argument("--json", action="store_true")
 
     skill_sync_parser = sub.add_parser("skill-sync", help="Check or sync the engineering-autopilot runtime skill.")
-    skill_sync_parser.add_argument("--source", default="skills/engineering-autopilot")
+    skill_sync_parser.add_argument("--source")
     skill_sync_parser.add_argument("--runtime-root")
     skill_sync_parser.add_argument("--apply", action="store_true")
     skill_sync_parser.add_argument("--json", action="store_true")
@@ -74,6 +80,8 @@ def main(argv: list[str] | None = None) -> int:
     hooks_install.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
+    if getattr(args, "json", False):
+        configure_utf8_stdout()
     if args.command == "route":
         return emit(route_task(args.task), as_json=args.json)
     if args.command == "gate":
@@ -87,7 +95,7 @@ def main(argv: list[str] | None = None) -> int:
         return emit({"sources": [serialize_source(source) for source in select_technology_sources(args.domain)]}, as_json=args.json)
     if args.command == "skill-sync":
         runtime_root = Path(args.runtime_root).resolve() if args.runtime_root else default_runtime_root()
-        source = Path(args.source).resolve()
+        source = Path(args.source).resolve() if args.source else default_skill_source()
         payload = sync_skill(source_dir=source, runtime_root=runtime_root, apply=True) if args.apply else compare_skill(source_dir=source, runtime_root=runtime_root)
         payload["mode"] = "apply" if args.apply else "dry-run"
         return emit(payload, as_json=args.json)
@@ -130,6 +138,12 @@ def emit(payload: dict[str, Any], *, as_json: bool) -> int:
     else:
         print(render_text(payload))
     return 0
+
+
+def configure_utf8_stdout() -> None:
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if callable(reconfigure) and sys.stdout.encoding.lower().replace("-", "") != "utf8":
+        reconfigure(encoding="utf-8")
 
 
 def render_text(payload: dict[str, Any]) -> str:

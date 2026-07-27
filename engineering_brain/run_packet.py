@@ -5,7 +5,7 @@ from typing import Any
 
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import select_technology_sources
-from .skill_sync import compare_skill, default_runtime_root
+from .skill_sync import compare_skill, default_runtime_root, default_skill_source
 
 
 HUMAN_STOPLINES = [
@@ -25,7 +25,7 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
     gates = evaluate_triggers(route["inferred_triggers"])
     catalog_domain = domain or _infer_catalog_domain(task)
     sources = select_technology_sources(catalog_domain) if catalog_domain else []
-    skill_source = resolved_repo / "skills" / "engineering-autopilot"
+    skill_source = default_skill_source()
     skill_sync = compare_skill(source_dir=skill_source, runtime_root=default_runtime_root())
     closeout_payload: dict[str, Any]
     if closeout:
