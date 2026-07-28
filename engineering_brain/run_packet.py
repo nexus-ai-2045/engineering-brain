@@ -6,7 +6,7 @@ from typing import Any
 from .algorithms import infer_algorithm_inputs, select_algorithms
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import select_technology_sources
-from .skill_sync import compare_skill, default_runtime_root, default_skill_source
+from .skill_sync import compare_skill_targets, default_skill_source
 
 
 HUMAN_STOPLINES = [
@@ -32,7 +32,7 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
         constraints=algorithm_constraints,
     )
     skill_source = default_skill_source()
-    skill_sync = compare_skill(source_dir=skill_source, runtime_root=default_runtime_root())
+    skill_sync = compare_skill_targets(source_dir=skill_source)
     closeout_payload: dict[str, Any]
     if closeout:
         closeout_payload = closeout_repo(resolved_repo)

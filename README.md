@@ -148,7 +148,7 @@ Repo-owned skill source は `skills/engineering-autopilot/` にあります。ru
 
 Claude Code の実動 smoke は通常モードで `/engineering-autopilot` を呼びます。Claude Code 2.1.220 の実測では `--bare` が個人スキル projection を `Unknown command` としたため、個人スキルの発見確認には使いません。`skill-sync --target claude-code --json` は、この実行契約を `invocation` として返します。
 
-定番アルゴリズムはコード断片集ではなく、選定メタデータとして `registry/algorithms.json` に保存します。運用方法は [アルゴリズム選定台帳](docs/ALGORITHM_SELECTION.md) を参照します。
+定番アルゴリズムはコード断片集ではなく、選定メタデータとして `engineering_brain/data/algorithms.json` に保存し、wheelにも同梱します。運用方法は [アルゴリズム選定台帳](docs/ALGORITHM_SELECTION.md) を参照します。
 
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。
 
@@ -170,7 +170,7 @@ Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community lea
 
 ## 技術別ベスプラ catalog
 
-`registry/technology-sources.yaml` に Go、Bun、Vue/Nuxt、Azure、サーバー/API、コンテナ/Kubernetes、GitHub repo lifecycle の公式・一次情報 source を `candidate` として登録しています。
+`engineering_brain/data/technology-sources.yaml` に Go、Bun、Vue/Nuxt、Azure、サーバー/API、コンテナ/Kubernetes、GitHub repo lifecycle の公式・一次情報 source を `candidate` として登録し、wheelにも同梱しています。
 
 これは「採用済み保証」ではなく、実プロジェクトへ入る前の source catalog です。`engineering_brain catalog --domain <domain> --json` で対象 domain の source と gate hint を確認します。
 

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
 
-ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CATALOG = ROOT / "registry" / "algorithms.json"
+PACKAGE_ROOT = Path(__file__).resolve().parent
+DEFAULT_CATALOG = PACKAGE_ROOT / "data" / "algorithms.json"
 VALID_STATUSES = {"adopted", "candidate", "hold", "rejected"}
 
 
@@ -151,6 +152,7 @@ def infer_algorithm_inputs(task: str) -> tuple[list[str], list[str]]:
         "random_access": ("random access", "配列"),
         "unweighted_graph": ("重みなし", "unweighted"),
         "weighted_graph": ("重み付き", "weighted"),
+        "non_negative_edge": ("非負辺", "non-negative edge", "non negative edge"),
         "shortest_path": ("最短経路", "shortest path"),
         "dependency_order": ("依存順", "dependency order", "topological"),
         "optimal_substructure": ("最適部分構造", "dynamic programming", "dp"),
@@ -174,12 +176,19 @@ def infer_algorithm_inputs(task: str) -> tuple[list[str], list[str]]:
     signals = [
         signal
         for signal, aliases in signal_aliases.items()
-        if any(alias in normalized for alias in aliases)
+        if any(_contains_alias(normalized, alias) for alias in aliases)
     ]
     constraints = [
         constraint
         for constraint, aliases in constraint_aliases.items()
-        if any(alias in normalized for alias in aliases)
+        if any(_contains_alias(normalized, alias) for alias in aliases)
+        and not (
+            constraint == "negative_edge"
+            and any(
+                _contains_alias(normalized, alias)
+                for alias in signal_aliases["non_negative_edge"]
+            )
+        )
     ]
     return signals, constraints
 
@@ -202,3 +211,10 @@ def _build_entry(raw: dict[str, Any]) -> AlgorithmEntry:
 
 def _normalize(value: str) -> str:
     return value.strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _contains_alias(text: str, alias: str) -> bool:
+    if all(ord(character) < 128 for character in alias):
+        pattern = rf"(?<![A-Za-z0-9_]){re.escape(alias)}(?![A-Za-z0-9_])"
+        return re.search(pattern, text) is not None
+    return alias in text

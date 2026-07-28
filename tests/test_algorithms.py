@@ -6,6 +6,7 @@ import pytest
 from engineering_brain.algorithms import (
     algorithm_catalog,
     compare_algorithms,
+    infer_algorithm_inputs,
     select_algorithms,
     validate_algorithm,
 )
@@ -160,3 +161,52 @@ def test_cli_algorithms_select_and_compare_emit_json(capsys) -> None:
 
     assert code == 0
     assert [item["id"] for item in compared["comparison"]] == ["binary_search", "hash_index"]
+
+
+@pytest.mark.parametrize(
+    ("task", "expected_signals", "expected_constraints", "excluded"),
+    [
+        (
+            "unweighted graph shortest path",
+            {"unweighted_graph", "shortest_path"},
+            set(),
+            {"weighted_graph"},
+        ),
+        ("unsorted input", set(), {"input_unsorted"}, {"sorted_input"}),
+        (
+            "non-negative edge weighted graph",
+            {"non_negative_edge", "weighted_graph"},
+            set(),
+            {"negative_edge"},
+        ),
+    ],
+)
+def test_infer_algorithm_inputs_does_not_match_overlapping_aliases(
+    task: str,
+    expected_signals: set[str],
+    expected_constraints: set[str],
+    excluded: set[str],
+) -> None:
+    signals, constraints = infer_algorithm_inputs(task)
+
+    assert expected_signals.issubset(signals)
+    assert expected_constraints.issubset(constraints)
+    assert excluded.isdisjoint(signals)
+    assert excluded.isdisjoint(constraints)
+
+
+def test_concurrency_limit_selects_bounded_concurrency_not_token_bucket() -> None:
+    signals, constraints = infer_algorithm_inputs("同時実行の並行数を制限する")
+    selected = select_algorithms(signals=signals, constraints=constraints)
+    selected_ids = [item["id"] for item in selected]
+
+    assert selected_ids[0] == "bounded_concurrency"
+    assert "token_bucket" not in selected_ids
+
+
+def test_stable_rescan_requires_independent_completeness_evidence() -> None:
+    entry = next(item for item in algorithm_catalog() if item.id == "stable_rescan")
+    verification = " ".join(entry.verification)
+
+    assert "独立" in verification
+    assert any(term in verification for term in ("総件数", "cursor", "shard", "ID集合"))

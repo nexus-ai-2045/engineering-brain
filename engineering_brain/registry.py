@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any
 
 
-ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REGISTRY = ROOT / "registry" / "adoption-units.yaml"
-DEFAULT_TECHNOLOGY_SOURCES = ROOT / "registry" / "technology-sources.yaml"
+PACKAGE_ROOT = Path(__file__).resolve().parent
+DEFAULT_REGISTRY = PACKAGE_ROOT / "data" / "adoption-units.yaml"
+DEFAULT_TECHNOLOGY_SOURCES = PACKAGE_ROOT / "data" / "technology-sources.yaml"
 
 
 @dataclass(frozen=True)

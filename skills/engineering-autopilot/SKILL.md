@@ -54,7 +54,7 @@ python -m engineering_brain closeout --repo . --json
 - 同期: 現在会話で runtime write の承認を得た後だけ `python -m engineering_brain skill-sync --target all --apply --json`
 - Claude Code smoke: 通常モードで `/engineering-autopilot` を呼ぶ。個人スキルの発見確認には `--bare` を使わない。
 - run packet: `python -m engineering_brain run --task "<task>" --json`
-- algorithm registry: `registry/algorithms.json`
+- algorithm registry: `engineering_brain/data/algorithms.json`
 - algorithm selection: `python -m engineering_brain algorithms select --signal <signal> --json`
 - algorithm comparison: `python -m engineering_brain algorithms compare --id <id> --id <id> --json`
 - しない: GitHub visibility 変更

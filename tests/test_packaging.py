@@ -13,3 +13,14 @@ def test_setuptools_only_discovers_engineering_brain_package() -> None:
     assert pyproject["tool"]["setuptools"]["packages"]["find"]["include"] == [
         "engineering_brain*"
     ]
+
+
+def test_algorithm_catalog_is_packaged_inside_engineering_brain() -> None:
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    package_data = pyproject["tool"]["setuptools"]["package-data"]["engineering_brain"]
+
+    assert "data/*.json" in package_data
+    assert "data/*.yaml" in package_data
+    assert (ROOT / "engineering_brain" / "data" / "algorithms.json").is_file()
+    assert (ROOT / "engineering_brain" / "data" / "adoption-units.yaml").is_file()
+    assert (ROOT / "engineering_brain" / "data" / "technology-sources.yaml").is_file()

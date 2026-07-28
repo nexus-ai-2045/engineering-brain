@@ -221,7 +221,7 @@
       "avoid_when": ["single_pass_only", "unbounded_mutation"],
       "complexity": {"time": "O(k n)", "space": "O(n)"},
       "tradeoffs": ["完全性の確度と取得コストの交換"],
-      "verification": ["連続2走査のID集合・境界・件数一致を確認"],
+      "verification": ["連続2走査のID集合・境界・件数一致に加え、独立した総件数、cursor/shard coverage、authoritative ID集合のいずれかと照合"],
       "source_refs": ["Distributed snapshot verification practice"]
     },
     {
@@ -255,13 +255,26 @@
       "title_ja": "トークンバケット",
       "family": "信頼性",
       "status": "adopted",
-      "problem_signals": ["rate_limit", "burst_control", "concurrent_limit"],
+      "problem_signals": ["rate_limit", "burst_control"],
       "preconditions": ["許容レートとバースト量を定義できる"],
       "avoid_when": ["strict_periodic_schedule", "unmetered_flow"],
       "complexity": {"time": "O(1) / request", "space": "O(1)"},
       "tradeoffs": ["短いバーストを許す"],
       "verification": ["補充・上限・時計ずれをテスト"],
       "source_refs": ["RFC 2697"]
+    },
+    {
+      "id": "bounded_concurrency",
+      "title_ja": "有界セマフォ",
+      "family": "信頼性",
+      "status": "adopted",
+      "problem_signals": ["concurrent_limit", "bounded_workers", "in_flight_limit"],
+      "preconditions": ["許容する同時実行数と待機・拒否方針を定義できる"],
+      "avoid_when": ["rate_limit_only", "unbounded_queue"],
+      "complexity": {"time": "O(1) / acquire-release", "space": "O(waiters)"},
+      "tradeoffs": ["同時実行数を抑えるが時間当たりの流量制御は別途必要"],
+      "verification": ["上限超過、解放漏れ、取消、待機順序をテスト"],
+      "source_refs": ["Python threading.Semaphore documentation"]
     },
     {
       "id": "bloom_filter",

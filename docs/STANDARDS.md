@@ -14,4 +14,4 @@ engineering-brain の初期 seed は、確実性が高く、開発ゲートへ�
 | AI開発標準カードと Living Harness | 開発開始カード、PDCA、昇格階段 |
 | Go / Bun / Vue / Nuxt / Node / Next.js / Python / Rust / Azure / Server / Kubernetes / Terraform / GitHub Actions / Docker / PostgreSQL 公式docs | 技術別 gate の候補 source |
 
-各標準は丸写ししない。`registry/adoption-units.yaml` の adoption unit に落ちるものだけを採用し、未成熟なものは candidate または hold に残す。
+各標準は丸写ししない。`engineering_brain/data/adoption-units.yaml` の adoption unit に落ちるものだけを採用し、未成熟なものは candidate または hold に残す。

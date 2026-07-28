@@ -71,6 +71,22 @@ def compare_skill(
     )
 
 
+def compare_skill_targets(
+    *,
+    source_dir: Path,
+    runtimes: tuple[str, ...] = RUNTIME_TARGETS,
+) -> dict[str, Any]:
+    targets = [
+        compare_skill(
+            source_dir=source_dir,
+            runtime_root=default_runtime_root(runtime),
+            runtime=runtime,
+        )
+        for runtime in runtimes
+    ]
+    return _targets_result(targets=targets, mode="dry-run")
+
+
 def sync_skill(
     *,
     source_dir: Path,
@@ -93,6 +109,20 @@ def sync_skill(
     after["mode"] = "apply"
     after["status"] = "synced" if after["status"] == "ok" else after["status"]
     return after
+
+
+def _targets_result(*, targets: list[dict[str, Any]], mode: str) -> dict[str, Any]:
+    ready_statuses = {"ok", "synced"}
+    return {
+        "skill": SKILL_NAME,
+        "status": (
+            "ok"
+            if targets and all(item["status"] in ready_statuses for item in targets)
+            else "action_required"
+        ),
+        "mode": mode,
+        "targets": targets,
+    }
 
 
 def _required_files(source: Path) -> list[str]:
