@@ -126,10 +126,14 @@ def main(argv: list[str] | None = None) -> int:
         except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
             return emit_feedback_error(error, as_json=args.json)
         errors = validate_feedback_packet(packet)
+        safe_identifiers = not any(
+            "secret-like content" in error or "Unicode surrogate" in error
+            for error in errors
+        )
         payload = {
             "overall": "ok" if not errors else "error",
             "schema_version": packet.get("schema_version"),
-            "feedback_id": packet.get("feedback_id"),
+            "feedback_id": packet.get("feedback_id") if safe_identifiers else None,
             "errors": errors,
             "next_plan": build_next_plan_context(packet) if not errors else None,
             "external_actions_performed": False,
@@ -149,7 +153,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def emit(payload: dict[str, Any], *, as_json: bool) -> int:
     if as_json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        print(json.dumps(payload, ensure_ascii=True, indent=2))
     else:
         print(render_text(payload))
     return 0
@@ -171,7 +175,7 @@ def emit_feedback_error(error: Exception, *, as_json: bool) -> int:
 def render_text(payload: dict[str, Any]) -> str:
     if "units" in payload and isinstance(payload["units"], list):
         return "\n".join(str(unit) for unit in payload["units"])
-    return json.dumps(payload, ensure_ascii=False, indent=2)
+    return json.dumps(payload, ensure_ascii=True, indent=2)
 
 
 def serialize_source(source: Any) -> dict[str, Any]:

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -10,35 +12,47 @@ from jsonschema import Draft202012Validator, FormatChecker
 from .path_safety import PERSONAL_PATH_PATTERN
 
 
-ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_PATH = ROOT / "schemas" / "fde-feedback-packet.schema.json"
-SCHEMA = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-SECRET_LIKE_PATTERN = re.compile(
-    r"(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})"
+SCHEMA = json.loads(
+    files("devbrain").joinpath("fde-feedback-packet.schema.json").read_text(encoding="utf-8")
 )
+SECRET_LIKE_PATTERN = re.compile(
+    r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})"
+)
+SURROGATE_ESCAPE_PATTERN = re.compile(r"\\u[dD][89aAbB][0-9a-fA-F]{2}")
 
 
 def validate_feedback_packet(packet: dict[str, Any]) -> list[str]:
     validator = Draft202012Validator(SCHEMA, format_checker=FormatChecker())
     errors = [
-        f"{'/'.join(str(part) for part in error.absolute_path) or '<root>'}: {error.message}"
+        f"{'/'.join(str(part) for part in error.absolute_path) or '<root>'}: invalid {error.validator}"
         for error in sorted(
             validator.iter_errors(packet), key=lambda item: list(item.absolute_path)
         )
     ]
     act = packet.get("act")
-    if isinstance(act, dict):
-        next_plan_input = act.get("next_plan_input")
-        if isinstance(next_plan_input, str) and PERSONAL_PATH_PATTERN.search(
-            next_plan_input
-        ):
-            errors.append("act/next_plan_input: personal path is not allowed")
-    serialized = json.dumps(packet, ensure_ascii=False)
+    serialized = json.dumps(packet, ensure_ascii=True)
+    if PERSONAL_PATH_PATTERN.search(serialized):
+        errors.append("<root>: personal path is not allowed")
     if SECRET_LIKE_PATTERN.search(serialized):
         errors.append("<root>: secret-like content is not allowed")
+    if SURROGATE_ESCAPE_PATTERN.search(serialized):
+        errors.append("<root>: invalid Unicode surrogate")
+    observed_at = packet.get("observed_at")
+    if isinstance(observed_at, str):
+        try:
+            datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
+        except ValueError:
+            errors.append("observed_at: invalid date-time")
     check = packet.get("check")
     boundaries = packet.get("boundaries")
     if (
+        isinstance(act, dict)
+        and act.get("decision") == "adopt"
+        and isinstance(check, dict)
+        and check.get("human_review") == "rejected"
+    ):
+        errors.append("act/decision: adopt conflicts with rejected human review")
+    elif (
         isinstance(act, dict)
         and act.get("decision") == "adopt"
         and isinstance(boundaries, dict)

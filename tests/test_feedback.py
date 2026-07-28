@@ -85,7 +85,7 @@ def test_cli_feedback_validate_emits_next_plan_context(tmp_path, capsys) -> None
 
 def test_feedback_schema_copy_declares_fde_contract() -> None:
     schema = json.loads(
-        (ROOT / "schemas" / "fde-feedback-packet.schema.json").read_text(
+        (ROOT / "devbrain" / "fde-feedback-packet.schema.json").read_text(
             encoding="utf-8"
         )
     )
@@ -108,7 +108,7 @@ def test_validate_feedback_packet_rejects_unknown_nested_field() -> None:
 
     errors = validate_feedback_packet(payload)
 
-    assert any("raw_chat" in error for error in errors)
+    assert any("check: invalid additionalProperties" in error for error in errors)
 
 
 def test_validate_feedback_packet_rejects_personal_path_in_next_plan() -> None:
@@ -157,3 +157,57 @@ def test_feedback_rejects_secret_like_content() -> None:
     errors = validate_feedback_packet(payload)
 
     assert any("secret-like" in error for error in errors)
+
+
+def test_validation_errors_do_not_echo_rejected_secret() -> None:
+    payload = packet()
+    secret = "Bearer " + ("x" * 32)
+    payload["check"]["evidence"][0]["ref"] = secret
+
+    errors = validate_feedback_packet(payload)
+
+    assert errors
+    assert secret not in json.dumps(errors)
+
+
+def test_feedback_rejects_all_field_paths_tokens_and_rejected_adoption() -> None:
+    payload = packet()
+    payload["plan"]["hypothesis"] = "github_pat_" + ("x" * 40)
+    payload["do"]["changed_artifacts"] = [
+        chr(47) + "home/alice/private/trace.json"
+    ]
+    payload["check"]["human_review"] = "rejected"
+    payload["boundaries"]["human_gate_required"] = False
+    payload["act"]["decision"] = "adopt"
+
+    errors = validate_feedback_packet(payload)
+
+    assert any("secret-like" in error for error in errors)
+    assert any("personal path" in error for error in errors)
+    assert any("conflicts with rejected" in error for error in errors)
+
+
+def test_cli_redacts_secret_bearing_feedback_id(tmp_path, capsys) -> None:
+    from devbrain.cli import main
+
+    payload = packet()
+    payload["feedback_id"] = "ghp_" + ("x" * 36)
+    input_path = tmp_path / "feedback.json"
+    input_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    assert main(["feedback", "--input", str(input_path), "--json"]) == 1
+    output = json.loads(capsys.readouterr().out)
+    assert output["feedback_id"] is None
+
+
+def test_feedback_rejects_invalid_date_large_collection_and_surrogate() -> None:
+    payload = packet()
+    payload["observed_at"] = "not-a-date"
+    payload["do"]["actions"] = ["step"] * 17
+    payload["producer"] = "\ud800"
+
+    errors = validate_feedback_packet(payload)
+
+    assert any("observed_at" in error for error in errors)
+    assert any("actions" in error for error in errors)
+    assert any("Unicode surrogate" in error for error in errors)

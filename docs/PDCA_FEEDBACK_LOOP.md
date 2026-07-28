@@ -161,7 +161,7 @@ python -m devbrain feedback --input <feedback.json> --json
 
 このcommandはpacketをread-onlyで検証し、`act.next_plan_input`とCheckの型付きevidence pointerだけを`engineering-brain.next-plan.v1`へ圧縮する。raw chat、raw tool output、会話履歴全体は次Planへ再投入しない。`next_plan_input`は1000文字以内とし、個人ホーム絶対パスを拒否する。
 
-互換schemaは`schemas/fde-feedback-packet.schema.json`に置く。正本はFDE repositoryの`schemas/fde_feedback_packet.v1.schema.json`であり、互換性を壊す変更は新しいschema versionで行う。
+互換schemaはpackage resourceの`devbrain/fde-feedback-packet.schema.json`に置く。正本はFDE repositoryの`schemas/fde_feedback_packet.v1.schema.json`であり、互換性を壊す変更は新しいschema versionで行う。
 
 ## Stoplines
 

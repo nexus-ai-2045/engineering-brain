@@ -32,7 +32,7 @@
       "properties": {
         "hypothesis": { "type": "string", "minLength": 1, "maxLength": 1000 },
         "expected_effect": { "type": "string", "minLength": 1, "maxLength": 1000 },
-        "verification_plan": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1, "maxLength": 500 } }
+        "verification_plan": { "type": "array", "minItems": 1, "maxItems": 16, "items": { "type": "string", "minLength": 1, "maxLength": 500 } }
       }
     },
     "do": {
@@ -40,8 +40,8 @@
       "additionalProperties": false,
       "required": ["actions", "changed_artifacts"],
       "properties": {
-        "actions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1, "maxLength": 500 } },
-        "changed_artifacts": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 256 } }
+        "actions": { "type": "array", "minItems": 1, "maxItems": 16, "items": { "type": "string", "minLength": 1, "maxLength": 500 } },
+        "changed_artifacts": { "type": "array", "maxItems": 32, "items": { "type": "string", "minLength": 1, "maxLength": 256 } }
       }
     },
     "check": {
@@ -53,6 +53,7 @@
         "evidence": {
           "type": "array",
           "minItems": 1,
+          "maxItems": 32,
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -80,6 +81,7 @@
         "update_targets": {
           "type": "array",
           "minItems": 1,
+          "maxItems": 16,
           "uniqueItems": true,
           "items": { "enum": ["route", "skill", "gate", "test", "ssot", "roadmap", "docs", "registry", "adr"] }
         },
@@ -104,6 +106,7 @@
         "source_refs": {
           "type": "array",
           "minItems": 1,
+          "maxItems": 32,
           "items": {
             "type": "object",
             "additionalProperties": false,
