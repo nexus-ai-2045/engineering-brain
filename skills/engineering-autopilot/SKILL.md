@@ -25,7 +25,7 @@ python -m engineering_brain gate --trigger implementation --json
 python -m engineering_brain catalog --domain <domain> --json
 python -m engineering_brain algorithms select --signal <problem-signal> --constraint <constraint> --json
 python -m engineering_brain algorithms compare --id <candidate-a> --id <candidate-b> --json
-python -m engineering_brain skill-sync --json
+python -m engineering_brain skill-sync --target all --json
 python -m engineering_brain run --task "<task>" --domain <domain> --json
 python -m engineering_brain closeout --repo . --json
 ```
@@ -41,7 +41,7 @@ python -m engineering_brain closeout --repo . --json
 - local で悩んだことは raw chat ではなく、docs / registry / test / ADR のどれかへ薄く吸収する。
 - push、PR作成、merge、remote branch削除、公開、visibility変更、credential変更は current-turn explicit approval まで止める。
 - runtime install copy は repo-owned source から同期する projection として扱う。
-- runtime install copy との差分確認は `python -m engineering_brain skill-sync --json` で行う。
+- Codex / Claude Code の runtime install copy との差分確認は `python -m engineering_brain skill-sync --target all --json` で行う。
 - `engineering_brain run` は既定では計画 packet を返す。verification を実行する時は `--closeout` を明示する。
 
 ## 現在の範囲
@@ -50,7 +50,8 @@ python -m engineering_brain closeout --repo . --json
 
 - 正本: `skills/engineering-autopilot/`
 - projection: `<USER_HOME>/.codex/skills/engineering-autopilot`
-- 確認: `python -m engineering_brain skill-sync --json`
+- 確認: `python -m engineering_brain skill-sync --target all --json`
+- 同期: 現在会話で runtime write の承認を得た後だけ `python -m engineering_brain skill-sync --target all --apply --json`
 - run packet: `python -m engineering_brain run --task "<task>" --json`
 - algorithm registry: `registry/algorithms.json`
 - algorithm selection: `python -m engineering_brain algorithms select --signal <signal> --json`

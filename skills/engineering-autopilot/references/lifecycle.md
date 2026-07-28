@@ -16,7 +16,7 @@ owner: nexus_ai
 | catalog | 技術・既存例・公式 source を候補として確認する | `python -m engineering_brain catalog --domain <domain> --json` |
 | algorithm select | 問題シグナルと制約から定番アルゴリズム候補を順位付けする | `python -m engineering_brain algorithms select --signal <signal> --constraint <constraint> --json` |
 | algorithm compare | 前提・避ける条件・計算量・検証方法を同じ形式で比較する | `python -m engineering_brain algorithms compare --id <id> --id <id> --json` |
-| skill-sync | repo-owned skill source と runtime install copy の drift を確認する | `python -m engineering_brain skill-sync --json` |
+| skill-sync | repo-owned skill source と Codex / Claude Code runtime install copy の drift を確認する | `python -m engineering_brain skill-sync --target all --json` |
 | run packet | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる | `python -m engineering_brain run --task "<task>" --json` |
 | implement | 対象 repo の既存パターンに沿って最小差分で実装する | repo-local tests / docs |
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m engineering_brain closeout --repo . --json` |

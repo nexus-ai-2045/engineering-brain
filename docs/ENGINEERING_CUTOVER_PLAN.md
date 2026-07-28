@@ -15,7 +15,7 @@ cutover では次の 4 層を同じ packet で切り替える。
 1. local directory: `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain`
 2. GitHub repo: `nexus-ai-2045/engineering-brain`
 3. repo-owned skill: `skills/engineering-autopilot`
-4. runtime install copy: `<USER_HOME>/.codex/skills/engineering-autopilot` (同期済み / `engineering_brain skill-sync` で drift check)
+4. runtime install copy: Codex `<USER_HOME>/.codex/skills/engineering-autopilot` / Claude Code `<USER_HOME>/.claude/skills/engineering-autopilot` (`engineering_brain skill-sync --target all` で drift check)
 
 ## Rename と recreate の判断
 

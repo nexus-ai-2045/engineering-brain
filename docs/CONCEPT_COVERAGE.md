@@ -25,7 +25,7 @@
 | Merge / branch cleanup | covered | `engineering_brain finish`, `tools/hooks/post-merge`, `docs/AUTOPILOT_GOAL_DESIGN.md` | remote cleanup は approval / identity gate を維持する |
 | Operation guarantee | covered | `engineering_brain closeout`, `docs/OPERATING_MODEL.md` | evidence-based closeout v2 を追加する |
 | PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
-| Runtime skill | covered | `skills/engineering-autopilot/` repo-owned source, `<USER_HOME>/.codex/skills/engineering-autopilot`, `engineering_brain skill-sync` | runtime drift を継続監視する |
+| Runtime skill | covered | `skills/engineering-autopilot/` repo-owned source, Codex / Claude Code runtime copies, `engineering_brain skill-sync --target all` | runtime drift を継続監視する |
 | Best-practice source catalog | covered | `registry/technology-sources.yaml` | adopted / candidate / hold status を強める |
 | Public readiness | covered | `PUBLIC_READY.md`, `docs/PUBLIC_RELEASE_REVIEW_PACKET.md` | release / tag / announcement は別 review packet で再測定する |
 

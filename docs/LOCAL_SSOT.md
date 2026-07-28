@@ -56,7 +56,7 @@ Legacy `dev-brain` repo、stale clone、runtime skill copy は削除済みであ
 - GitHub push / PR / repo create / visibility change は current-turn explicit approval まで実行しない。
 - GitHub write 前に identity probe と PR readiness preflight を実行する。active `gh` login が `nexus-ai-2045` 以外、または viewer permission が `WRITE` 未満なら push / PR 更新 / merge を止める。
 - `gh` active account drift の回復は `gh auth switch --hostname github.com --user nexus-ai-2045` を使う。ただし auth / credential state 変更なので、実行前に current conversation の明示 yes を取る。
-- `engineering-autopilot` を live runtime skill と呼べる。維持条件は `python -m engineering_brain skill-sync --json` が `status: ok` を返すこと。
+- `engineering-autopilot` を Codex / Claude Code の live runtime skill と呼べる。維持条件は `python -m engineering_brain skill-sync --target all --json` が `status: ok` を返すこと。
 
 ## Placement decision
 

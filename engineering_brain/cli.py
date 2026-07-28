@@ -13,6 +13,7 @@ from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
 from .run_packet import build_run_packet
 from .skill_sync import (
+    RUNTIME_TARGETS,
     compare_skill,
     default_runtime_root,
     default_skill_source,
@@ -63,6 +64,7 @@ def main(argv: list[str] | None = None) -> int:
     skill_sync_parser = sub.add_parser("skill-sync", help="Check or sync the engineering-autopilot runtime skill.")
     skill_sync_parser.add_argument("--source")
     skill_sync_parser.add_argument("--runtime-root")
+    skill_sync_parser.add_argument("--target", choices=(*RUNTIME_TARGETS, "all"), default="codex")
     skill_sync_parser.add_argument("--apply", action="store_true")
     skill_sync_parser.add_argument("--json", action="store_true")
 
@@ -139,10 +141,43 @@ def main(argv: list[str] | None = None) -> int:
         if args.algorithms_command == "compare":
             return emit({"comparison": compare_algorithms(args.id)}, as_json=args.json)
     if args.command == "skill-sync":
-        runtime_root = Path(args.runtime_root).resolve() if args.runtime_root else default_runtime_root()
+        if args.target == "all" and args.runtime_root:
+            skill_sync_parser.error("--runtime-root cannot be combined with --target all")
         source = Path(args.source).resolve() if args.source else default_skill_source()
-        payload = sync_skill(source_dir=source, runtime_root=runtime_root, apply=True) if args.apply else compare_skill(source_dir=source, runtime_root=runtime_root)
-        payload["mode"] = "apply" if args.apply else "dry-run"
+        targets = RUNTIME_TARGETS if args.target == "all" else (args.target,)
+        results = []
+        for runtime in targets:
+            runtime_root = (
+                Path(args.runtime_root).resolve()
+                if args.runtime_root
+                else default_runtime_root(runtime)
+            )
+            result = (
+                sync_skill(
+                    source_dir=source,
+                    runtime_root=runtime_root,
+                    apply=True,
+                    runtime=runtime,
+                )
+                if args.apply
+                else compare_skill(
+                    source_dir=source,
+                    runtime_root=runtime_root,
+                    runtime=runtime,
+                )
+            )
+            result["mode"] = "apply" if args.apply else "dry-run"
+            results.append(result)
+        if args.target == "all":
+            ready_statuses = {"ok", "synced"}
+            payload = {
+                "skill": results[0]["skill"],
+                "status": "ok" if all(item["status"] in ready_statuses for item in results) else "action_required",
+                "mode": "apply" if args.apply else "dry-run",
+                "targets": results,
+            }
+        else:
+            payload = results[0]
         return emit(payload, as_json=args.json)
     if args.command == "run":
         return emit(

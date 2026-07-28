@@ -8,23 +8,35 @@ from typing import Any
 
 SKILL_NAME = "engineering-autopilot"
 RUNTIME_PLACEHOLDER = "<RUNTIME_SKILLS>"
+RUNTIME_TARGETS = ("codex", "claude-code")
 
 
-def default_runtime_root() -> Path:
-    return Path.home() / ".codex" / "skills"
+def default_runtime_root(runtime: str = "codex", *, home: Path | None = None) -> Path:
+    base = home or Path.home()
+    if runtime == "codex":
+        return base / ".codex" / "skills"
+    if runtime == "claude-code":
+        return base / ".claude" / "skills"
+    raise ValueError(f"unsupported runtime: {runtime}")
 
 
 def default_skill_source() -> Path:
     return Path(__file__).resolve().parents[1] / "skills" / SKILL_NAME
 
 
-def compare_skill(*, source_dir: Path, runtime_root: Path) -> dict[str, Any]:
+def compare_skill(
+    *,
+    source_dir: Path,
+    runtime_root: Path,
+    runtime: str | None = None,
+) -> dict[str, Any]:
     source = source_dir.resolve()
     target = (runtime_root / source.name).resolve()
     missing = _required_files(source)
     if missing:
         return _result(
             status="source_missing",
+            runtime=runtime,
             source=source,
             runtime_root=runtime_root,
             target=target,
@@ -36,6 +48,7 @@ def compare_skill(*, source_dir: Path, runtime_root: Path) -> dict[str, Any]:
     if not target.exists():
         return _result(
             status="missing",
+            runtime=runtime,
             source=source,
             runtime_root=runtime_root,
             target=target,
@@ -48,6 +61,7 @@ def compare_skill(*, source_dir: Path, runtime_root: Path) -> dict[str, Any]:
     status = "drift" if changed else "ok"
     return _result(
         status=status,
+        runtime=runtime,
         source=source,
         runtime_root=runtime_root,
         target=target,
@@ -57,8 +71,14 @@ def compare_skill(*, source_dir: Path, runtime_root: Path) -> dict[str, Any]:
     )
 
 
-def sync_skill(*, source_dir: Path, runtime_root: Path, apply: bool) -> dict[str, Any]:
-    before = compare_skill(source_dir=source_dir, runtime_root=runtime_root)
+def sync_skill(
+    *,
+    source_dir: Path,
+    runtime_root: Path,
+    apply: bool,
+    runtime: str | None = None,
+) -> dict[str, Any]:
+    before = compare_skill(source_dir=source_dir, runtime_root=runtime_root, runtime=runtime)
     before["mode"] = "apply" if apply else "dry-run"
     if not apply or before["status"] == "source_missing":
         return before
@@ -69,7 +89,7 @@ def sync_skill(*, source_dir: Path, runtime_root: Path, apply: bool) -> dict[str
         shutil.rmtree(target)
     shutil.copytree(source, target, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
 
-    after = compare_skill(source_dir=source, runtime_root=runtime_root)
+    after = compare_skill(source_dir=source, runtime_root=runtime_root, runtime=runtime)
     after["mode"] = "apply"
     after["status"] = "synced" if after["status"] == "ok" else after["status"]
     return after
@@ -113,6 +133,7 @@ def _relative_files(root: Path) -> set[str]:
 def _result(
     *,
     status: str,
+    runtime: str | None,
     source: Path,
     runtime_root: Path,
     target: Path,
@@ -120,7 +141,7 @@ def _result(
     missing_files: list[str],
     apply_required: bool,
 ) -> dict[str, Any]:
-    return {
+    result = {
         "skill": SKILL_NAME,
         "status": status,
         "source": _display_path(source),
@@ -132,6 +153,9 @@ def _result(
         "stopline": "home runtime write requires --apply and current-turn approval",
         "runtime_root_exists": runtime_root.exists(),
     }
+    if runtime:
+        result["runtime"] = runtime
+    return result
 
 
 def _display_path(path: Path) -> str:

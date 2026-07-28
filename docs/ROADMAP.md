@@ -45,7 +45,7 @@ public 化は完了済み。release、tag、announcement、visibility 再変更�
 
 `engineering-autopilot` の repo-owned source は `skills/engineering-autopilot/` に置く。skill-facing roadmap は `skills/engineering-autopilot/references/roadmap.md` を参照する。
 
-runtime install copy (`<USER_HOME>/.codex/skills/engineering-autopilot`) は同期済み。`python -m engineering_brain skill-sync --json` が `status: ok` を返すことを維持条件にする。
+Codex / Claude Code の runtime install copy は `python -m engineering_brain skill-sync --target all --json` が `status: ok` を返すことを維持条件にする。
 
 ## Done for current public seed phase
 

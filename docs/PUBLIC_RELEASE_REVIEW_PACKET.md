@@ -32,7 +32,7 @@ completed_operation: `gh repo edit nexus-ai-2045/engineering-brain --visibility 
 | open PRs before this packet | none |
 | `python -m pytest -q` | 34 passed |
 | `python -m engineering_brain closeout --repo . --json` | overall ok |
-| `python -m engineering_brain skill-sync --json` | status ok |
+| `python -m engineering_brain skill-sync --target all --json` | 両 runtime が status ok |
 | `gh_identity_probe.py --repo . --json` | status ok / repo private / token env absent |
 | LICENSE | MIT |
 | SECURITY.md | present |

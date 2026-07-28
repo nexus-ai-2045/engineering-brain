@@ -101,7 +101,7 @@ python -m engineering_brain closeout --repo . --json
 
 運用と後片付け:
 
-- `python -m engineering_brain skill-sync --json`: repo-owned skill source と runtime projection の drift を見る。
+- `python -m engineering_brain skill-sync --target all --json`: repo-owned skill source と Codex / Claude Code runtime projection の drift を見る。
 - `python -m engineering_brain version --json`: version surface と release policy を見る。
 - `python -m engineering_brain finish --json`: merge 後の local / remote branch cleanup 候補を plan する。
 - `python -m engineering_brain hooks install --json`: repo 同梱の opt-in Git hook をローカル `.git/hooks/` へ入れる。
@@ -144,7 +144,7 @@ python -m engineering_brain closeout --repo . --json
 
 repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m engineering_brain hooks install --json` で opt-in install すると、merge 後に `engineering_brain finish --json` の plan だけを表示します。hook は branch を自動削除しません。
 
-Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は `<USER_HOME>/.codex/skills/engineering-autopilot` へ同期済みです。差分は `python -m engineering_brain skill-sync --json` で確認します。
+Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は Codex の `<USER_HOME>/.codex/skills/engineering-autopilot` と Claude Code の `<USER_HOME>/.claude/skills/engineering-autopilot` を対象にします。両方の差分は `python -m engineering_brain skill-sync --target all --json` で確認し、現在会話で承認を得た後だけ `--apply` を付けて同期します。
 
 定番アルゴリズムはコード断片集ではなく、選定メタデータとして `registry/algorithms.json` に保存します。運用方法は [アルゴリズム選定台帳](docs/ALGORITHM_SELECTION.md) を参照します。
 
