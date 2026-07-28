@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Local-first development decision and assurance gates."
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = [
+  "jsonschema>=4.20,<5",
+]
 
 [project.scripts]
 devbrain = "devbrain.cli:main"

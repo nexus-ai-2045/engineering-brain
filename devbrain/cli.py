@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .finish import apply_local_cleanup, finish_plan, install_hooks
+from .feedback import build_next_plan_context, load_feedback_packet, validate_feedback_packet
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
@@ -61,6 +62,12 @@ def main(argv: list[str] | None = None) -> int:
     version_parser.add_argument("--repo", default=".")
     version_parser.add_argument("--json", action="store_true")
 
+    feedback_parser = sub.add_parser(
+        "feedback", help="Validate an FDE feedback packet and build next-Plan context."
+    )
+    feedback_parser.add_argument("--input", required=True)
+    feedback_parser.add_argument("--json", action="store_true")
+
     finish_parser = sub.add_parser("finish", help="Plan or apply post-merge branch cleanup.")
     finish_parser.add_argument("--repo", default=".")
     finish_parser.add_argument("--apply-local", action="store_true")
@@ -113,6 +120,22 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "version":
         return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
+    if args.command == "feedback":
+        try:
+            packet = load_feedback_packet(Path(args.input).resolve())
+        except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
+            return emit_feedback_error(error, as_json=args.json)
+        errors = validate_feedback_packet(packet)
+        payload = {
+            "overall": "ok" if not errors else "error",
+            "schema_version": packet.get("schema_version"),
+            "feedback_id": packet.get("feedback_id"),
+            "errors": errors,
+            "next_plan": build_next_plan_context(packet) if not errors else None,
+            "external_actions_performed": False,
+        }
+        emit(payload, as_json=args.json)
+        return 0 if not errors else 1
     if args.command == "finish":
         repo = Path(args.repo).resolve()
         payload = apply_local_cleanup(repo) if args.apply_local else finish_plan(repo)
@@ -130,6 +153,19 @@ def emit(payload: dict[str, Any], *, as_json: bool) -> int:
     else:
         print(render_text(payload))
     return 0
+
+
+def emit_feedback_error(error: Exception, *, as_json: bool) -> int:
+    payload = {
+        "overall": "error",
+        "schema_version": None,
+        "feedback_id": None,
+        "errors": [f"{type(error).__name__}: invalid feedback input"],
+        "next_plan": None,
+        "external_actions_performed": False,
+    }
+    emit(payload, as_json=as_json)
+    return 1
 
 
 def render_text(payload: dict[str, Any]) -> str:
