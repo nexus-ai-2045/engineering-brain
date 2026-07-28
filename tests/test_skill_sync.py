@@ -17,6 +17,19 @@ def test_default_runtime_roots_cover_codex_and_claude_code(tmp_path: Path) -> No
     assert default_runtime_root("claude-code", home=tmp_path) == tmp_path / ".claude" / "skills"
 
 
+def test_claude_code_result_exposes_safe_live_smoke_contract(tmp_path: Path) -> None:
+    result = compare_skill(
+        source_dir=SOURCE,
+        runtime_root=tmp_path,
+        runtime="claude-code",
+    )
+
+    assert result["invocation"]["command"] == "/engineering-autopilot"
+    assert result["invocation"]["verified_mode"] == "normal"
+    assert result["invocation"]["unsupported_modes"] == ["--bare"]
+    assert "personal skill" in result["invocation"]["reason"]
+
+
 def test_compare_skill_reports_missing_runtime_copy(tmp_path: Path) -> None:
     result = compare_skill(source_dir=SOURCE, runtime_root=tmp_path)
 

@@ -155,6 +155,13 @@ def _result(
     }
     if runtime:
         result["runtime"] = runtime
+    if runtime == "claude-code":
+        result["invocation"] = {
+            "command": f"/{SKILL_NAME}",
+            "verified_mode": "normal",
+            "unsupported_modes": ["--bare"],
+            "reason": "Claude Code 2.1.220 live smoke returned Unknown command for the personal skill projection in --bare mode",
+        }
     return result
 
 

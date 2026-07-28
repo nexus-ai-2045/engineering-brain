@@ -146,6 +146,8 @@ repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m engin
 
 Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は Codex の `<USER_HOME>/.codex/skills/engineering-autopilot` と Claude Code の `<USER_HOME>/.claude/skills/engineering-autopilot` を対象にします。両方の差分は `python -m engineering_brain skill-sync --target all --json` で確認し、現在会話で承認を得た後だけ `--apply` を付けて同期します。
 
+Claude Code の実動 smoke は通常モードで `/engineering-autopilot` を呼びます。Claude Code 2.1.220 の実測では `--bare` が個人スキル projection を `Unknown command` としたため、個人スキルの発見確認には使いません。`skill-sync --target claude-code --json` は、この実行契約を `invocation` として返します。
+
 定番アルゴリズムはコード断片集ではなく、選定メタデータとして `registry/algorithms.json` に保存します。運用方法は [アルゴリズム選定台帳](docs/ALGORITHM_SELECTION.md) を参照します。
 
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。

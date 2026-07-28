@@ -49,9 +49,10 @@ python -m engineering_brain closeout --repo . --json
 現在の runtime scope は次の通りです。
 
 - 正本: `skills/engineering-autopilot/`
-- projection: `<USER_HOME>/.codex/skills/engineering-autopilot`
+- projection: Codex `<USER_HOME>/.codex/skills/engineering-autopilot` / Claude Code `<USER_HOME>/.claude/skills/engineering-autopilot`
 - 確認: `python -m engineering_brain skill-sync --target all --json`
 - 同期: 現在会話で runtime write の承認を得た後だけ `python -m engineering_brain skill-sync --target all --apply --json`
+- Claude Code smoke: 通常モードで `/engineering-autopilot` を呼ぶ。個人スキルの発見確認には `--bare` を使わない。
 - run packet: `python -m engineering_brain run --task "<task>" --json`
 - algorithm registry: `registry/algorithms.json`
 - algorithm selection: `python -m engineering_brain algorithms select --signal <signal> --json`
