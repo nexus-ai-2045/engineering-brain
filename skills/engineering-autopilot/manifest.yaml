@@ -10,6 +10,9 @@ commands:
   - python -m engineering_brain route --task "<task>" --json
   - python -m engineering_brain gate --trigger implementation --json
   - python -m engineering_brain catalog --domain <domain> --json
+  - python -m engineering_brain algorithms list --json
+  - python -m engineering_brain algorithms select --signal <problem-signal> --json
+  - python -m engineering_brain algorithms compare --id <candidate-a> --id <candidate-b> --json
   - python -m engineering_brain finish --json
   - python -m engineering_brain hooks install --json
   - python -m engineering_brain closeout --repo . --json

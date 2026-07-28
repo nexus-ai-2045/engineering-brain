@@ -19,7 +19,7 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 | question | answer |
 |---|---|
 | Why | 開発のたびに判断、調査、実装、検証、PR、公開判断が散らばる問題を解く。嬉しいことは、毎回同じ入口で「作るべきか」「既存で足りるか」「何をテストしたか」「何は人間承認か」まで確認できること。 |
-| How | task を `route / gate / catalog / skill-sync / closeout` の run packet にまとめ、TDD、既存調査、公開前 redaction、GitHub visibility などの停止線を分ける。 |
+| How | task を `route / gate / catalog / algorithm selection / skill-sync / closeout` の run packet にまとめ、TDD、既存調査、公開前 redaction、GitHub visibility などの停止線を分ける。 |
 | What | `engineering-brain` CLI、`engineering-autopilot` runtime skill、docs / registry / tests / ADR を使う local-first な開発保証 repo。 |
 
 具体的には、作る前に既存実装・公式機能・OSS 候補を確認し、local trial や Obsidian / memory / web / GitHub 由来の学びを docs / registry / tests / ADR へ吸収します。
@@ -68,6 +68,8 @@ flowchart LR
 
 ```powershell
 python -m engineering_brain run --task "implement small python CLI feature and prepare PR" --domain python --json
+python -m engineering_brain algorithms select --signal shortest_path --signal weighted_graph --constraint negative_edge --json
+python -m engineering_brain algorithms compare --id dijkstra --id bellman_ford --json
 python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --json
 python -m engineering_brain closeout --repo . --json
 ```
@@ -93,6 +95,8 @@ python -m engineering_brain closeout --repo . --json
 - `python -m engineering_brain route --task "<task>" --json`: task から必要 gate を推定する。
 - `python -m engineering_brain gate --trigger implementation --json`: trigger から採用済み / candidate gate を確認する。
 - `python -m engineering_brain catalog --domain python --json`: 技術別の一次情報 / best-practice candidate を見る。
+- `python -m engineering_brain algorithms select --signal <signal> --json`: 問題シグナルと制約から定番アルゴリズム候補を順位付けする。
+- `python -m engineering_brain algorithms compare --id <id> --id <id> --json`: 候補の前提・計算量・交換条件・検証法を比較する。
 - `python -m engineering_brain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
 
 運用と後片付け:
@@ -141,6 +145,8 @@ python -m engineering_brain closeout --repo . --json
 repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m engineering_brain hooks install --json` で opt-in install すると、merge 後に `engineering_brain finish --json` の plan だけを表示します。hook は branch を自動削除しません。
 
 Repo-owned skill source は `skills/engineering-autopilot/` にあります。runtime install copy は `<USER_HOME>/.codex/skills/engineering-autopilot` へ同期済みです。差分は `python -m engineering_brain skill-sync --json` で確認します。
+
+定番アルゴリズムはコード断片集ではなく、選定メタデータとして `registry/algorithms.json` に保存します。運用方法は [アルゴリズム選定台帳](docs/ALGORITHM_SELECTION.md) を参照します。
 
 Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` templates を参照します。
 

@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .algorithms import algorithm_catalog, compare_algorithms, select_algorithms
 from .finish import apply_local_cleanup, finish_plan, install_hooks
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
@@ -42,6 +43,21 @@ def main(argv: list[str] | None = None) -> int:
     catalog_parser = sub.add_parser("catalog", help="List technology best-practice sources.")
     catalog_parser.add_argument("--domain")
     catalog_parser.add_argument("--json", action="store_true")
+
+    algorithms_parser = sub.add_parser("algorithms", help="定番アルゴリズムを一覧・選択・比較する。")
+    algorithms_sub = algorithms_parser.add_subparsers(dest="algorithms_command", required=True)
+    algorithms_list = algorithms_sub.add_parser("list", help="アルゴリズム台帳を一覧する。")
+    algorithms_list.add_argument("--family")
+    algorithms_list.add_argument("--json", action="store_true")
+    algorithms_select = algorithms_sub.add_parser("select", help="問題シグナルと制約から候補を順位付けする。")
+    algorithms_select.add_argument("--signal", action="append", default=[])
+    algorithms_select.add_argument("--constraint", action="append", default=[])
+    algorithms_select.add_argument("--family")
+    algorithms_select.add_argument("--limit", type=int, default=5)
+    algorithms_select.add_argument("--json", action="store_true")
+    algorithms_compare = algorithms_sub.add_parser("compare", help="指定候補の選択条件と計算量を比較する。")
+    algorithms_compare.add_argument("--id", action="append", required=True)
+    algorithms_compare.add_argument("--json", action="store_true")
 
     skill_sync_parser = sub.add_parser("skill-sync", help="Check or sync the engineering-autopilot runtime skill.")
     skill_sync_parser.add_argument("--source")
@@ -93,6 +109,36 @@ def main(argv: list[str] | None = None) -> int:
         return emit({"units": [unit.id for unit in adoption_units()]}, as_json=args.json)
     if args.command == "catalog":
         return emit({"sources": [serialize_source(source) for source in select_technology_sources(args.domain)]}, as_json=args.json)
+    if args.command == "algorithms":
+        if args.algorithms_command == "list":
+            entries = algorithm_catalog()
+            if args.family:
+                entries = [entry for entry in entries if entry.family == args.family]
+            return emit(
+                {
+                    "algorithms": [
+                        {"id": entry.id, "title_ja": entry.title_ja, "family": entry.family, "status": entry.status}
+                        for entry in entries
+                    ]
+                },
+                as_json=args.json,
+            )
+        if args.algorithms_command == "select":
+            return emit(
+                {
+                    "signals": args.signal,
+                    "constraints": args.constraint,
+                    "selection": select_algorithms(
+                        signals=args.signal,
+                        constraints=args.constraint,
+                        family=args.family,
+                        limit=args.limit,
+                    ),
+                },
+                as_json=args.json,
+            )
+        if args.algorithms_command == "compare":
+            return emit({"comparison": compare_algorithms(args.id)}, as_json=args.json)
     if args.command == "skill-sync":
         runtime_root = Path(args.runtime_root).resolve() if args.runtime_root else default_runtime_root()
         source = Path(args.source).resolve() if args.source else default_skill_source()
@@ -149,6 +195,11 @@ def configure_utf8_stdout() -> None:
 def render_text(payload: dict[str, Any]) -> str:
     if "units" in payload and isinstance(payload["units"], list):
         return "\n".join(str(unit) for unit in payload["units"])
+    if "algorithms" in payload and isinstance(payload["algorithms"], list):
+        return "\n".join(
+            f"{item['id']}\t{item['family']}\t{item['title_ja']}\t{item['status']}"
+            for item in payload["algorithms"]
+        )
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
