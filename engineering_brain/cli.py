@@ -22,6 +22,7 @@ from .versioning import version_packet
 
 
 def main(argv: list[str] | None = None) -> int:
+    configure_utf8_stdout()
     parser = argparse.ArgumentParser(prog="engineering-brain", description="Local-first development assurance gates.")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -96,8 +97,6 @@ def main(argv: list[str] | None = None) -> int:
     hooks_install.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
-    if getattr(args, "json", False):
-        configure_utf8_stdout()
     if args.command == "route":
         return emit(route_task(args.task), as_json=args.json)
     if args.command == "gate":

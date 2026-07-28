@@ -11,7 +11,13 @@ description: engineering-brain を通して開発作業を設計し、定番ア�
 
 1. `references/lifecycle.md` を読む。
 2. 対象 repo と作業範囲を確認する。
-3. `engineering-brain` repo から、現行 CLI で使える gate を実行する。
+3. canonical `engineering-brain` repo で `python -m engineering_brain --help` を実行し、
+   利用可能commandを実測する。
+4. `engineering-brain` repo から、現行 CLI で使える gate だけを実行する。
+
+`engineering-brain`という別skillは作らない。これはrepo名であり、Codexからのruntime
+入口は`engineering-autopilot`へ一本化する。`engineering_brain`はPython module名として
+扱う。helpに出ない未確認のcommandを推測実行しない。
 
 ```powershell
 python -m engineering_brain route --task "<task>" --json

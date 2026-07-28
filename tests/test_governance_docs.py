@@ -192,6 +192,21 @@ def test_engineering_autopilot_repo_owned_skill_exists() -> None:
     assert "repo-owned source" in coverage
 
 
+def test_single_skill_entrypoint_decision_and_capability_preflight_are_documented() -> None:
+    skill = read_doc("skills/engineering-autopilot/SKILL.md")
+    adr_index = read_doc("docs/adr/README.md")
+    adr = read_doc("docs/adr/ADR-0002-single-autopilot-entrypoint.md")
+
+    assert "engineering-brain`という別skillは作らない" in skill
+    assert "利用可能commandを実測" in skill
+    assert "未確認のcommandを推測実行しない" in skill
+    assert "ADR-0002" in adr_index
+    assert "single runtime skill entrypoint" in adr
+    assert "engineering-autopilot" in adr
+    assert "engineering-brain" in adr
+    assert "engineering_brain" in adr
+
+
 def test_current_entrypoints_do_not_reintroduce_dev_brain_branding() -> None:
     issue_template = read_doc(".github/ISSUE_TEMPLATE/research-intake.yml")
     autopilot_design = read_doc("docs/AUTOPILOT_GOAL_DESIGN.md")
