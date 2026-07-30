@@ -15,6 +15,9 @@ engineering-brain = "engineering_brain.cli:main"
 [tool.setuptools.packages.find]
 include = ["engineering_brain*"]
 
+[tool.setuptools.package-data]
+engineering_brain = ["data/*.json", "data/*.yaml"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

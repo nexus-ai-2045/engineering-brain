@@ -14,7 +14,10 @@ owner: nexus_ai
 | route | task の種類と必要 gate を決める | `python -m engineering_brain route --task "<task>" --json` |
 | gate | trigger から必要な採用 unit を確認する | `python -m engineering_brain gate --trigger implementation --json` |
 | catalog | 技術・既存例・公式 source を候補として確認する | `python -m engineering_brain catalog --domain <domain> --json` |
-| skill-sync | repo-owned skill source と runtime install copy の drift を確認する | `python -m engineering_brain skill-sync --json` |
+| algorithm select | 問題シグナルと制約から定番アルゴリズム候補を順位付けする | `python -m engineering_brain algorithms select --signal <signal> --constraint <constraint> --json` |
+| algorithm compare | 前提・避ける条件・計算量・検証方法を同じ形式で比較する | `python -m engineering_brain algorithms compare --id <id> --id <id> --json` |
+| skill-sync | repo-owned skill source と Codex / Claude Code runtime install copy の drift を確認する | `python -m engineering_brain skill-sync --target all --json` |
+| Claude Code smoke | 個人スキルを通常モードで直接呼び、停止境界を確認する | `/engineering-autopilot` (`--bare` は使わない) |
 | run packet | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる | `python -m engineering_brain run --task "<task>" --json` |
 | implement | 対象 repo の既存パターンに沿って最小差分で実装する | repo-local tests / docs |
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m engineering_brain closeout --repo . --json` |
@@ -33,6 +36,16 @@ owner: nexus_ai
 - credential / auth / hook / settings 変更
 - production DB / cloud mutation
 - public release / publish / external share
+
+## アルゴリズム選定契約
+
+`engineering_brain/data/algorithms.json` はコピー可能な実装断片集ではなく、wheelへ同梱する選定判断の正本です。問題を次の観点へ分解してから使います。
+
+- 入力の順序、グラフ重み、状態遷移、ID安定性
+- データ量、更新頻度、メモリ上限、厳密性
+- 一時障害、再試行可能性、冪等性、観測の揺れ
+
+`select` の点数は採用決定ではありません。採用前に候補の `preconditions` を満たし、`avoid_when` に該当しないことを対象 repo のテストまたは実測で確認します。候補が0件なら未知として入力シグナルを補い、無関係な候補を自動採用しません。
 
 ## post-merge hook 方針
 

@@ -119,7 +119,7 @@ units:
     source_refs:
       - <REPO>/docs/AUTOPILOT_GOAL_DESIGN.md
       - <REPO>/docs/KNOWLEDGE_INTAKE.md
-      - <REPO>/registry/technology-sources.yaml
+      - <REPO>/engineering_brain/data/technology-sources.yaml
     applies_when: [reinvention_check, implementation, bug_fix, refactor, design, research, review, pr]
     timing: [before_work, before_patch, before_pr_prepare]
     boundary: 実装前に repo-local、workspace shared、公式機能、GitHub/OSS 候補を確認し、既存で足りるものを作り直さない。

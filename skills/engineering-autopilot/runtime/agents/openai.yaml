@@ -1,7 +1,6 @@
 name: engineering-autopilot
-description: engineering-brain の repo-owned thin skill。設計、既存調査、TDD、実装、検証、運用保証、PR準備、人間レビュー停止線までを CLI と docs/registry にルーティングする。
+description: engineering-brain の repo-owned thin skill。設計、定番アルゴリズムの選択・比較、既存調査、TDD、実装、検証、運用保証、PR準備、人間レビュー停止線までを CLI と docs/registry にルーティングする。
 instructions: |
-  Use this skill when the user asks for autonomous or self-driving development through engineering-brain.
+  Use this skill when the user asks for autonomous or self-driving development, algorithm selection, or algorithm comparison through engineering-brain.
   Keep the skill thin: read SKILL.md and referenced files, then use repository CLI commands and docs as the source of truth.
   Do not install runtime copies, push, create PRs, merge, publish, or change visibility without current-turn explicit approval.
-

@@ -13,8 +13,14 @@ def test_build_run_packet_combines_route_gates_catalog_skill_sync_and_closeout(
 ) -> None:
     monkeypatch.setattr(
         run_packet,
-        "compare_skill",
-        lambda **_: {"status": "ok"},
+        "compare_skill_targets",
+        lambda **_: {
+            "status": "ok",
+            "targets": [
+                {"runtime": "codex", "status": "ok"},
+                {"runtime": "claude-code", "status": "ok"},
+            ],
+        },
     )
 
     packet = build_run_packet(
@@ -32,7 +38,13 @@ def test_build_run_packet_combines_route_gates_catalog_skill_sync_and_closeout(
     assert packet["gates"]["overall"] == "blocked"
     assert packet["catalog"]["domain"] == "python"
     assert packet["catalog"]["sources"]
+    assert packet["algorithms"]["selection"] == []
+    assert packet["algorithms"]["unknown_rule"]
     assert packet["skill_sync"]["status"] == "ok"
+    assert [target["runtime"] for target in packet["skill_sync"]["targets"]] == [
+        "codex",
+        "claude-code",
+    ]
     assert packet["closeout"]["status"] == "skipped"
     assert "push" in packet["human_stoplines"]
     assert "pr_create" in packet["human_stoplines"]
@@ -54,6 +66,42 @@ def test_build_run_packet_can_include_closeout(monkeypatch) -> None:
 
     assert packet["closeout"]["overall"] == "ok"
     assert packet["verification"]["closeout_status"] == "ok"
+
+
+def test_build_run_packet_reports_claude_runtime_drift(monkeypatch) -> None:
+    monkeypatch.setattr(
+        run_packet,
+        "compare_skill_targets",
+        lambda **_: {
+            "status": "action_required",
+            "targets": [
+                {"runtime": "codex", "status": "ok"},
+                {"runtime": "claude-code", "status": "drift"},
+            ],
+        },
+    )
+
+    packet = build_run_packet(
+        task="review runtime projections",
+        repo=ROOT,
+        domain=None,
+        closeout=False,
+    )
+
+    assert packet["skill_sync"]["status"] == "action_required"
+    assert packet["verification"]["skill_sync_status"] == "action_required"
+
+
+def test_build_run_packet_selects_algorithms_from_task_signals() -> None:
+    packet = build_run_packet(
+        task="ソート済み配列を二分探索して ordered lookup を実装する",
+        repo=ROOT,
+        domain="python",
+        closeout=False,
+    )
+
+    assert packet["algorithms"]["selection"][0]["id"] == "binary_search"
+    assert "sorted_input" in packet["algorithms"]["signals"]
 
 
 def test_cli_run_emits_json_packet(capsys) -> None:

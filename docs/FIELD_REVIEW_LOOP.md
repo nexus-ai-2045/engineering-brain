@@ -165,7 +165,7 @@ human_field_review:
 | result | target |
 |---|---|
 | rule | `registry/local-learnings.yaml` |
-| repeated gate | `registry/adoption-units.yaml` |
+| repeated gate | `engineering_brain/data/adoption-units.yaml` |
 | workflow | `docs/*.md` |
 | irreversible design decision | `docs/adr/ADR-*.md` |
 | regression | `tests/` |
@@ -190,4 +190,3 @@ field review loop が機能していると言えるのは、次を満たす時�
 - human field review が `adopt|hold|reject` を決める。
 - adopted の場合は docs / registry / tests / ADR のどれかに接続される。
 - Field review の結果は [PDCA feedback loop](PDCA_FEEDBACK_LOOP.md) の `Check` と `Act` に戻す。
-

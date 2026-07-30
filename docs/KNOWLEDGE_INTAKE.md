@@ -31,9 +31,9 @@
 | 設計判断 | `docs/adr/ADR-*.md` | 後続 PR の前提になる |
 | 開発標準 | `docs/STANDARDS.md` | 既存標準と矛盾しない |
 | 運用モデル | `docs/OPERATING_MODEL.md` | command / gate / stopline がある |
-| 技術 source | `registry/technology-sources.yaml` | 公式または一次情報を含む |
+| 技術 source | `engineering_brain/data/technology-sources.yaml` | 公式または一次情報を含む |
 | local learning | `registry/local-learnings.yaml` | raw chat log ではなく再利用可能な rule / failure pattern に圧縮する |
-| adoption unit | `registry/adoption-units.yaml` | trigger と evidence がある |
+| adoption unit | `engineering_brain/data/adoption-units.yaml` | trigger と evidence がある |
 | regression | `tests/` | 失敗を再発防止できる |
 | runtime entry | `skills/engineering-autopilot/` | CLI を呼ぶ薄い入口に留める |
 

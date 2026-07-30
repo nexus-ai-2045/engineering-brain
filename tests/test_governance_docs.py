@@ -11,12 +11,16 @@ def read_doc(path: str) -> str:
 def test_adr_index_and_first_decision_exist() -> None:
     index = read_doc("docs/adr/README.md")
     adr = read_doc("docs/adr/ADR-0001-engineering-brain-private-knowledge-repo.md")
+    workspace_entrypoint = read_doc("Documents/decisions/README.md")
 
     assert "ADR-0001" in index
     assert "engineering-brain" in adr
     assert "private executable SSOT" in adr
     assert "Obsidian" in adr
     assert "Human Review Gate" in adr
+    assert "docs/adr/" in workspace_entrypoint
+    assert "正本" in workspace_entrypoint
+    assert "複製せず" in workspace_entrypoint
 
 
 def test_knowledge_intake_keeps_obsidian_as_intake() -> None:
@@ -190,6 +194,21 @@ def test_engineering_autopilot_repo_owned_skill_exists() -> None:
     assert "human stopline" in lifecycle
     assert "skills/engineering-autopilot/" in docs_roadmap
     assert "repo-owned source" in coverage
+
+
+def test_single_skill_entrypoint_decision_and_capability_preflight_are_documented() -> None:
+    skill = read_doc("skills/engineering-autopilot/SKILL.md")
+    adr_index = read_doc("docs/adr/README.md")
+    adr = read_doc("docs/adr/ADR-0002-single-autopilot-entrypoint.md")
+
+    assert "engineering-brain`という別skillは作らない" in skill
+    assert "利用可能commandを実測" in skill
+    assert "未確認のcommandを推測実行しない" in skill
+    assert "ADR-0002" in adr_index
+    assert "single runtime skill entrypoint" in adr
+    assert "engineering-autopilot" in adr
+    assert "engineering-brain" in adr
+    assert "engineering_brain" in adr
 
 
 def test_current_entrypoints_do_not_reintroduce_dev_brain_branding() -> None:
