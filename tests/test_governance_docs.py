@@ -11,12 +11,16 @@ def read_doc(path: str) -> str:
 def test_adr_index_and_first_decision_exist() -> None:
     index = read_doc("docs/adr/README.md")
     adr = read_doc("docs/adr/ADR-0001-engineering-brain-private-knowledge-repo.md")
+    workspace_entrypoint = read_doc("Documents/decisions/README.md")
 
     assert "ADR-0001" in index
     assert "engineering-brain" in adr
     assert "private executable SSOT" in adr
     assert "Obsidian" in adr
     assert "Human Review Gate" in adr
+    assert "docs/adr/" in workspace_entrypoint
+    assert "正本" in workspace_entrypoint
+    assert "複製せず" in workspace_entrypoint
 
 
 def test_knowledge_intake_keeps_obsidian_as_intake() -> None:
