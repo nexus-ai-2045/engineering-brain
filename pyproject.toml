@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Local-first development decision and assurance gates."
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = [
+  "jsonschema[format]>=4.20,<5",
+]
 
 [project.scripts]
 engineering-brain = "engineering_brain.cli:main"
@@ -16,7 +19,7 @@ engineering-brain = "engineering_brain.cli:main"
 include = ["engineering_brain*"]
 
 [tool.setuptools.package-data]
-engineering_brain = ["data/*.json", "data/*.yaml"]
+engineering_brain = ["data/*.json", "data/*.yaml", "*.schema.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

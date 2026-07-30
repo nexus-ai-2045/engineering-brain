@@ -5,3 +5,7 @@
 
 このファイルは、workspace共通のADR検査が参照する互換入口です。
 判断内容をここへ複製せず、追加・更新・レビューは正本側で行います。
+
+今回の判断:
+
+- [ADR-0004 安全なFDE feedback境界](../../docs/adr/ADR-0004-safe-fde-feedback-boundary.md)
