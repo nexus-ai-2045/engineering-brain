@@ -59,3 +59,21 @@ def test_cli_skill_sync_dry_run_uses_runtime_root(tmp_path: Path, capsys) -> Non
     assert '"status": "missing"' in output
     assert '"target": "<RUNTIME_SKILLS>/engineering-autopilot"' in output
     assert not (tmp_path / "engineering-autopilot").exists()
+
+
+def test_cli_skill_sync_resolves_default_source_outside_source_checkout(
+    tmp_path: Path,
+    capsys,
+    monkeypatch,
+) -> None:
+    external_cwd = tmp_path / "consumer"
+    external_cwd.mkdir()
+    runtime_root = tmp_path / "runtime-skills"
+    monkeypatch.chdir(external_cwd)
+
+    code = main(["skill-sync", "--runtime-root", str(runtime_root), "--json"])
+
+    assert code == 0
+    output = capsys.readouterr().out
+    assert '"status": "missing"' in output
+    assert '"status": "source_missing"' not in output

@@ -12,6 +12,9 @@ requires-python = ">=3.10"
 [project.scripts]
 engineering-brain = "engineering_brain.cli:main"
 
+[tool.setuptools.packages.find]
+include = ["engineering_brain*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
