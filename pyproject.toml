@@ -12,15 +12,14 @@ dependencies = [
   "jsonschema[format]>=4.20,<5",
 ]
 
-[tool.setuptools.package-data]
-devbrain = ["*.schema.json"]
-
-[tool.setuptools]
-packages = ["devbrain"]
-
 [project.scripts]
-devbrain = "devbrain.cli:main"
-engineering-brain = "devbrain.cli:main"
+engineering-brain = "engineering_brain.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["engineering_brain*"]
+
+[tool.setuptools.package-data]
+engineering_brain = ["data/*.json", "data/*.yaml", "*.schema.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

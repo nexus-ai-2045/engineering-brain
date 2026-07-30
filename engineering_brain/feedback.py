@@ -13,12 +13,35 @@ from .path_safety import PERSONAL_PATH_PATTERN
 
 
 SCHEMA = json.loads(
-    files("devbrain").joinpath("fde-feedback-packet.schema.json").read_text(encoding="utf-8")
+    files("engineering_brain").joinpath("fde-feedback-packet.schema.json").read_text(encoding="utf-8")
 )
 SECRET_LIKE_PATTERN = re.compile(
     r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})"
 )
-SURROGATE_ESCAPE_PATTERN = re.compile(r"\\u[dD][89aAbB][0-9a-fA-F]{2}")
+
+
+def _contains_unpaired_surrogate(value: Any) -> bool:
+    if isinstance(value, str):
+        index = 0
+        while index < len(value):
+            codepoint = ord(value[index])
+            if 0xD800 <= codepoint <= 0xDBFF:
+                if index + 1 < len(value) and 0xDC00 <= ord(value[index + 1]) <= 0xDFFF:
+                    index += 2
+                    continue
+                return True
+            if 0xDC00 <= codepoint <= 0xDFFF:
+                return True
+            index += 1
+        return False
+    if isinstance(value, dict):
+        return any(
+            _contains_unpaired_surrogate(key) or _contains_unpaired_surrogate(item)
+            for key, item in value.items()
+        )
+    if isinstance(value, list):
+        return any(_contains_unpaired_surrogate(item) for item in value)
+    return False
 
 
 def validate_feedback_packet(packet: dict[str, Any]) -> list[str]:
@@ -35,34 +58,33 @@ def validate_feedback_packet(packet: dict[str, Any]) -> list[str]:
         errors.append("<root>: personal path is not allowed")
     if SECRET_LIKE_PATTERN.search(serialized):
         errors.append("<root>: secret-like content is not allowed")
-    if SURROGATE_ESCAPE_PATTERN.search(serialized):
+    if _contains_unpaired_surrogate(packet):
         errors.append("<root>: invalid Unicode surrogate")
     observed_at = packet.get("observed_at")
     if isinstance(observed_at, str):
+        normalized_observed_at = (
+            observed_at[:-1] + "+00:00"
+            if observed_at.endswith(("Z", "z"))
+            else observed_at
+        )
         try:
-            datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
+            datetime.fromisoformat(normalized_observed_at)
         except ValueError:
             errors.append("observed_at: invalid date-time")
     check = packet.get("check")
-    boundaries = packet.get("boundaries")
     if (
         isinstance(act, dict)
         and act.get("decision") == "adopt"
-        and isinstance(check, dict)
-        and check.get("human_review") == "rejected"
-    ):
-        errors.append("act/decision: adopt conflicts with rejected human review")
-    elif (
-        isinstance(act, dict)
-        and act.get("decision") == "adopt"
-        and isinstance(boundaries, dict)
-        and boundaries.get("human_gate_required") is True
         and (
             not isinstance(check, dict)
             or check.get("human_review") != "approved"
         )
     ):
-        errors.append("act/decision: adopt requires approved human review")
+        errors.append(
+            "act/decision: adopt conflicts with rejected human review"
+            if isinstance(check, dict) and check.get("human_review") == "rejected"
+            else "act/decision: adopt requires approved human review"
+        )
     return errors
 
 

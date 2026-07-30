@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -76,7 +77,18 @@ def serialize_unit(unit: AdoptionUnit) -> dict[str, Any]:
 def closeout_repo(repo: Path) -> dict[str, Any]:
     git_status = run(["git", "status", "--short", "--branch"], cwd=repo)
     pytest_result = run(["python", "-m", "pytest", "-q"], cwd=repo)
-    compile_result = run(["python", "-m", "compileall", "-q", "devbrain", "tests"], cwd=repo)
+    tracked = run(["git", "ls-files", "*.py"], cwd=repo)
+    python_files = tracked["stdout"].splitlines() if tracked["returncode"] == 0 else []
+    compile_result = (
+        run(["python", "-m", "py_compile", *python_files], cwd=repo)
+        if python_files
+        else {
+            "command": "git ls-files *.py",
+            "returncode": 1,
+            "stdout": "",
+            "stderr": "tracked Python files could not be resolved",
+        }
+    )
     personal_path_findings = scan_personal_paths(repo)
 
     verification_ok = pytest_result["returncode"] == 0 and compile_result["returncode"] == 0
@@ -123,7 +135,17 @@ def closeout_repo(repo: Path) -> dict[str, Any]:
 
 
 def run(command: list[str], *, cwd: Path) -> dict[str, Any]:
-    completed = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+    completed = subprocess.run(
+        command,
+        cwd=cwd,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        creationflags=(
+            getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+        ),
+    )
     return {
         "command": " ".join(command),
         "returncode": completed.returncode,

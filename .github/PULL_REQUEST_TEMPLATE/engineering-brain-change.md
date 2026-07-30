@@ -14,8 +14,8 @@
 ## TDD / 検証
 
 - [ ] `python -m pytest -q`
-- [ ] `python -m compileall -q devbrain tests`
-- [ ] `python -m devbrain closeout --repo . --json`
+- [ ] `python -m compileall -q engineering_brain tests`
+- [ ] `python -m engineering_brain closeout --repo . --json`
 - [ ] 必要なら targeted test / smoke / E2E を実行した
 
 ## Security / operation

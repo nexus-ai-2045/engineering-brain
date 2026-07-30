@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from devbrain.feedback import build_next_plan_context, validate_feedback_packet
+from engineering_brain.feedback import build_next_plan_context, validate_feedback_packet
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,7 +70,7 @@ def test_next_plan_context_carries_act_without_replaying_raw_history() -> None:
 
 
 def test_cli_feedback_validate_emits_next_plan_context(tmp_path, capsys) -> None:
-    from devbrain.cli import main
+    from engineering_brain.cli import main
 
     input_path = tmp_path / "feedback.json"
     input_path.write_text(json.dumps(packet()), encoding="utf-8")
@@ -85,7 +85,7 @@ def test_cli_feedback_validate_emits_next_plan_context(tmp_path, capsys) -> None
 
 def test_feedback_schema_copy_declares_fde_contract() -> None:
     schema = json.loads(
-        (ROOT / "devbrain" / "fde-feedback-packet.schema.json").read_text(
+        (ROOT / "engineering_brain" / "fde-feedback-packet.schema.json").read_text(
             encoding="utf-8"
         )
     )
@@ -126,7 +126,7 @@ def test_validate_feedback_packet_rejects_personal_path_in_next_plan() -> None:
 
 
 def test_cli_feedback_returns_structured_error_for_invalid_json(tmp_path, capsys) -> None:
-    from devbrain.cli import main
+    from engineering_brain.cli import main
 
     input_path = tmp_path / "invalid.json"
     input_path.write_text("{", encoding="utf-8")
@@ -144,6 +144,16 @@ def test_cli_feedback_returns_structured_error_for_invalid_json(tmp_path, capsys
 def test_feedback_rejects_adopt_while_human_review_is_pending() -> None:
     payload = packet()
     payload["act"]["decision"] = "adopt"
+
+    errors = validate_feedback_packet(payload)
+
+    assert any("adopt requires approved human review" in error for error in errors)
+
+
+def test_feedback_rejects_adopt_without_review_even_when_packet_disables_gate() -> None:
+    payload = packet()
+    payload["act"]["decision"] = "adopt"
+    payload["boundaries"]["human_gate_required"] = False
 
     errors = validate_feedback_packet(payload)
 
@@ -188,7 +198,7 @@ def test_feedback_rejects_all_field_paths_tokens_and_rejected_adoption() -> None
 
 
 def test_cli_redacts_secret_bearing_feedback_id(tmp_path, capsys) -> None:
-    from devbrain.cli import main
+    from engineering_brain.cli import main
 
     payload = packet()
     payload["feedback_id"] = "ghp_" + ("x" * 36)
@@ -211,3 +221,50 @@ def test_feedback_rejects_invalid_date_large_collection_and_surrogate() -> None:
     assert any("observed_at" in error for error in errors)
     assert any("actions" in error for error in errors)
     assert any("Unicode surrogate" in error for error in errors)
+
+
+def test_feedback_accepts_valid_non_bmp_unicode() -> None:
+    payload = packet()
+    payload["plan"]["hypothesis"] = "emoji is valid \U0001f680"
+
+    assert validate_feedback_packet(payload) == []
+
+
+def test_feedback_accepts_lowercase_rfc3339_utc_marker() -> None:
+    payload = packet()
+    payload["observed_at"] = "2026-07-28T18:00:00z"
+
+    assert validate_feedback_packet(payload) == []
+
+
+def test_feedback_rejects_personal_path_in_evidence_reference() -> None:
+    payload = packet()
+    payload["check"]["evidence"][0]["ref"] = "C:/Users/alice/private/trace.json"
+
+    errors = validate_feedback_packet(payload)
+
+    assert any("personal path" in error for error in errors)
+
+
+def test_cli_redacts_all_metadata_for_sensitive_rejection(tmp_path, capsys) -> None:
+    from engineering_brain.cli import main
+
+    payload = packet()
+    payload["schema_version"] = "ghp_" + ("x" * 36)
+    payload["feedback_id"] = "C:/Users/alice/private/feedback.json"
+    input_path = tmp_path / "feedback.json"
+    input_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    assert main(["feedback", "--input", str(input_path), "--json"]) == 1
+    output = json.loads(capsys.readouterr().out)
+    assert output["schema_version"] is None
+    assert output["feedback_id"] is None
+
+
+def test_human_readable_output_preserves_unicode() -> None:
+    from engineering_brain.cli import render_text
+
+    rendered = render_text({"task": "日本語の実装"})
+
+    assert "日本語の実装" in rendered
+    assert "\\u65e5" not in rendered

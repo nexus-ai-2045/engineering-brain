@@ -12,7 +12,7 @@ completed_operation: `gh repo edit nexus-ai-2045/engineering-brain --visibility 
 
 ## 外から見えるもの
 
-- source code: `devbrain/`, `tests/`, `schemas/`
+- source code: `engineering_brain/`, `tests/`, `schemas/`
 - repo-owned skill source: `skills/engineering-autopilot/`
 - governance docs: `README.md`, `docs/`, `registry/`, `PUBLIC_READY.md`, `SECURITY.md`, `CONTRIBUTING.md`
 - migration history notes: `docs/MIGRATION_NOTES.md`, `docs/ENGINEERING_CUTOVER_PLAN.md`, `docs/PRIVATE_CUTOVER_PACKET.md`
@@ -31,8 +31,8 @@ completed_operation: `gh repo edit nexus-ai-2045/engineering-brain --visibility 
 | repo visibility | `PUBLIC` |
 | open PRs before this packet | none |
 | `python -m pytest -q` | 34 passed |
-| `python -m devbrain closeout --repo . --json` | overall ok |
-| `python -m devbrain skill-sync --json` | status ok |
+| `python -m engineering_brain closeout --repo . --json` | overall ok |
+| `python -m engineering_brain skill-sync --target all --json` | 両 runtime が status ok |
 | `gh_identity_probe.py --repo . --json` | status ok / repo private / token env absent |
 | LICENSE | MIT |
 | SECURITY.md | present |

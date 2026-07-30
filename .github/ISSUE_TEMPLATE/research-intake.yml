@@ -1,5 +1,5 @@
 name: Research intake
-description: 公式/一次情報、GitHub evidence、OSS候補を dev-brain の source catalog へ入れる
+description: 公式/一次情報、GitHub evidence、OSS候補を engineering-brain の source catalog へ入れる
 title: "[research] "
 labels: ["research", "candidate"]
 body:

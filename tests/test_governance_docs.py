@@ -11,12 +11,16 @@ def read_doc(path: str) -> str:
 def test_adr_index_and_first_decision_exist() -> None:
     index = read_doc("docs/adr/README.md")
     adr = read_doc("docs/adr/ADR-0001-engineering-brain-private-knowledge-repo.md")
+    workspace_entrypoint = read_doc("Documents/decisions/README.md")
 
     assert "ADR-0001" in index
     assert "engineering-brain" in adr
     assert "private executable SSOT" in adr
     assert "Obsidian" in adr
     assert "Human Review Gate" in adr
+    assert "docs/adr/" in workspace_entrypoint
+    assert "正本" in workspace_entrypoint
+    assert "複製せず" in workspace_entrypoint
 
 
 def test_knowledge_intake_keeps_obsidian_as_intake() -> None:
@@ -45,7 +49,7 @@ def test_concept_coverage_tracks_required_gaps() -> None:
     for concept in required_concepts:
         assert concept in doc
 
-    assert "devbrain run" in doc
+    assert "engineering_brain run" in doc
     assert "registry/local-learnings.yaml" in doc
 
 
@@ -58,6 +62,60 @@ def test_next_goal_design_defines_run_packet_sequence() -> None:
     assert "registry/local-learnings.yaml" in doc
     assert "PR packet generator" in doc
     assert "candidate gate is advisory" in doc
+
+
+def test_readme_visualizes_full_human_gated_lifecycle() -> None:
+    readme = read_doc("README.md")
+
+    assert "`engineering-brain`" in readme
+    assert "`engineering-autopilot`" in readme
+    assert "`engineering_brain`" in readme
+    assert "Python module 名" in readme
+
+    for label in (
+        "1. 設計",
+        "2. リサーチ",
+        "3. TDD計画",
+        "4. 実装",
+        "5. テスト",
+        "6. 運用保証",
+        "7. PR準備・作成",
+        "8. 人間目視レビュー",
+        "9. マージ",
+        "10. 後片付け",
+    ):
+        assert label in readme
+    assert 'H -->|"修正が必要"| C' in readme
+    assert "current conversation の人間承認" in readme
+
+
+def test_local_ssot_reflects_public_repo_and_deleted_legacy_runtime() -> None:
+    doc = read_doc("docs/LOCAL_SSOT.md")
+
+    assert "public GitHub review / distribution surface" in doc
+    assert "deleted legacy runtime install copy" in doc
+    assert "完了済み cutover の記録" in doc
+    assert "Legacy `dev-brain` repo、stale clone、runtime skill copy は削除済み" in doc
+    assert "visibility: public" in doc
+    assert "repo_class: own_public" in doc
+    assert "visibility: private" not in doc
+    assert "private GitHub mirror / review surface" not in doc
+    assert "将来の cutover 候補" not in doc
+    assert "target candidate" not in doc
+    assert "`Documents/repos/second-brain/dev-brain` | `Documents/repos/engineering/engineering-brain`" not in doc
+    assert "identity probe と PR readiness preflight" in doc
+    assert "active `gh` login が `nexus-ai-2045` 以外" in doc
+    assert "gh auth switch --hostname github.com --user nexus-ai-2045" in doc
+    assert "auth / credential state 変更" in doc
+
+
+def test_concept_coverage_tracks_post_public_seed_reality() -> None:
+    doc = read_doc("docs/CONCEPT_COVERAGE.md")
+
+    assert "Public GitHub surface" in doc
+    assert "engineering_brain research" in doc
+    assert "engineering_brain finish" in doc
+    assert "PR packet generator は未実装" in doc
 
 
 def test_community_learning_intake_keeps_external_sources_as_candidates() -> None:
@@ -131,11 +189,37 @@ def test_engineering_autopilot_repo_owned_skill_exists() -> None:
     coverage = read_doc("docs/CONCEPT_COVERAGE.md")
 
     assert "薄い入口" in skill
-    assert "python -m devbrain closeout --repo . --json" in skill
+    assert "python -m engineering_brain closeout --repo . --json" in skill
     assert "runtime install copy" in roadmap
     assert "human stopline" in lifecycle
     assert "skills/engineering-autopilot/" in docs_roadmap
     assert "repo-owned source" in coverage
+
+
+def test_single_skill_entrypoint_decision_and_capability_preflight_are_documented() -> None:
+    skill = read_doc("skills/engineering-autopilot/SKILL.md")
+    adr_index = read_doc("docs/adr/README.md")
+    adr = read_doc("docs/adr/ADR-0002-single-autopilot-entrypoint.md")
+
+    assert "engineering-brain`という別skillは作らない" in skill
+    assert "利用可能commandを実測" in skill
+    assert "未確認のcommandを推測実行しない" in skill
+    assert "ADR-0002" in adr_index
+    assert "single runtime skill entrypoint" in adr
+    assert "engineering-autopilot" in adr
+    assert "engineering-brain" in adr
+    assert "engineering_brain" in adr
+
+
+def test_current_entrypoints_do_not_reintroduce_dev_brain_branding() -> None:
+    issue_template = read_doc(".github/ISSUE_TEMPLATE/research-intake.yml")
+    autopilot_design = read_doc("docs/AUTOPILOT_GOAL_DESIGN.md")
+    gitignore = read_doc(".gitignore")
+
+    assert "engineering-brain の source catalog" in issue_template
+    assert "dev-brain の source catalog" not in issue_template
+    assert "互換入口と rollback を残す" not in autopilot_design
+    assert ".codex/" in gitignore
 
 
 def test_public_release_review_packet_names_exact_stopline() -> None:

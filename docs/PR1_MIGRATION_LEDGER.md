@@ -17,7 +17,7 @@ PR #1 はそのまま merge しない。`main` との実衝突があり、PR #2 
 |---|---|---|
 | wrong local SSOT | PR #1 は旧 local root を正本として扱う | reject。現行 [Local SSOT](LOCAL_SSOT.md) を維持 |
 | personal absolute paths | docs / registry に実ユーザー名入り absolute path が含まれる | rewrite。`<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` に置換 |
-| merge conflicts | `README.md` / `devbrain/cli.py` / `devbrain/registry.py` / `docs/LOCAL_SSOT.md` / `registry/technology-sources.yaml` が conflict | split PR で再実装 |
+| merge conflicts | `README.md` / `engineering_brain/cli.py` / `engineering_brain/registry.py` / `docs/LOCAL_SSOT.md` / `registry/technology-sources.yaml` が conflict | split PR で再実装 |
 | design drift | PR #1 は planner 実装を先行し、PR #3 の goal design / anti-goals / research method を経由していない | rewrite。PR #3 の state machine と roadmap に合わせる |
 | broad blast radius | docs、registry、CLI、skill、GitHub templates、identity gate を 1 PR に混在 | split |
 
@@ -31,10 +31,10 @@ PR #1 はそのまま merge しない。`main` との実衝突があり、PR #2 
 | `CONTRIBUTING.md` | rewrite | public / private / local-first 境界を現行 policy に合わせる必要あり | PR A: templates |
 | `README.md` | reject/rewrite | 現行 README と conflict。旧 SSOT 記載が危険 | per slice |
 | `ROADMAP.md` | rewrite | PR #3 の MVP roadmap に合わせ直す | PR B: roadmap |
-| `devbrain/autopilot.py` | rewrite | planner-only で self-driving と呼ばない。run packet / lifecycle / evidence へ分解 | PR D: planner |
-| `devbrain/cli.py` | rewrite | 現行 `catalog` / `closeout` と conflict。CLI は slice ごとに追加 | each slice |
-| `devbrain/identity.py` | adopt with review | commit identity gate は有用。fail-open / invalid rev range を重点確認 | PR C: identity gate |
-| `devbrain/registry.py` | rewrite | PR #1 の registry 拡張は現行 lightweight parser と conflict | per registry slice |
+| `engineering_brain/autopilot.py` | rewrite | planner-only で self-driving と呼ばない。run packet / lifecycle / evidence へ分解 | PR D: planner |
+| `engineering_brain/cli.py` | rewrite | 現行 `catalog` / `closeout` と conflict。CLI は slice ごとに追加 | each slice |
+| `engineering_brain/identity.py` | adopt with review | commit identity gate は有用。fail-open / invalid rev range を重点確認 | PR C: identity gate |
+| `engineering_brain/registry.py` | rewrite | PR #1 の registry 拡張は現行 lightweight parser と conflict | per registry slice |
 | `docs/ARCHITECTURE.md` | already-covered/rewrite | [Autopilot goal design](AUTOPILOT_GOAL_DESIGN.md) に統合済み。残すなら短い pointer | optional |
 | `docs/AUTOPILOT_LIFECYCLE.md` | rewrite | lifecycle registry / tests と一緒に再作成 | PR E: lifecycle |
 | `docs/COLLABORATION_MODEL.md` | rewrite | agent / plugin orchestration は PR #3 の section に合わせる | optional |
@@ -57,7 +57,7 @@ PR #1 はそのまま merge しない。`main` との実衝突があり、PR #2 
 | `skills/dev-brain-autopilot/SKILL.md` | rewrite | repo-owned thin skill として再作成。logic duplicate 禁止 | PR G: skill |
 | `skills/dev-brain-autopilot/agents/openai.yaml` | hold | runtime agent mapping は repo CLI 完成後 | PR G or later |
 | `skills/dev-brain-autopilot/references/lifecycle.md` | rewrite | lifecycle registry の pointer にする | PR G |
-| `skills/dev-brain-autopilot/scripts/devbrain_autopilot.py` | reject/rewrite | skill script に logic を複製しない | PR G |
+| legacy autopilot skill script | reject/rewrite | skill script に logic を複製しない | PR G |
 | `tests/test_cli.py` | partial adopt | CLI slice ごとにテストを再利用 | each slice |
 | `tests/test_identity.py` | adopt with review | identity gate の regression seed | PR C |
 
@@ -78,7 +78,7 @@ PR #1 はそのまま merge しない。`main` との実衝突があり、PR #2 
 - Do not keep real local absolute paths.
 - Do not reintroduce planner-only self-driving claims.
 - Do not put push / PR creation / merge / cleanup behind one approval.
-- Every adopted piece must pass `python -m pytest -q`, `python -m devbrain closeout --repo . --json`, and public path redaction.
+- Every adopted piece must pass `python -m pytest -q`, `python -m engineering_brain closeout --repo . --json`, and public path redaction.
 
 ## Current PR #1 status
 

@@ -15,8 +15,8 @@ engineering-brain は local-first の開発保証 repo です。contribution は
 
 ```powershell
 python -m pytest -q
-python -m compileall -q devbrain tests
-python -m devbrain closeout --repo . --json
+python -m compileall -q engineering_brain tests
+python -m engineering_brain closeout --repo . --json
 git diff --check
 git status --short --branch
 ```

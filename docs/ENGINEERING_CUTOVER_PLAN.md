@@ -15,7 +15,7 @@ cutover では次の 4 層を同じ packet で切り替える。
 1. local directory: `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain`
 2. GitHub repo: `nexus-ai-2045/engineering-brain`
 3. repo-owned skill: `skills/engineering-autopilot`
-4. runtime install copy: `<USER_HOME>/.codex/skills/engineering-autopilot` (同期済み / `devbrain skill-sync` で drift check)
+4. runtime install copy: Codex `<USER_HOME>/.codex/skills/engineering-autopilot` / Claude Code `<USER_HOME>/.claude/skills/engineering-autopilot` (`engineering_brain skill-sync --target all` で drift check)
 
 ## Rename と recreate の判断
 
@@ -58,7 +58,7 @@ result: private recreate / clean history / legacy repo kept private.
 1. initial engineering-brain snapshot を push する。
 2. `<PROJECTS_ROOT>/ssot-registry.yaml` を更新する。
 3. repo-owned `skills/engineering-autopilot` は薄い CLI 入口として追加済み。
-4. runtime install copy への dry-run drift check は `devbrain skill-sync` で追加済み。
+4. runtime install copy への dry-run drift check は `engineering_brain skill-sync` で追加済み。
 5. runtime install copy への `--apply` と post-apply validation は実施済み。
 6. PR D-G 相当の CLI / lifecycle / skill 実装は、新 live SSOT で続行する。
 7. 旧 `dev-brain` 由来の未採用知見が後から見つかった場合は、raw copy ではなく knowledge intake packet として評価する。

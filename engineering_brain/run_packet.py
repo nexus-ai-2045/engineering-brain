@@ -3,9 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from .algorithms import infer_algorithm_inputs, select_algorithms
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import select_technology_sources
-from .skill_sync import compare_skill, default_runtime_root
+from .skill_sync import compare_skill_targets, default_skill_source
 
 
 HUMAN_STOPLINES = [
@@ -25,8 +26,13 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
     gates = evaluate_triggers(route["inferred_triggers"])
     catalog_domain = domain or _infer_catalog_domain(task)
     sources = select_technology_sources(catalog_domain) if catalog_domain else []
-    skill_source = resolved_repo / "skills" / "engineering-autopilot"
-    skill_sync = compare_skill(source_dir=skill_source, runtime_root=default_runtime_root())
+    algorithm_signals, algorithm_constraints = infer_algorithm_inputs(task)
+    selected_algorithms = select_algorithms(
+        signals=algorithm_signals,
+        constraints=algorithm_constraints,
+    )
+    skill_source = default_skill_source()
+    skill_sync = compare_skill_targets(source_dir=skill_source)
     closeout_payload: dict[str, Any]
     if closeout:
         closeout_payload = closeout_repo(resolved_repo)
@@ -52,6 +58,13 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
             "domain": catalog_domain,
             "sources": [_serialize_source(source) for source in sources],
             "adoption_rule": "candidate sources are advisory until adopted by test/docs/ADR",
+        },
+        "algorithms": {
+            "signals": algorithm_signals,
+            "constraints": algorithm_constraints,
+            "selection": selected_algorithms,
+            "selection_rule": "一致シグナルを加点し、avoid_when と candidate 状態を減点する。0点以下は提示しない。",
+            "unknown_rule": "シグナルを抽出できない場合は自動採用せず、algorithms select の入力を人間が補う。",
         },
         "skill_sync": skill_sync,
         "closeout": closeout_payload,

@@ -16,7 +16,7 @@ def version_packet(repo: Path) -> dict[str, Any]:
     skill_version = _read_skill_manifest_version(root / "skills" / "engineering-autopilot" / "manifest.yaml")
     surfaces = {
         "pyproject": pyproject_version,
-        "devbrain": package_version,
+        "engineering_brain": package_version,
         "skill_manifest": skill_version,
     }
     unique_versions = {version for version in surfaces.values() if version}

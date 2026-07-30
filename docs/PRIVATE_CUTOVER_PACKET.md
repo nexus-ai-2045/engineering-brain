@@ -52,7 +52,7 @@ git clone https://github.com/nexus-ai-2045/engineering-brain.git <PROJECTS_ROOT>
 For clean-history recreation, copy the reviewed working tree from the current repo into the target repo without `.git`, local state, caches, or private runtime artifacts.
 
 ```powershell
-robocopy <PROJECTS_ROOT>/Documents/repos/second-brain/dev-brain <PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain /E /XD .git .pytest_cache __pycache__ .devbrain /XF *.pyc
+robocopy <PROJECTS_ROOT>/Documents/repos/second-brain/dev-brain <PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain /E /XD .git .pytest_cache __pycache__ .engineering_brain /XF *.pyc
 git -C <PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain status --short
 git -C <PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain add .
 git -C <PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain commit -m "Initialize engineering brain"
@@ -64,8 +64,8 @@ After the new private repo is verified, update the SSOT registry and runtime poi
 ## Required Checks Before Execution
 
 - `python -m pytest -q`
-- `python -m devbrain closeout --repo . --json`
-- `python -m devbrain catalog --domain recreate --json`
+- `python -m engineering_brain closeout --repo . --json`
+- `python -m engineering_brain catalog --domain recreate --json`
 - personal path / old identity scan
 - GitHub identity probe for `nexus-ai-2045`
 - target repo availability check: `gh repo view nexus-ai-2045/engineering-brain`

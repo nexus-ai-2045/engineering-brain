@@ -1,4 +1,4 @@
 #!/bin/sh
 
 echo "[engineering-brain] post-merge finish plan"
-python -m devbrain finish --repo . --json || true
+python -m engineering_brain finish --repo . --json || true

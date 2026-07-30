@@ -1,8 +1,8 @@
 from pathlib import Path
 
-import devbrain.cli as cli
-from devbrain import finish
-from devbrain.cli import main
+import engineering_brain.cli as cli
+from engineering_brain import finish
+from engineering_brain.cli import main
 
 
 def test_finish_plan_reports_merged_local_and_remote_candidates(monkeypatch) -> None:
@@ -76,4 +76,4 @@ def test_hook_install_copies_repo_template(tmp_path: Path) -> None:
     assert result["status"] == "installed"
     assert result["installed"] == ["post-merge"]
     assert hook.exists()
-    assert "devbrain finish" in hook.read_text(encoding="utf-8")
+    assert "engineering_brain finish" in hook.read_text(encoding="utf-8")
