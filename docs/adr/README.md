@@ -14,4 +14,5 @@ ADR は作業ログではなく、後続 PR で同じ判断を繰り返さない
 | ADR | status | 決定 |
 |---|---|---|
 | [ADR-0001 engineering-brain private knowledge repo](ADR-0001-engineering-brain-private-knowledge-repo.md) | accepted | `engineering-brain` を private executable SSOT とし、Obsidian は intake に留める |
-
+| [ADR-0002 single runtime skill entrypoint](ADR-0002-single-autopilot-entrypoint.md) | accepted | runtime skillは`engineering-autopilot`へ一本化し、repoとmoduleを別skillにしない |
+| [ADR-0003 evidence-backed assurance gates](ADR-0003-evidence-backed-assurance-gates.md) | accepted | assurance gateはunit testではなく対象runの明示的evidenceを評価する |

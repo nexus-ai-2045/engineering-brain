@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from devbrain.cli import main
-from devbrain.versioning import version_packet
+from engineering_brain.cli import main
+from engineering_brain.versioning import version_packet
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,7 +18,7 @@ def test_version_surfaces_are_synced_to_public_seed() -> None:
     assert packet["status"] == "ok"
     assert packet["public_seed"] is True
     assert packet["surfaces"]["pyproject"] == "0.1.0"
-    assert packet["surfaces"]["devbrain"] == "0.1.0"
+    assert packet["surfaces"]["engineering_brain"] == "0.1.0"
     assert packet["surfaces"]["skill_manifest"] == "0.1.0"
 
 

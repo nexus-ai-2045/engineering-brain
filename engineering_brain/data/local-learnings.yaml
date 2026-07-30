@@ -33,6 +33,7 @@ learnings:
       - "artifact 'Steps of AI Adoption' (claude.ai) — 描画型で本文未抽出=pointer 参照"
       - "https://www.explainx.ai/blog/boris-cherny-steps-ai-adoption-claude-code-july-2026 (二次解説。docs digest の 0-4 表細部の出所)"
     observed_problem: 組織の AI 定着が個人依存で頭打ち(1人 10x、残り追随せず)。定着は個人技でなく組織の段階問題
+    proposed_solution: null
     reusable_rule: >
       AI 定着を step 0(Gated)〜4(AI-native)の ladder で評価。前進は tokens 増でなく
       「次ボトルネック除去 + 次ガードレール構築」の対。骨子(段階名/役割/ボトルネック)は
@@ -56,6 +57,7 @@ learnings:
       - "https://howborisusesclaudecode.com/ (Boris の使い方まとめ 121+ tips・community 集約)"
       - "https://github.com/shanraisshan/claude-code-best-practice (Boris+community tips 集約 repo)"
     observed_problem: Boris の Claude Code 実運用ノウハウが多数あり未吸収。棚卸しの入口が要る
+    proposed_solution: null
     reusable_rule: >
       13 tips を digest(docs 参照)。検証ループ(tip #13)は新規でなく既存 tdd_regression_gate に
       写像=reinvent しない。未実装候補=web 並列 / @claude PR / 検証ループの明文化。

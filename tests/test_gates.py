@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from devbrain.gates import evaluate_triggers, route_task
+from engineering_brain.gates import evaluate_triggers, route_task
 
 
 def test_route_task_blocks_public_release_actions() -> None:
@@ -66,6 +66,41 @@ def test_route_task_selects_async_orchestration_assurance() -> None:
 def test_route_task_selects_structured_model_evaluation() -> None:
     result = route_task("OCR蒸留モデルの構造化出力と量子化を評価する")
     assert "structured_model_evaluation_gate" in result["selected_units"]
+
+
+def test_assurance_gate_blocks_without_run_evidence() -> None:
+    result = evaluate_triggers(["orchestration"])
+
+    assert result["overall"] == "blocked"
+    assert result["assurance"]["async_orchestration"]["status"] == "block"
+
+
+def test_assurance_gate_evaluates_supplied_run_evidence() -> None:
+    evidence = {
+        "async_orchestration": {
+            "execution_count": 1,
+            "marker_schema_version": 2,
+            "active_jobs_after_cancel": 0,
+            **{key: True for key in (
+                "control_endpoint_private", "iam_least_privilege", "job_terminal",
+                "marker_bound_to_run", "target_schema_valid", "gt_metrics_recorded",
+                "budget_reserved_before_dispatch", "compensation_terminal",
+            )},
+        }
+    }
+
+    result = evaluate_triggers(["orchestration"], evidence)
+
+    assert result["overall"] == "ok"
+    assert result["assurance"]["async_orchestration"] == {"status": "pass", "failures": []}
+
+
+@pytest.mark.parametrize("task", ["Implement a Swift parser", "democracy review"])
+def test_route_task_does_not_match_short_alias_inside_unrelated_word(task: str) -> None:
+    result = route_task(task)
+
+    assert "async_orchestration_evidence_gate" not in result["selected_units"]
+    assert "structured_model_evaluation_gate" not in result["selected_units"]
 
 
 @pytest.mark.parametrize("task", [

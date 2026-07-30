@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from devbrain.path_safety import scan_personal_paths
+from engineering_brain.path_safety import scan_personal_paths
 
 
 def test_scan_personal_paths_detects_windows_home(tmp_path: Path) -> None:

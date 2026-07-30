@@ -18,13 +18,13 @@ version は更新のたびに自動 bump しません。各 PR で必ず version
 | surface | 役割 |
 |---|---|
 | `pyproject.toml` | 正本 |
-| `devbrain.__version__` | Python package surface |
+| `engineering_brain.__version__` | Python package surface |
 | `skills/engineering-autopilot/manifest.yaml` | runtime skill surface |
 
 確認 command:
 
 ```powershell
-python -m devbrain version --json
+python -m engineering_brain version --json
 ```
 
 ## bump の目安

@@ -12,7 +12,7 @@ units:
     applies_when: [user_visible_judgment, done_claim, source_claim, implementation]
     timing: [before_work, before_final]
     boundary: ユーザー可視の判断・完了報告・採用宣言は source と fact label なしに完了扱いしない。
-    route: devbrain-lite
+    route: engineering-brain-lite
     guarantee_tier: G2 checked
     checks:
       - level: L0 lint
@@ -102,7 +102,7 @@ units:
     status: adopted
     source_refs:
       - <REPO>/docs/PUBLIC_PATH_POLICY.md
-      - <REPO>/devbrain/path_safety.py
+      - <REPO>/engineering_brain/path_safety.py
     applies_when: [public_release, publish, push, pr, public_path, absolute_path, personal_path, path_redaction]
     timing: [before_external_action, before_done]
     boundary: 公開候補 artifact に `C:/Users/<name>` / `C:\Users\<name>` / `/Users/<name>` 形式の個人ホーム絶対パスを残さない。
@@ -112,7 +112,7 @@ units:
       - level: L1 unit
         command: python -m pytest -q tests/test_path_safety.py
       - level: L3 smoke
-        command: python -m devbrain closeout --repo . --json
+        command: python -m engineering_brain closeout --repo . --json
     insufficient_if:
       - "`<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` へ置換せず、実ユーザー名入り path を docs / registry / PR 文面に残している"
       - scan が closeout に接続されていない
@@ -122,7 +122,7 @@ units:
     source_refs:
       - <REPO>/docs/AUTOPILOT_GOAL_DESIGN.md
       - <REPO>/docs/KNOWLEDGE_INTAKE.md
-      - <REPO>/registry/technology-sources.yaml
+      - <REPO>/engineering_brain/data/technology-sources.yaml
     applies_when: [reinvention_check, implementation, bug_fix, refactor, design, research, review, pr]
     timing: [before_work, before_patch, before_pr_prepare]
     boundary: 実装前に repo-local、workspace shared、公式機能、GitHub/OSS 候補を確認し、既存で足りるものを作り直さない。
@@ -130,7 +130,7 @@ units:
     guarantee_tier: G1 advisory
     checks:
       - level: L0 advisory
-        command: python -m devbrain catalog --domain <domain> --json
+        command: python -m engineering_brain catalog --domain <domain> --json
       - level: L0 repo-search
         command: rg <keyword> .
     insufficient_if:
@@ -152,8 +152,8 @@ units:
     route: async-orchestration-assurance
     guarantee_tier: G2 checked
     checks:
-      - level: L1 unit
-        command: python -m pytest -q tests/test_assurance.py
+      - level: L2 run-evidence
+        command: python -m engineering_brain gate --trigger orchestration --evidence <evidence.json> --json
     insufficient_if:
       - Workflow ACTIVEだがexecutionが0件
       - HTTP 2xxを非同期operationの成功と同一視する
@@ -176,8 +176,8 @@ units:
     route: structured-model-evaluation
     guarantee_tier: G2 checked
     checks:
-      - level: L1 unit
-        command: python -m pytest -q tests/test_assurance.py
+      - level: L2 run-evidence
+        command: python -m engineering_brain gate --trigger model_eval --evidence <evidence.json> --json
     insufficient_if:
       - JSON parse可能だけでschema validとする
       - schema validだけでsemantic correctとする
@@ -190,7 +190,7 @@ units:
     status: candidate
     source_refs:
       - <REPO>/docs/BORIS_CHERNY_AI_ADOPTION_AND_CC_TIPS.md
-      - <REPO>/registry/local-learnings.yaml
+      - <REPO>/engineering_brain/data/local-learnings.yaml
       - https://x.com/bcherny/status/2077929379661844559
     applies_when: [ai_adoption_review, tooling_migration, orchestration_design, team_scaling]
     timing: [before_work, periodic_review]

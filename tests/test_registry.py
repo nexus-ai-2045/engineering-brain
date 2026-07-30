@@ -1,6 +1,8 @@
+from pathlib import Path
+
 import pytest
 
-from devbrain.registry import (
+from engineering_brain.registry import (
     adoption_units,
     select_technology_sources,
     select_units,
@@ -15,6 +17,17 @@ def test_registry_loads_required_units() -> None:
     assert "fact_source_gate" in ids
     assert "scope_write_boundary_gate" in ids
     assert "human_publication_review_gate" in ids
+
+
+def test_candidate_learning_packets_keep_stable_proposed_solution_shape() -> None:
+    text = (
+        Path(__file__).resolve().parents[1]
+        / "engineering_brain"
+        / "data"
+        / "local-learnings.yaml"
+    ).read_text(encoding="utf-8")
+
+    assert text.count("proposed_solution:") == 3
 
 
 def test_select_units_matches_triggers() -> None:
