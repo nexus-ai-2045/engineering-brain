@@ -76,7 +76,7 @@ def serialize_unit(unit: AdoptionUnit) -> dict[str, Any]:
 def closeout_repo(repo: Path) -> dict[str, Any]:
     git_status = run(["git", "status", "--short", "--branch"], cwd=repo)
     pytest_result = run(["python", "-m", "pytest", "-q"], cwd=repo)
-    compile_result = run(["python", "-m", "compileall", "-q", "devbrain", "tests"], cwd=repo)
+    compile_result = run(["python", "-m", "compileall", "-q", "engineering_brain", "tests"], cwd=repo)
     personal_path_findings = scan_personal_paths(repo)
 
     verification_ok = pytest_result["returncode"] == 0 and compile_result["returncode"] == 0

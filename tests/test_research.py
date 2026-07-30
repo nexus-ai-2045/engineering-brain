@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from devbrain.cli import main
-from devbrain.research import build_research_packet
+from engineering_brain.cli import main
+from engineering_brain.research import build_research_packet
 
 
 ROOT = Path(__file__).resolve().parents[1]

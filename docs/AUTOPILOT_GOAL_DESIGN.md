@@ -202,8 +202,8 @@ research packet には次を入れる。
 | component | 役割 | MVP |
 |---|---|---|
 | Intake / Policy Router | task、repo、owner、risk、SSOT、trigger を run packet に固定する | 既存 `route` と `gate` を統合 |
-| Lifecycle Engine | phase、遷移、禁止遷移、失敗、再試行、cancel を fail-closed に扱う | `registry/lifecycle-phases.yaml` + `devbrain/lifecycle.py` |
-| Durable State Store | `run_id`、state、evidence、approval、target commit を保持する | `.devbrain/state.sqlite3` または JSON exportable packet |
+| Lifecycle Engine | phase、遷移、禁止遷移、失敗、再試行、cancel を fail-closed に扱う | `registry/lifecycle-phases.yaml` + `engineering_brain/lifecycle.py` |
+| Durable State Store | `run_id`、state、evidence、approval、target commit を保持する | `.engineering_brain/state.sqlite3` または JSON exportable packet |
 | Local Executor | allowlist 済みの read-only / local command だけ実行する | argv 配列、cwd 固定、timeout、出力上限 |
 | Evidence Store | 実行予定と実行済みを分離し、command / exit code / timestamp / stdout summary を保存する | run packet 内 `evidence[]` |
 | Approval Broker | approval を repo、commit、action、visible scope、expiry に束縛する | 古い OK の再利用を拒否 |
@@ -231,10 +231,10 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 | layer | command / evidence | 必須化タイミング |
 |---|---|---|
 | unit | `python -m pytest -q` | code diff |
-| compile | `python -m compileall -q devbrain tests` | Python code diff |
-| route | `python -m devbrain route --task "<task>" --json` | gate / router diff |
-| gate | `python -m devbrain gate --trigger <trigger> --json` | registry diff |
-| closeout | `python -m devbrain closeout --repo . --json` | before PR / before final |
+| compile | `python -m compileall -q engineering_brain tests` | Python code diff |
+| route | `python -m engineering_brain route --task "<task>" --json` | gate / router diff |
+| gate | `python -m engineering_brain gate --trigger <trigger> --json` | registry diff |
+| closeout | `python -m engineering_brain closeout --repo . --json` | before PR / before final |
 | path redaction | closeout `public_path_redaction.status=ok` | public candidate / PR text |
 | PR readiness | owner / branch / visibility / body / diff scope | before push / PR |
 | merge readiness | PR state / checks / human approval | before merge |
@@ -254,7 +254,7 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 
 ### Slice 1: run packet and lifecycle command
 
-- `devbrain run --task ... --repo ... --json` を追加する。
+- `engineering_brain run --task ... --repo ... --json` を追加する。
 - `route`、`gate`、`closeout` の結果を 1 packet に統合する。
 - TDD: packet に `selected_gates`、`human_stoplines`、`verification_plan` が入ること。
 
@@ -262,7 +262,7 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 
 - `schemas/run-packet.schema.json`
 - `registry/lifecycle-phases.yaml`
-- `devbrain/lifecycle.py`
+- `engineering_brain/lifecycle.py`
 - `tests/test_lifecycle.py`
 - `tests/test_run_packet.py`
 
@@ -274,7 +274,7 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 
 実装候補:
 
-- `devbrain/planner.py`
+- `engineering_brain/planner.py`
 - `tests/test_planner.py`
 - `tests/test_registry.py` の freshness case
 
@@ -286,7 +286,7 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 実装候補:
 
 - `registry/verification-profiles.yaml`
-- `devbrain/executor.py`
+- `engineering_brain/executor.py`
 - `tests/test_verification_profiles.py`
 - `tests/test_executor.py`
 
@@ -297,7 +297,7 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 
 実装候補:
 
-- `devbrain/review.py`
+- `engineering_brain/review.py`
 - `tests/test_review_packet.py`
 
 ### Slice 5: finish command
@@ -307,8 +307,8 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 
 実装候補:
 
-- `devbrain/identity.py`
-- `devbrain/finish.py`
+- `engineering_brain/identity.py`
+- `engineering_brain/finish.py`
 - `tests/test_identity.py`
 - `tests/test_finish.py`
 
@@ -321,7 +321,7 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 ### Slice 7: engineering cutover packet
 
 - directory、GitHub repo、runtime skill、registry の 4 層移行案を作る。
-- `dev-brain` 互換入口と rollback を残す。
+- legacy `dev-brain` 互換入口は残さず、移行判断と rollback 記録は historical docs に閉じる。
 - public 化はこの slice に含めない。visibility 変更は別 review packet と明示 yes が必要。
 - rename と private recreate の判断は [engineering-brain cutover plan](ENGINEERING_CUTOVER_PLAN.md) に従う。
 

@@ -1,14 +1,22 @@
 from pathlib import Path
 
-import devbrain.run_packet as run_packet
-from devbrain.cli import main
-from devbrain.run_packet import build_run_packet
+import engineering_brain.run_packet as run_packet
+from engineering_brain.cli import main
+from engineering_brain.run_packet import build_run_packet
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_build_run_packet_combines_route_gates_catalog_skill_sync_and_closeout() -> None:
+def test_build_run_packet_combines_route_gates_catalog_skill_sync_and_closeout(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        run_packet,
+        "compare_skill",
+        lambda **_: {"status": "ok"},
+    )
+
     packet = build_run_packet(
         task="implement small python CLI feature and prepare PR",
         repo=ROOT,

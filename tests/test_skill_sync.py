@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from devbrain.cli import main
-from devbrain.skill_sync import compare_skill, sync_skill
+from engineering_brain.cli import main
+from engineering_brain.skill_sync import compare_skill, sync_skill
 
 
 ROOT = Path(__file__).resolve().parents[1]

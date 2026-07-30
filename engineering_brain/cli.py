@@ -15,7 +15,7 @@ from .versioning import version_packet
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="devbrain", description="Local-first development assurance gates.")
+    parser = argparse.ArgumentParser(prog="engineering-brain", description="Local-first development assurance gates.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     route_parser = sub.add_parser("route", help="Route a task to development gates.")
