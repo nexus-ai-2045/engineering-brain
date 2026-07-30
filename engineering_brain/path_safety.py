@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 PERSONAL_PATH_PATTERN = re.compile(
-    r"(?:[A-Za-z]:[\\/]+Users[\\/]+[A-Za-z0-9._-]+|/Users/[A-Za-z0-9._-]+)"
+    r"(?:[A-Za-z]:[\\/]+Users[\\/]+[A-Za-z0-9._-]+|/(?:Users|home)/[A-Za-z0-9._-]+)"
 )
 
 TEXT_SUFFIXES = {

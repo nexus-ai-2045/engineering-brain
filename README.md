@@ -166,6 +166,8 @@ Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community lea
 
 実行結果とレビューを次の gate / docs / registry / tests へ戻す仕組みは [PDCA feedback loop](docs/PDCA_FEEDBACK_LOOP.md) を参照します。
 
+FDEへ学びを返す場合は、`python -m devbrain feedback --input <feedback.json> --json`で`fde.feedback.v1`を検証し、会話全文ではなくevidence pointerと次Plan入力だけを返します。
+
 必須概念がどこまで入っているかは [Concept coverage](docs/CONCEPT_COVERAGE.md) を参照します。
 
 ## 技術別ベスプラ catalog

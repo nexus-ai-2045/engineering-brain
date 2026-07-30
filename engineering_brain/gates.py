@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -111,7 +112,19 @@ def serialize_unit(unit: AdoptionUnit) -> dict[str, Any]:
 
 def closeout_repo(repo: Path) -> dict[str, Any]:
     git_status = run(["git", "status", "--short", "--branch"], cwd=repo)
-    pytest_result = run(["python", "-m", "pytest", "-q"], cwd=repo)
+    with tempfile.TemporaryDirectory(prefix="engineering-brain-closeout-") as temp_dir:
+        pytest_result = run(
+            [
+                "python",
+                "-m",
+                "pytest",
+                "-q",
+                "--basetemp",
+                str(Path(temp_dir) / "pytest"),
+            ],
+            cwd=repo,
+        )
+    pytest_result["command"] = "python -m pytest -q --basetemp <TEMP>"
     tracked = run(["git", "ls-files", "*.py"], cwd=repo)
     python_files = tracked["stdout"].splitlines() if tracked["returncode"] == 0 else []
     compile_result = (

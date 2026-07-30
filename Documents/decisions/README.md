@@ -9,3 +9,4 @@
 今回の判断:
 
 - [ADR-0003 実行証拠に基づくassurance gate](../../docs/adr/ADR-0003-evidence-backed-assurance-gates.md)
+- [ADR-0004 安全なFDE feedback境界](../../docs/adr/ADR-0004-safe-fde-feedback-boundary.md)
