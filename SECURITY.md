@@ -12,5 +12,5 @@ engineering-brain はローカル-first の開発ゲート repo です。visibil
 
 ローカル運用中の問題は、再現手順、対象 gate、期待した判定、実際の判定を添えて issue またはローカル report に残す。
 
-脆弱性はGitHubのPrivate vulnerability reportingから報告してください。secret、
-credential、private URL、個人情報や脆弱性の詳細を公開Issueへ貼らないでください。
+脆弱性はGitHubのPrivate vulnerability reportingから報告してください。秘密情報、
+認証情報、非公開URL、個人情報や脆弱性の詳細を公開Issueへ貼らないでください。
