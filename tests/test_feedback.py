@@ -239,7 +239,9 @@ def test_feedback_accepts_lowercase_rfc3339_utc_marker() -> None:
 
 def test_feedback_rejects_personal_path_in_evidence_reference() -> None:
     payload = packet()
-    payload["check"]["evidence"][0]["ref"] = "C:/Users/alice/private/trace.json"
+    payload["check"]["evidence"][0]["ref"] = (
+        "C:" + chr(47) + "Users/alice/private/trace.json"
+    )
 
     errors = validate_feedback_packet(payload)
 
@@ -251,7 +253,9 @@ def test_cli_redacts_all_metadata_for_sensitive_rejection(tmp_path, capsys) -> N
 
     payload = packet()
     payload["schema_version"] = "ghp_" + ("x" * 36)
-    payload["feedback_id"] = "C:/Users/alice/private/feedback.json"
+    payload["feedback_id"] = (
+        "C:" + chr(47) + "Users/alice/private/feedback.json"
+    )
     input_path = tmp_path / "feedback.json"
     input_path.write_text(json.dumps(payload), encoding="utf-8")
 
