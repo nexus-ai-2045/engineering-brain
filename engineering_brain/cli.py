@@ -12,6 +12,7 @@ from .feedback import build_next_plan_context, load_feedback_packet, validate_fe
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
+from .review import build_pr_packet, load_packet_file
 from .run_packet import build_run_packet
 from .skill_sync import (
     RUNTIME_TARGETS,
@@ -82,6 +83,17 @@ def main(argv: list[str] | None = None) -> int:
     research_parser.add_argument("--decision", choices=DECISIONS, default="hold")
     research_parser.add_argument("--rationale", default="")
     research_parser.add_argument("--json", action="store_true")
+
+    pr_parser = sub.add_parser(
+        "pr",
+        help="Build a plan-only PR packet and Japanese body (does not create or push PRs).",
+    )
+    pr_parser.add_argument("--repo", default=".")
+    pr_parser.add_argument("--purpose", default="")
+    pr_parser.add_argument("--run-packet", dest="run_packet")
+    pr_parser.add_argument("--research-packet", dest="research_packet")
+    pr_parser.add_argument("--no-closeout", action="store_true")
+    pr_parser.add_argument("--json", action="store_true")
 
     version_parser = sub.add_parser("version", help="Show version surfaces and release policy.")
     version_parser.add_argument("--repo", default=".")
@@ -206,6 +218,22 @@ def main(argv: list[str] | None = None) -> int:
             ),
             as_json=args.json,
         )
+    if args.command == "pr":
+        run_packet = load_packet_file(Path(args.run_packet).resolve()) if args.run_packet else None
+        research_packet = (
+            load_packet_file(Path(args.research_packet).resolve()) if args.research_packet else None
+        )
+        packet = build_pr_packet(
+            repo=Path(args.repo).resolve(),
+            purpose=args.purpose,
+            closeout=not args.no_closeout,
+            run_packet=run_packet,
+            research_packet=research_packet,
+        )
+        if args.json:
+            return emit(packet, as_json=True)
+        print(packet["pr_body_ja"])
+        return 0
     if args.command == "version":
         return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
     if args.command == "feedback":

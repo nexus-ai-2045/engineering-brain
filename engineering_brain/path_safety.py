@@ -63,6 +63,11 @@ class PersonalPathFinding:
     match: str
 
 
+def redact_personal_paths(text: str) -> str:
+    """Replace personal absolute path prefixes with public-safe placeholders."""
+    return PERSONAL_PATH_PATTERN.sub("<USER_HOME>", text)
+
+
 def scan_personal_paths(repo: Path) -> list[PersonalPathFinding]:
     findings: list[PersonalPathFinding] = []
     for path in iter_text_files(repo):

@@ -18,8 +18,8 @@ owner: nexus_ai
 | run packet MVP | `engineering_brain run` で route / gate / closeout を統合 | done |
 | research packet | source / candidate / decision を packet 化 | done |
 | finish planner | merge 後の cleanup plan と opt-in hook を扱う | done |
-| PR packet generator | 日本語 PR body と stopline を生成 | next |
-| verification profile | task に応じた smoke / preflight 候補を返す | planned |
+| PR packet generator | 日本語 PR body と stopline を生成 | done |
+| verification profile | task に応じた smoke / preflight 候補を返す | next |
 
 ## 採用しないこと
 

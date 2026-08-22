@@ -62,7 +62,7 @@ flowchart LR
 | 9. マージ | latest head、checks、review、merge可否 | merge commit | current conversation のmerge承認なし |
 | 10. 後片付け | merged proof、dirty state、他者worktree | main同期、cleanup plan | 未merge・dirty・削除承認なし |
 
-現在のCLIはこのうち run packet、research packet、gate、closeout、skill drift check、version、merge後cleanup planを実装済みです。PR packet generatorやverification profileの拡張はロードマップ上の次段階です。
+現在のCLIはこのうち run packet、research packet、gate、closeout、PR packet、skill drift check、version、merge後cleanup planを実装済みです。verification profileの拡張はロードマップ上の次段階です。
 
 ## Quick Start
 
@@ -71,6 +71,7 @@ python -m engineering_brain run --task "implement small python CLI feature and p
 python -m engineering_brain algorithms select --signal shortest_path --signal weighted_graph --constraint negative_edge --json
 python -m engineering_brain algorithms compare --id dijkstra --id bellman_ford --json
 python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --json
+python -m engineering_brain pr --repo . --json
 python -m engineering_brain closeout --repo . --json
 ```
 
@@ -81,6 +82,7 @@ python -m engineering_brain closeout --repo . --json
 ```powershell
 engineering-brain run --task "<task>" --json
 engineering-brain closeout --repo . --json
+engineering-brain pr --repo . --json
 ```
 
 module として実行する場合:
@@ -88,6 +90,7 @@ module として実行する場合:
 ```powershell
 python -m engineering_brain run --task "<task>" --json
 python -m engineering_brain closeout --repo . --json
+python -m engineering_brain pr --repo . --json
 ```
 
 調査と判断:
@@ -98,6 +101,7 @@ python -m engineering_brain closeout --repo . --json
 - `python -m engineering_brain algorithms select --signal <signal> --json`: 問題シグナルと制約から定番アルゴリズム候補を順位付けする。
 - `python -m engineering_brain algorithms compare --id <id> --id <id> --json`: 候補の前提・計算量・交換条件・検証法を比較する。
 - `python -m engineering_brain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
+- `python -m engineering_brain pr --repo . --json`: 差分・closeout・stopline から plan-only の日本語 PR packet を作る（PR作成/pushはしない）。
 
 運用と後片付け:
 
@@ -115,7 +119,7 @@ python -m engineering_brain closeout --repo . --json
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
 | release / GitHub tag | not created; separate approval |
-| primary next work | PR packet generator / verification profile |
+| primary next work | verification profile / closeout v2 |
 
 ## Local SSOT
 
