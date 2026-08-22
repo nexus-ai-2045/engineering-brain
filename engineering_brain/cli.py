@@ -12,6 +12,7 @@ from .feedback import build_next_plan_context, load_feedback_packet, validate_fe
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
+from .review import build_pr_packet
 from .run_packet import build_run_packet
 from .skill_sync import (
     RUNTIME_TARGETS,
@@ -82,6 +83,27 @@ def main(argv: list[str] | None = None) -> int:
     research_parser.add_argument("--decision", choices=DECISIONS, default="hold")
     research_parser.add_argument("--rationale", default="")
     research_parser.add_argument("--json", action="store_true")
+
+    pr_parser = sub.add_parser(
+        "pr",
+        help="Build a plan-only Japanese PR packet from local repo state (no GitHub mutation).",
+    )
+    pr_parser.add_argument("--repo", default=".")
+    pr_parser.add_argument("--purpose", default="", help="PR 目的。未指定時は run packet task または diff から推定する。")
+    pr_parser.add_argument("--base", default=None, help="diff 比較先 branch（未指定時は origin/main 等を検出）")
+    pr_parser.add_argument(
+        "--closeout",
+        action="store_true",
+        help="既存 closeout_repo を実行して verification を packet に載せる。",
+    )
+    pr_parser.add_argument("--run-packet", default=None, help="既存 run packet JSON への path")
+    pr_parser.add_argument("--research-packet", default=None, help="既存 research packet JSON への path")
+    pr_parser.add_argument(
+        "--body-only",
+        action="store_true",
+        help="日本語 PR body だけを標準出力する（--json より優先）。",
+    )
+    pr_parser.add_argument("--json", action="store_true")
 
     version_parser = sub.add_parser("version", help="Show version surfaces and release policy.")
     version_parser.add_argument("--repo", default=".")
@@ -206,6 +228,19 @@ def main(argv: list[str] | None = None) -> int:
             ),
             as_json=args.json,
         )
+    if args.command == "pr":
+        packet = build_pr_packet(
+            repo=Path(args.repo).resolve(),
+            purpose=args.purpose,
+            closeout=args.closeout,
+            run_packet=Path(args.run_packet).resolve() if args.run_packet else None,
+            research_packet=Path(args.research_packet).resolve() if args.research_packet else None,
+            base=args.base,
+        )
+        if args.body_only:
+            print(packet["pr_body_ja"])
+            return 0
+        return emit(packet, as_json=args.json)
     if args.command == "version":
         return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
     if args.command == "feedback":

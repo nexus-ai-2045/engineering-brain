@@ -115,7 +115,8 @@ def test_concept_coverage_tracks_post_public_seed_reality() -> None:
     assert "Public GitHub surface" in doc
     assert "engineering_brain research" in doc
     assert "engineering_brain finish" in doc
-    assert "PR packet generator は未実装" in doc
+    assert "engineering_brain pr" in doc
+    assert "PR packet generator は未実装" not in doc
 
 
 def test_community_learning_intake_keeps_external_sources_as_candidates() -> None:

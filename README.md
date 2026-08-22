@@ -62,7 +62,7 @@ flowchart LR
 | 9. マージ | latest head、checks、review、merge可否 | merge commit | current conversation のmerge承認なし |
 | 10. 後片付け | merged proof、dirty state、他者worktree | main同期、cleanup plan | 未merge・dirty・削除承認なし |
 
-現在のCLIはこのうち run packet、research packet、gate、closeout、skill drift check、version、merge後cleanup planを実装済みです。PR packet generatorやverification profileの拡張はロードマップ上の次段階です。
+現在のCLIはこのうち run packet、research packet、gate、closeout、PR packet、skill drift check、version、merge後cleanup planを実装済みです。verification profile の拡張はロードマップ上の次段階です。
 
 ## Quick Start
 
@@ -71,15 +71,16 @@ python -m engineering_brain run --task "implement small python CLI feature and p
 python -m engineering_brain algorithms select --signal shortest_path --signal weighted_graph --constraint negative_edge --json
 python -m engineering_brain algorithms compare --id dijkstra --id bellman_ford --json
 python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --json
+python -m engineering_brain pr --repo . --json
 python -m engineering_brain closeout --repo . --json
 ```
-
 ## Core Commands
 
 まず使う入口:
 
 ```powershell
 engineering-brain run --task "<task>" --json
+engineering-brain pr --repo . --json
 engineering-brain closeout --repo . --json
 ```
 
@@ -87,9 +88,9 @@ module として実行する場合:
 
 ```powershell
 python -m engineering_brain run --task "<task>" --json
+python -m engineering_brain pr --repo . --json
 python -m engineering_brain closeout --repo . --json
 ```
-
 調査と判断:
 
 - `python -m engineering_brain route --task "<task>" --json`: task から必要 gate を推定する。
@@ -98,6 +99,7 @@ python -m engineering_brain closeout --repo . --json
 - `python -m engineering_brain algorithms select --signal <signal> --json`: 問題シグナルと制約から定番アルゴリズム候補を順位付けする。
 - `python -m engineering_brain algorithms compare --id <id> --id <id> --json`: 候補の前提・計算量・交換条件・検証法を比較する。
 - `python -m engineering_brain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
+- `python -m engineering_brain pr --repo . --json`: ローカル diff / closeout / stopline から日本語 PR packet を plan-only で作る（GitHub への PR 作成や push はしない）。
 
 運用と後片付け:
 
@@ -115,7 +117,7 @@ python -m engineering_brain closeout --repo . --json
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
 | release / GitHub tag | not created; separate approval |
-| primary next work | PR packet generator / verification profile |
+| primary next work | verification profile / closeout v2 |
 
 ## Local SSOT
 
@@ -139,6 +141,8 @@ python -m engineering_brain closeout --repo . --json
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
 `engineering_brain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
+
+`engineering_brain pr` は、default branch との diff、任意の closeout / run / research packet、human stopline を日本語 PR body 付き packet にまとめます。既定は plan-only で、PR 作成・push・merge は実行しません。verification を載せる時は `--closeout` を付けます。
 
 `engineering_brain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。既定は plan-only です。local branch 削除は `--apply-local`、remote branch 削除は別途 current conversation approval が必要です。
 

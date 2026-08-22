@@ -13,6 +13,7 @@ public seed.
 
 ## Unreleased
 
+- `engineering_brain pr` を追加し、local diff / closeout / stopline から日本語 PR packet を plan-only で生成できるようにした。
 - version sync guard を追加。
 - `engineering_brain version --json` を追加。
 - `engineering_brain finish --json` を追加し、merge 後の branch cleanup 候補を plan できるようにした。

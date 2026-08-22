@@ -14,14 +14,14 @@
 | Obsidian intake | covered | `docs/KNOWLEDGE_INTAKE.md` | 自動候補抽出は別 slice |
 | Local learning absorption | partial | `docs/KNOWLEDGE_INTAKE.md` | `registry/local-learnings.yaml` を追加する |
 | Reinvention avoidance | covered | `docs/AUTOPILOT_GOAL_DESIGN.md`, `engineering_brain/data/adoption-units.yaml` | run packet 実装で evidence 付き検査へ昇格 |
-| Research / GitHub method | covered | `engineering_brain research`, `docs/AUTOPILOT_GOAL_DESIGN.md`, `reinvention_candidate_research_gate` | PR packet と closeout evidence へ接続する |
+| Research / GitHub method | covered | `engineering_brain research`, `docs/AUTOPILOT_GOAL_DESIGN.md`, `reinvention_candidate_research_gate` | PR packet へ research を任意添付する運用を継続する |
 | TDD / regression | covered | `README.md`, `tests/` | lifecycle command で選択可能にする |
 | Smoke / preflight / E2E | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | `registry/verification-profiles.yaml` を追加する |
 | Security / containment | covered | `docs/OPERATING_MODEL.md`, `SECURITY.md` | codex-security scan slice を追加する |
-| Public path redaction | covered | `docs/PUBLIC_PATH_POLICY.md`, `tests/test_path_safety.py` | PR body generator に接続する |
+| Public path redaction | covered | `docs/PUBLIC_PATH_POLICY.md`, `tests/test_path_safety.py`, `engineering_brain pr` | PR body / packet 出力での redaction を維持する |
 | GitHub identity gate | partial | local skill + docs | repo-owned identity command を追加する |
-| PR lifecycle | partial | `.github/`, `CONTRIBUTING.md` | PR packet generator を追加する |
-| Human visual review | partial | `engineering_brain run`, `docs/AUTOPILOT_GOAL_DESIGN.md` | review state を PR packet に接続する |
+| PR lifecycle | covered | `.github/`, `CONTRIBUTING.md`, `engineering_brain pr` | Draft PR 作成は human approval のまま |
+| Human visual review | partial | `engineering_brain run`, `engineering_brain pr`, `docs/AUTOPILOT_GOAL_DESIGN.md` | review state を run packet へ接続する |
 | Merge / branch cleanup | covered | `engineering_brain finish`, `tools/hooks/post-merge`, `docs/AUTOPILOT_GOAL_DESIGN.md` | remote cleanup は approval / identity gate を維持する |
 | Operation guarantee | covered | `engineering_brain closeout`, `docs/OPERATING_MODEL.md` | evidence-based closeout v2 を追加する |
 | PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
@@ -53,13 +53,11 @@
 2. runtime install copy は同期済み。継続的な drift check を運用に入れる。
 3. `registry/local-learnings.yaml` がまだない。
 4. GitHub identity gate は local skill に依存しており、repo-owned command ではない。
-5. PR packet generator は未実装。
-6. verification profile と closeout v2 evidence schema は未実装。
+5. verification profile と closeout v2 evidence schema は未実装。
 
 ## Next slices
 
 1. `registry/local-learnings.yaml` と schema を追加する。
-2. PR packet generator を追加する。
-3. verification profile を追加する。
-4. `engineering_brain run --closeout` の evidence schema を強化する。
-5. Obsidian / memory から候補 packet を作る read-only importer を追加する。
+2. verification profile を追加する。
+3. `engineering_brain run --closeout` の evidence schema を強化する。
+4. Obsidian / memory から候補 packet を作る read-only importer を追加する。

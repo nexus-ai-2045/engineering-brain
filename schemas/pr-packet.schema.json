@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/pr-packet.schema.json",
+  "title": "Engineering Brain PR Packet",
+  "type": "object",
+  "required": [
+    "packet_type",
+    "version",
+    "repo",
+    "mode",
+    "status",
+    "merge_status",
+    "purpose",
+    "changes",
+    "visible_scope",
+    "checks",
+    "unknowns",
+    "human_stoplines",
+    "external_actions",
+    "pr_body_ja"
+  ],
+  "properties": {
+    "packet_type": {"const": "engineering_brain_pr"},
+    "version": {"const": 1},
+    "repo": {"const": "<REPO>"},
+    "mode": {"const": "plan_only"},
+    "status": {"type": "string", "minLength": 1},
+    "merge_status": {"const": "承認待ち"},
+    "purpose": {"type": "string"},
+    "changes": {"type": "array", "items": {"type": "string"}},
+    "visible_scope": {"type": "object"},
+    "checks": {"type": "object"},
+    "unknowns": {"type": "array", "items": {"type": "string"}},
+    "reinvention_check": {"type": "object"},
+    "human_stoplines": {"type": "array", "items": {"type": "string"}},
+    "external_actions": {
+      "type": "object",
+      "required": ["allowed", "actions_performed", "blocked_actions"],
+      "properties": {
+        "allowed": {"const": false},
+        "actions_performed": {"const": false},
+        "reason": {"type": "string"},
+        "blocked_actions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "diff": {"type": "object"},
+    "closeout": {"type": "object"},
+    "run_packet": {"type": ["object", "null"]},
+    "research_packet": {"type": ["object", "null"]},
+    "pr_body_ja": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}

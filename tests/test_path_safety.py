@@ -29,3 +29,12 @@ def test_scan_personal_paths_checks_public_config_files(tmp_path: Path) -> None:
     findings = scan_personal_paths(tmp_path)
 
     assert {finding.path for finding in findings} == {".env.example", "Dockerfile"}
+
+
+def test_redact_personal_paths_removes_username_segments(tmp_path: Path) -> None:
+    from engineering_brain.path_safety import redact_personal_paths
+
+    text = "see " + "C:" + "/Users/" + "carol/Documents/notes.md"
+    redacted = redact_personal_paths(text, repo=tmp_path)
+    assert "carol" not in redacted
+    assert "<USER_HOME>" in redacted

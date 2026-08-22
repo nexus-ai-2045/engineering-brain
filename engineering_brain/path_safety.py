@@ -77,6 +77,30 @@ def scan_personal_paths(repo: Path) -> list[PersonalPathFinding]:
     return findings
 
 
+def redact_personal_paths(text: str, *, repo: Path | None = None) -> str:
+    """Replace personal absolute paths with public placeholders.
+
+    Uses ``<USER_HOME>`` for home-directory prefixes and ``<REPO>`` when a
+    concrete repo root is supplied. Does not invent usernames or keep raw
+    personal path segments in public-facing packet text.
+    """
+    if not text:
+        return text
+
+    redacted = text
+    if repo is not None:
+        resolved = str(repo.resolve())
+        variants = {resolved, resolved.replace("\\", "/")}
+        for variant in sorted(variants, key=len, reverse=True):
+            if variant:
+                redacted = redacted.replace(variant, "<REPO>")
+
+    def _replace(match: re.Match[str]) -> str:
+        return "<USER_HOME>"
+
+    return PERSONAL_PATH_PATTERN.sub(_replace, redacted)
+
+
 def iter_text_files(repo: Path):
     for path in repo.rglob("*"):
         if not path.is_file():
