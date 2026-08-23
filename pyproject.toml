@@ -19,7 +19,7 @@ engineering-brain = "engineering_brain.cli:main"
 include = ["engineering_brain*"]
 
 [tool.setuptools.package-data]
-engineering_brain = ["data/*.json", "data/*.yaml", "*.schema.json"]
+engineering_brain = ["data/*.json", "data/*.yaml", "data/eval-suites/*.json", "*.schema.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
