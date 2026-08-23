@@ -143,7 +143,10 @@ def public_stdout_packet(
             "compileall": _command_summary(verification.get("compileall")),
         }
     attachment = (packet.get("checks") or {}).get("attachment_validation") or {}
-    purpose = purpose_override if purpose_override is not None else ""
+    if purpose_override is not None and str(purpose_override).strip():
+        purpose, _ = scrub_secret_like(redact_personal_paths(str(purpose_override).strip()))
+    else:
+        purpose = str(packet.get("purpose") or "")
     safe = {
         "packet_type": "engineering_brain_pr",
         "version": 1,
@@ -178,7 +181,7 @@ def public_stdout_packet(
             if attachment.get("research_packet") == "ok"
             else "research packet not yet attached",
         },
-        "unknowns": _allowlisted_unknowns(packet.get("unknowns") or []),
+        "unknowns": _public_unknowns(packet.get("unknowns") or []),
         "human_stoplines": list(HUMAN_STOPLINES),
         "merge": {
             "status": "承認待ち",
@@ -208,7 +211,13 @@ def _allowlisted_decision(value: Any) -> str:
     return allowed.get(str(value), "hold")
 
 
-def _allowlisted_unknowns(items: list[Any]) -> list[str]:
+def _public_unknowns(items: list[Any]) -> list[str]:
+    """Keep residual risks visible after path redaction and secret scrub.
+
+    Known phrases are re-emitted from a catalog so stdout does not carry
+    attachment free text. Unknown phrases stay, but only as newly constructed
+    scrubbed strings.
+    """
     catalog = {
         "default branch を検出できず、diff scope が worktree 依存": "default branch を検出できず、diff scope が worktree 依存",
         "closeout 未実行（--no-closeout）": "closeout 未実行（--no-closeout）",
@@ -220,7 +229,19 @@ def _allowlisted_unknowns(items: list[Any]) -> list[str]:
         "secret-like content was scrubbed from attached evidence": "secret-like content was scrubbed from attached evidence",
         "decision rationale is not recorded": "decision rationale is not recorded",
     }
-    return [catalog[str(item)] for item in items if str(item) in catalog]
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        raw = str(item)
+        if raw in catalog:
+            text = catalog[raw]
+        else:
+            text, _ = scrub_secret_like(redact_personal_paths(raw))
+        if not text or text in seen:
+            continue
+        out.append(text)
+        seen.add(text)
+    return out
 
 
 def _safe_pr_body(packet: dict[str, Any]) -> str:
@@ -259,7 +280,7 @@ def _safe_pr_body(packet: dict[str, Any]) -> str:
             "summary": str((packet.get("visible_scope") or {}).get("summary") or "（未収集）"),
             "file_count": (packet.get("visible_scope") or {}).get("file_count", 0),
         },
-        "unknowns": _allowlisted_unknowns(packet.get("unknowns") or []),
+        "unknowns": _public_unknowns(packet.get("unknowns") or []),
         "human_stoplines": list(HUMAN_STOPLINES),
         "merge": {"status": "承認待ち"},
         "external_actions": {"performed": False},
