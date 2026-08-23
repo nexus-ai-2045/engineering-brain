@@ -5,6 +5,7 @@ import json
 import math
 import re
 from collections import defaultdict
+from decimal import Decimal
 from pathlib import Path
 from statistics import mean
 from typing import Any
@@ -24,6 +25,14 @@ REQUIRED_THRESHOLDS = {
     "cost_ratio_max",
 }
 RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$")
+REQUIRED_ARM_FIELDS = ("model", "workflow", "tool_profile")
+OPTIONAL_ITEM_CASE_FIELDS = (
+    "evidence_bundle",
+    "response_contract",
+    "allowed_tools",
+    "time_limit_seconds",
+)
+OPTIONAL_ITEM_ARM_FIELDS = ("system_prompt_hash", "model_revision", "parameters")
 
 
 def load_eval_suite(path: Path) -> dict[str, Any]:
@@ -48,9 +57,17 @@ def load_eval_suite(path: Path) -> dict[str, Any]:
     case_ids = _unique_ids(payload["cases"], label="case")
     if not case_ids:
         raise ValueError("eval suite requires at least one case")
+    for arm in payload["arms"]:
+        missing_arm_fields = [field for field in REQUIRED_ARM_FIELDS if not arm.get(field)]
+        if missing_arm_fields:
+            raise ValueError(
+                f"arm {arm.get('id', '<unknown>')} missing fields: {', '.join(missing_arm_fields)}"
+            )
     for case in payload["cases"]:
         if case.get("split") not in SPLITS:
             raise ValueError(f"case {case.get('id', '<unknown>')} has invalid split")
+        if not case.get("domain"):
+            raise ValueError(f"case {case.get('id', '<unknown>')} requires domain")
         if not case.get("prompt") or not _case_rubric(case):
             raise ValueError(f"case {case.get('id', '<unknown>')} requires prompt and rubric")
     if not any(case["split"] == "held_out" for case in payload["cases"]):
@@ -139,13 +156,14 @@ def build_run_manifest(suite: dict[str, Any], *, run_id: str) -> dict[str, Any]:
                         "system_prompt_binding_status", "unresolved"
                     ),
                 }
-            if "system_prompt_hash" in arm:
-                item["system_prompt_hash"] = arm["system_prompt_hash"]
-            for field in ("evidence_bundle", "response_contract"):
+            for field in OPTIONAL_ITEM_ARM_FIELDS:
+                if field in arm:
+                    item[field] = arm[field]
+            for field in OPTIONAL_ITEM_CASE_FIELDS:
                 if field in case:
                     item[field] = case[field]
             items.append(item)
-    return {
+    packet = {
         "packet_type": "engineering_brain_eval_run_manifest",
         "version": 1,
         "run_id": run_id,
@@ -165,12 +183,17 @@ def build_run_manifest(suite: dict[str, Any], *, run_id: str) -> dict[str, Any]:
         },
         "human_stoplines": ["api_call", "paid_run", "external_send", "dataset_change_after_manifest"],
     }
+    if "random_seed" in suite:
+        packet["random_seed"] = suite["random_seed"]
+    return packet
 
 
 def build_eval_smoke_packet(suite: dict[str, Any], *, run_id: str) -> dict[str, Any]:
     manifest = build_run_manifest(suite, run_id=run_id)
     outputs = [
         {
+            "run_id": run_id,
+            "suite_sha256": manifest["suite_sha256"],
             "case_id": item["case_id"],
             "arm_id": item["arm_id"],
             "output": f"Synthetic response {index:03d}",
@@ -242,6 +265,9 @@ def validate_result_import(
     run_id = manifest.get("run_id")
     if not isinstance(run_id, str) or not RUN_ID_PATTERN.fullmatch(run_id):
         raise ValueError("run manifest has invalid run_id")
+    expected = build_run_manifest(suite, run_id=run_id)
+    if _canonical_json(expected["items"]) != _canonical_json(manifest.get("items")):
+        raise ValueError("run manifest items do not match the suite matrix")
     for row in results:
         if row.get("run_id") != run_id:
             raise ValueError("result row run_id mismatch")
@@ -265,6 +291,7 @@ def build_blind_review_bundle(
     }
     arm_ids = {arm["id"] for arm in suite["arms"]}
     expected = {(case_id, arm_id) for case_id in cases for arm_id in arm_ids}
+    suite_sha256 = _suite_digest(suite)
     indexed: dict[tuple[str, str], str] = {}
     for row in outputs:
         key = (row.get("case_id"), row.get("arm_id"))
@@ -272,6 +299,10 @@ def build_blind_review_bundle(
             raise ValueError(f"unexpected output row: {key[0]} / {key[1]}")
         if key in indexed:
             raise ValueError(f"duplicate output row: {key[0]} / {key[1]}")
+        if row.get("run_id") != run_id:
+            raise ValueError("output row run_id mismatch")
+        if row.get("suite_sha256") != suite_sha256:
+            raise ValueError("output row suite digest mismatch")
         output = row.get("output")
         if not isinstance(output, str) or not output.strip():
             raise ValueError(f"output row requires non-empty output: {key[0]} / {key[1]}")
@@ -295,8 +326,7 @@ def build_blind_review_bundle(
                 if baseline_first
                 else (candidate_id, baseline_id)
             )
-            review_pairs.append(
-                {
+            pair = {
                     "pair_id": pair_id,
                     "domain": case["domain"],
                     "prompt": case["prompt"],
@@ -308,7 +338,10 @@ def build_blind_review_bundle(
                         "required_fields": ["winner", "rationale", "critical_miss_a", "critical_miss_b"],
                     },
                 }
-            )
+            for field in ("evidence_bundle", "response_contract"):
+                if field in case:
+                    pair[field] = case[field]
+            review_pairs.append(pair)
             answer_pairs[pair_id] = {"A": arm_a, "B": arm_b}
 
     return {
@@ -363,10 +396,11 @@ def score_eval_results(suite: dict[str, Any], results: list[dict[str, Any]]) -> 
         arm_id: _compare(summaries[arm_id], baseline, suite["thresholds"])
         for arm_id in sorted(arm_ids.difference({baseline_id}))
     }
+    arms_by_id = {arm["id"]: arm for arm in suite["arms"]}
     runtime_passed = any(
         comparison["overall"] == "pass"
         for arm_id, comparison in comparisons.items()
-        if "runtime" in arm_id
+        if "runtime" in str(arms_by_id[arm_id].get("workflow", ""))
     )
     return {
         "packet_type": "engineering_brain_eval_report",
@@ -386,18 +420,19 @@ def score_eval_results(suite: dict[str, Any], results: list[dict[str, Any]]) -> 
 
 
 def _compare(candidate: dict[str, float], baseline: dict[str, float], thresholds: dict[str, float]) -> dict[str, Any]:
-    gain = candidate["task_success"] - baseline["task_success"]
+    gain = float(_decimal(candidate["task_success"]) - _decimal(baseline["task_success"]))
     cost_ratio = _ratio(candidate["cost_usd"], baseline["cost_usd"])
     quality_pass = (
-        gain >= thresholds["task_success_gain_min"]
-        and candidate["citation_support"] >= thresholds["citation_support_min"]
-        and candidate["human_win"] >= thresholds["human_win_rate_min"]
+        _decimal(candidate["task_success"]) - _decimal(baseline["task_success"])
+        >= _decimal(thresholds["task_success_gain_min"])
+        and _decimal(candidate["citation_support"]) >= _decimal(thresholds["citation_support_min"])
+        and _decimal(candidate["human_win"]) >= _decimal(thresholds["human_win_rate_min"])
     )
     safety_pass = (
         candidate["critical_misses_total"] <= thresholds["critical_misses_max"]
         and candidate["boundary_violations_total"] <= thresholds["boundary_violations_max"]
     )
-    efficiency_pass = cost_ratio <= thresholds["cost_ratio_max"]
+    efficiency_pass = cost_ratio is not None and cost_ratio <= thresholds["cost_ratio_max"]
     return {
         "task_success_gain": gain,
         "cost_ratio": cost_ratio,
@@ -460,10 +495,18 @@ def _case_rubric(case: dict[str, Any]) -> list[str]:
     return rubric if isinstance(rubric, list) else []
 
 
-def _ratio(value: float, baseline: float) -> float:
+def _ratio(value: float, baseline: float) -> float | None:
     if baseline == 0:
-        return 0.0 if value == 0 else float("inf")
+        return 0.0 if value == 0 else None
     return value / baseline
+
+
+def _decimal(value: float) -> Decimal:
+    return Decimal(str(value))
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def _percentile(values: list[float], quantile: float) -> float:
@@ -480,8 +523,7 @@ def _percentile(values: list[float], quantile: float) -> float:
 
 
 def _suite_digest(suite: dict[str, Any]) -> str:
-    canonical = json.dumps(suite, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return hashlib.sha256(_canonical_json(suite).encode("utf-8")).hexdigest()
 
 
 def _stable_side(run_id: str, case_id: str, candidate_id: str) -> str:

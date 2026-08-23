@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 
@@ -108,16 +109,8 @@ def test_result_import_rejects_manifest_digest_mismatch() -> None:
 
 def test_blind_review_bundle_separates_packet_from_answer_key() -> None:
     suite = load_eval_suite(SUITE_PATH)
-    outputs = [
-        {
-            "case_id": case["id"],
-            "arm_id": arm["id"],
-            "output": f"answer {case['id']} {index}",
-        }
-        for index, arm in enumerate(suite["arms"])
-        for case in suite["cases"]
-        if case["split"] == "held_out"
-    ]
+    manifest = build_run_manifest(suite, run_id="rr-20260730-seed")
+    outputs = _outputs(suite, manifest, run_id="rr-20260730-seed")
 
     bundle = build_blind_review_bundle(suite, outputs, run_id="rr-20260730-seed")
 
@@ -133,16 +126,8 @@ def test_blind_review_bundle_separates_packet_from_answer_key() -> None:
 
 def test_blind_review_bundle_requires_complete_outputs() -> None:
     suite = load_eval_suite(SUITE_PATH)
-    outputs = [
-        {
-            "case_id": case["id"],
-            "arm_id": arm["id"],
-            "output": "answer",
-        }
-        for case in suite["cases"]
-        if case["split"] == "held_out"
-        for arm in suite["arms"]
-    ]
+    manifest = build_run_manifest(suite, run_id="rr-20260730-seed")
+    outputs = _outputs(suite, manifest, run_id="rr-20260730-seed")
     outputs.pop()
 
     with pytest.raises(ValueError, match="missing output rows"):
@@ -318,12 +303,8 @@ def test_cli_eval_blind_emits_separated_bundle(
     capfd: pytest.CaptureFixture[str],
 ) -> None:
     suite = load_eval_suite(SUITE_PATH)
-    outputs = [
-        {"case_id": case["id"], "arm_id": arm["id"], "output": "answer"}
-        for case in suite["cases"]
-        if case["split"] == "held_out"
-        for arm in suite["arms"]
-    ]
+    manifest = build_run_manifest(suite, run_id="rr-20260730-seed")
+    outputs = _outputs(suite, manifest, run_id="rr-20260730-seed")
     outputs_path = tmp_path / "outputs.json"
     outputs_path.write_text(json.dumps(outputs), encoding="utf-8")
 
@@ -401,6 +382,223 @@ def test_v2_suite_loads_into_existing_runner_without_ground_truth_leakage() -> N
     }
     assert "expected_decision" not in json.dumps(manifest)
     assert all(item["evidence_bundle"] for item in manifest["items"])
+    assert manifest["random_seed"] == 20260730
+
+
+def test_result_import_rejects_tampered_manifest_items() -> None:
+    suite = load_eval_suite(SUITE_PATH)
+    manifest = build_run_manifest(suite, run_id="rr-20260730-seed")
+    results = _bound_results(manifest)
+    manifest["items"][0]["prompt"] = "tampered prompt"
+
+    with pytest.raises(ValueError, match="manifest item"):
+        validate_result_import(suite, manifest, results)
+
+
+def test_blind_review_rejects_outputs_from_another_run() -> None:
+    suite = load_eval_suite(SUITE_PATH)
+    manifest = build_run_manifest(suite, run_id="rr-20260730-seed")
+    outputs = _outputs(suite, manifest, run_id="rr-old-run")
+
+    with pytest.raises(ValueError, match="run_id"):
+        build_blind_review_bundle(suite, outputs, run_id="rr-20260730-seed")
+
+
+def test_run_manifest_preserves_arm_and_case_execution_controls(tmp_path: Path) -> None:
+    payload = json.loads(SUITE_PATH.read_text(encoding="utf-8"))
+    payload["random_seed"] = 20260730
+    payload["arms"][2]["model_revision"] = "sol-2026-07-30"
+    payload["arms"][2]["parameters"] = {"temperature": 0}
+    held_out = next(case for case in payload["cases"] if case["split"] == "held_out")
+    held_out["allowed_tools"] = ["read_file"]
+    held_out["time_limit_seconds"] = 30
+    suite_path = tmp_path / "suite-with-execution.json"
+    suite_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    suite = load_eval_suite(suite_path)
+    manifest = build_run_manifest(suite, run_id="rr-exec-local")
+
+    assert manifest["random_seed"] == 20260730
+    runtime_item = next(
+        item
+        for item in manifest["items"]
+        if item["case_id"] == held_out["id"] and item["arm_id"] == "sol_runtime"
+    )
+    assert runtime_item["model_revision"] == "sol-2026-07-30"
+    assert runtime_item["parameters"] == {"temperature": 0}
+    assert runtime_item["allowed_tools"] == ["read_file"]
+    assert runtime_item["time_limit_seconds"] == 30
+
+
+def test_blind_review_pairs_include_case_evidence() -> None:
+    suite = load_eval_suite(SUITE_V2_PATH)
+    manifest = build_run_manifest(suite, run_id="rr-v2-local")
+    outputs = _outputs(suite, manifest, run_id="rr-v2-local")
+
+    bundle = build_blind_review_bundle(suite, outputs, run_id="rr-v2-local")
+
+    for pair in bundle["review_packet"]["pairs"]:
+        assert pair["evidence_bundle"]
+        assert pair["response_contract"]["required_sections"]
+        assert pair["response_contract"]["prohibited_actions"]
+
+
+def test_load_eval_suite_rejects_missing_domain(tmp_path: Path) -> None:
+    payload = json.loads(SUITE_PATH.read_text(encoding="utf-8"))
+    held_out = next(case for case in payload["cases"] if case["split"] == "held_out")
+    del held_out["domain"]
+    broken = tmp_path / "missing-domain.json"
+    broken.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="domain"):
+        load_eval_suite(broken)
+
+
+def test_score_eval_results_uses_workflow_not_arm_id_substring() -> None:
+    suite = copy.deepcopy(load_eval_suite(SUITE_PATH))
+    suite["arms"].append(
+        {
+            "id": "runtime_disabled",
+            "model": "gpt-5.6-sol",
+            "workflow": "direct",
+            "tool_profile": "matched",
+        }
+    )
+    held_out = [case for case in suite["cases"] if case["split"] == "held_out"]
+    results = []
+    for case in held_out:
+        for arm in suite["arms"]:
+            passing = arm["id"] == "runtime_disabled"
+            results.append(
+                _result(
+                    case["id"],
+                    arm["id"],
+                    task_success=0.90 if passing else 0.70,
+                    citation_support=0.98 if passing else 0.85,
+                    human_win=0.70 if passing else 0.50,
+                    cost_usd=1.00,
+                )
+            )
+
+    report = score_eval_results(suite, results)
+
+    assert report["comparisons"]["runtime_disabled"]["overall"] == "pass"
+    assert report["comparisons"]["sol_runtime"]["overall"] == "fail"
+    assert report["decision"] == "hold"
+
+
+def test_score_eval_results_emits_json_safe_undefined_ratio() -> None:
+    suite = load_eval_suite(SUITE_PATH)
+    held_out = [case for case in suite["cases"] if case["split"] == "held_out"]
+    results = [
+        _result(
+            case["id"],
+            arm["id"],
+            task_success=0.85 if "runtime" in arm["id"] else 0.70,
+            cost_usd=1.50 if arm["id"] == "sol_runtime" else 0.0,
+        )
+        for case in held_out
+        for arm in suite["arms"]
+    ]
+
+    report = score_eval_results(suite, results)
+    payload = json.dumps(report)
+
+    assert "Infinity" not in payload
+    parsed = json.loads(payload)
+    assert parsed["comparisons"]["sol_runtime"]["cost_ratio"] is None
+    assert parsed["comparisons"]["sol_runtime"]["efficiency_gate"] == "fail"
+
+
+def test_score_eval_results_accepts_decimal_gain_at_threshold() -> None:
+    suite = load_eval_suite(SUITE_PATH)
+    held_out = [case for case in suite["cases"] if case["split"] == "held_out"]
+    results = [
+        _result(
+            case["id"],
+            arm["id"],
+            task_success=0.6 if arm["id"] == "sol_direct" else 0.7 if arm["id"] == "sol_runtime" else 0.5,
+            citation_support=0.98 if arm["id"] == "sol_runtime" else 0.95,
+            human_win=0.70 if arm["id"] == "sol_runtime" else 0.60,
+        )
+        for case in held_out
+        for arm in suite["arms"]
+    ]
+
+    report = score_eval_results(suite, results)
+
+    assert report["comparisons"]["sol_runtime"]["task_success_gain"] == pytest.approx(0.1)
+    assert report["comparisons"]["sol_runtime"]["quality_gate"] == "pass"
+
+
+def test_review_result_schema_rejects_score_above_max_score() -> None:
+    jsonschema = pytest.importorskip("jsonschema")
+    schema = json.loads((ROOT / "schemas" / "eval-review-result.schema.json").read_text(encoding="utf-8"))
+    payload = {
+        "schema_version": "eval-review-result-v1",
+        "review_id": "rev-1",
+        "suite_id": "research-review-v1",
+        "suite_version": 1,
+        "case_id": "best-practice-adoption-retry",
+        "candidate_id": "sol_runtime",
+        "reviewer": {"kind": "human", "identity": "reviewer-1", "rubric_version": 1},
+        "dimensions": [
+            {"id": "accuracy", "score": 10, "max_score": 1, "evidence": ["cited primary source"]}
+        ],
+        "overall_score": 1,
+        "critical_misses": [],
+        "boundary_violations": [],
+        "leakage": {
+            "arm_identity_hidden": True,
+            "ground_truth_hidden_until_scoring": True,
+            "detected": False,
+        },
+        "attestation": {
+            "blind_review": True,
+            "no_arm_identity_access": True,
+            "no_candidate_authorship": True,
+            "independent_judgment": True,
+            "signed_by": "reviewer-1",
+            "signed_at": "2026-07-30T00:00:00Z",
+            "review_input_hash": "sha256:" + ("a" * 64),
+        },
+        "reviewed_at": "2026-07-30T00:00:00Z",
+    }
+
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.Draft202012Validator(schema).validate(payload)
+
+
+def _outputs(suite: dict, manifest: dict, *, run_id: str) -> list[dict[str, object]]:
+    return [
+        {
+            "run_id": run_id,
+            "suite_sha256": manifest["suite_sha256"],
+            "case_id": item["case_id"],
+            "arm_id": item["arm_id"],
+            "output": f"Synthetic response {index:03d}",
+        }
+        for index, item in enumerate(manifest["items"], start=1)
+    ]
+
+
+def _bound_results(manifest: dict) -> list[dict[str, object]]:
+    return [
+        {
+            "run_id": manifest["run_id"],
+            "suite_sha256": manifest["suite_sha256"],
+            "case_id": item["case_id"],
+            "arm_id": item["arm_id"],
+            "task_success": 0.5,
+            "citation_support": 0.5,
+            "human_win": 0.5,
+            "critical_misses": 0,
+            "boundary_violations": 0,
+            "latency_ms": 1,
+            "cost_usd": 0,
+        }
+        for item in manifest["items"]
+    ]
 
 
 def _result(
