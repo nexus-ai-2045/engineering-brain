@@ -156,12 +156,12 @@ PDCA の Act は `registry/local-learnings.yaml` へ次の形で畳む。candida
 FDEはrouting、scope、owner、risk、human gateを担当し、`engineering-brain`はPlan / Do / Check / Actの実行証拠を担当する。両者の受け渡しには`fde.feedback.v1`を使う。
 
 ```powershell
-python -m devbrain feedback --input <feedback.json> --json
+python -m engineering_brain feedback --input <feedback.json> --json
 ```
 
 このcommandはpacketをread-onlyで検証し、`act.next_plan_input`とCheckの型付きevidence pointerだけを`engineering-brain.next-plan.v1`へ圧縮する。raw chat、raw tool output、会話履歴全体は次Planへ再投入しない。`next_plan_input`は1000文字以内とし、個人ホーム絶対パスを拒否する。
 
-互換schemaはpackage resourceの`devbrain/fde-feedback-packet.schema.json`に置く。正本はFDE repositoryの`schemas/fde_feedback_packet.v1.schema.json`であり、互換性を壊す変更は新しいschema versionで行う。
+互換schemaはpackage resourceの`engineering_brain/fde-feedback-packet.schema.json`に置く。正本はFDE repositoryの`schemas/fde_feedback_packet.v1.schema.json`であり、互換性を壊す変更は新しいschema versionで行う。
 
 ## Stoplines
 
