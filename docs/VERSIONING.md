@@ -1,13 +1,13 @@
 # Versioning
 
 status: active
-current_version: 0.1.0
+current_version: 0.2.0
 scheme: SemVer
 source_of_truth: `pyproject.toml`
 
 ## 方針
 
-`engineering-brain` は SemVer (`MAJOR.MINOR.PATCH`) を使います。public seed は `0.1.0` です。
+`engineering-brain` は SemVer (`MAJOR.MINOR.PATCH`) を使います。public seed は `0.1.0`、現行は `0.2.0` です。
 
 version は更新のたびに自動 bump しません。各 PR で必ず version を上げると意味が薄くなるため、version bump は release / capability boundary ごとに明示的に行います。
 
@@ -35,7 +35,7 @@ python -m engineering_brain version --json
 
 ## release / tag policy
 
-Git tag (`v0.1.0`) と GitHub Release は、version file の更新とは別の承認境界です。実行前に次を提示します。
+Git tag (`v0.2.0`) と GitHub Release は、version file の更新とは別の承認境界です。実行前に次を提示します。
 
 - target repo
 - tag name

@@ -124,7 +124,7 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 
 | item | status |
 |---|---|
-| version | `0.1.0` public seed。次の capability release 候補は `0.2.0`（tag 未作成） |
+| version | `0.2.0`（public seed は `0.1.0`） |
 | visibility | public |
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
@@ -172,7 +172,7 @@ Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` te
 
 設計判断は [ADR](docs/adr/README.md) に残します。Obsidian や local memory は正本ではなく入口として扱い、採用済みの知見だけを [Knowledge intake](docs/KNOWLEDGE_INTAKE.md) の流れで docs / registry / tests / ADR / skill source へ昇格します。
 
-version 管理は [Versioning](docs/VERSIONING.md) を参照します。public seed は `0.1.0` で、tag / GitHub Release は別承認です。
+version 管理は [Versioning](docs/VERSIONING.md) を参照します。現行は `0.2.0` です。
 
 Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community learning intake](docs/COMMUNITY_LEARNING_INTAKE.md) の source packet として扱います。
 

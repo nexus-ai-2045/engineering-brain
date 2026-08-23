@@ -29,12 +29,12 @@ visibility は PUBLIC。GitHub Release / tag は未作成。
 | 設定 | 実測 | リリース前の推奨 |
 |---|---|---|
 | secret scanning | enabled | 維持 |
-| secret scanning push protection | disabled | 有効化を別承認 |
-| Dependabot security updates | disabled | 有効化を別承認 |
-| Dependabot alerts | disabled (API 404) | 有効化を別承認 |
+| secret scanning push protection | enabled (2026-08-23) | 維持 |
+| Dependabot security updates | enabled (2026-08-23) | 維持 |
+| Dependabot alerts | enabled (2026-08-23) | 維持 |
 | private vulnerability reporting | enabled | 維持 |
-| branch protection on `main` | なし | 要/不要を別判断 |
-| delete_branch_on_merge | false | squash 後のブランチ残存の主因。有効化を別承認 |
+| branch protection on `main` | なし | solo 運用では未設定。ruleset は別判断 |
+| delete_branch_on_merge | true (2026-08-23) | 維持 |
 
 ## 未吸収の local work
 
