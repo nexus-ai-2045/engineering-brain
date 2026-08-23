@@ -287,20 +287,18 @@ def test_detect_default_branch_uses_origin_head(monkeypatch) -> None:
     assert review.detect_default_branch(Path(".")) == "origin/develop"
 
 
-def test_detect_default_branch_falls_back_to_remote_show(monkeypatch) -> None:
+def test_detect_default_branch_falls_back_to_abbrev_ref(monkeypatch) -> None:
     def fake_run(command: list[str], *, cwd: Path) -> dict:
         joined = " ".join(command)
         if joined == "git symbolic-ref --quiet refs/remotes/origin/HEAD":
             return {"command": joined, "returncode": 1, "stdout": "", "stderr": ""}
-        if joined == "git remote show origin":
+        if joined == "git rev-parse --abbrev-ref origin/HEAD":
             return {
                 "command": joined,
                 "returncode": 0,
-                "stdout": "  HEAD branch: trunk\n",
+                "stdout": "origin/trunk",
                 "stderr": "",
             }
-        if joined == "git rev-parse --verify origin/trunk":
-            return {"command": joined, "returncode": 0, "stdout": "abc", "stderr": ""}
         raise AssertionError(joined)
 
     monkeypatch.setattr(review, "run", fake_run)

@@ -124,6 +124,11 @@ def build_pr_packet(
 
 
 def detect_default_branch(repo: Path) -> str | None:
+    """Resolve the remote default branch without calling `git remote show`.
+
+    `git remote show origin` can echo credential-bearing remote URLs into stdout.
+    Prefer symbolic-ref / rev-parse which return only ref names.
+    """
     symbolic = run(["git", "symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"], cwd=repo)
     if symbolic["returncode"] == 0 and symbolic["stdout"].strip():
         ref = symbolic["stdout"].strip()
@@ -131,20 +136,11 @@ def detect_default_branch(repo: Path) -> str | None:
             return ref.removeprefix("refs/remotes/")
         return ref
 
-    remote_show = run(["git", "remote", "show", "origin"], cwd=repo)
-    if remote_show["returncode"] == 0:
-        for line in remote_show["stdout"].splitlines():
-            stripped = line.strip()
-            if stripped.lower().startswith("head branch:"):
-                name = stripped.split(":", maxsplit=1)[1].strip()
-                if name:
-                    origin_ref = f"origin/{name}"
-                    verified = run(["git", "rev-parse", "--verify", origin_ref], cwd=repo)
-                    if verified["returncode"] == 0:
-                        return origin_ref
-                    local = run(["git", "rev-parse", "--verify", name], cwd=repo)
-                    if local["returncode"] == 0:
-                        return name
+    abbrev = run(["git", "rev-parse", "--abbrev-ref", "origin/HEAD"], cwd=repo)
+    if abbrev["returncode"] == 0:
+        name = abbrev["stdout"].strip()
+        if name and name != "origin/HEAD":
+            return name
     return None
 
 
