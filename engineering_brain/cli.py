@@ -17,6 +17,15 @@ from .feedback import (
 )
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
+from .evals import (
+    build_blind_review_bundle,
+    build_eval_plan,
+    build_eval_smoke_packet,
+    build_run_manifest,
+    load_eval_suite,
+    score_eval_results,
+    validate_result_import,
+)
 from .research import (
     DECISIONS,
     PRECEDENT_DECISION_CONTRACT,
@@ -106,6 +115,32 @@ def main(argv: list[str] | None = None) -> int:
         help="Evidence pointer from implementation-precedent-research. Repeatable. Required with outcome before wrap/extend/adopt_oss/build.",
     )
     research_parser.add_argument("--json", action="store_true")
+
+    eval_plan_parser = sub.add_parser("eval-plan", help="Build a plan-only model comparison packet.")
+    eval_plan_parser.add_argument("--suite", required=True)
+    eval_plan_parser.add_argument("--json", action="store_true")
+
+    eval_manifest_parser = sub.add_parser("eval-manifest", help="Freeze a held-out model run manifest.")
+    eval_manifest_parser.add_argument("--suite", required=True)
+    eval_manifest_parser.add_argument("--run-id", required=True)
+    eval_manifest_parser.add_argument("--json", action="store_true")
+
+    eval_smoke_parser = sub.add_parser("eval-smoke", help="Run the synthetic local evaluation pipeline.")
+    eval_smoke_parser.add_argument("--suite", required=True)
+    eval_smoke_parser.add_argument("--run-id", default="local-smoke")
+    eval_smoke_parser.add_argument("--json", action="store_true")
+
+    eval_blind_parser = sub.add_parser("eval-blind", help="Build a blind review packet and separate answer key.")
+    eval_blind_parser.add_argument("--suite", required=True)
+    eval_blind_parser.add_argument("--outputs", required=True)
+    eval_blind_parser.add_argument("--run-id", required=True)
+    eval_blind_parser.add_argument("--json", action="store_true")
+
+    eval_score_parser = sub.add_parser("eval-score", help="Score completed held-out evaluation results.")
+    eval_score_parser.add_argument("--suite", required=True)
+    eval_score_parser.add_argument("--results", required=True)
+    eval_score_parser.add_argument("--manifest")
+    eval_score_parser.add_argument("--json", action="store_true")
 
     pr_parser = sub.add_parser(
         "pr",
@@ -249,6 +284,35 @@ def main(argv: list[str] | None = None) -> int:
             ),
             as_json=args.json,
         )
+    if args.command == "eval-plan":
+        suite = load_eval_suite(Path(args.suite).resolve())
+        return emit(build_eval_plan(suite), as_json=args.json)
+    if args.command == "eval-manifest":
+        suite = load_eval_suite(Path(args.suite).resolve())
+        return emit(build_run_manifest(suite, run_id=args.run_id), as_json=args.json)
+    if args.command == "eval-smoke":
+        suite = load_eval_suite(Path(args.suite).resolve())
+        return emit(build_eval_smoke_packet(suite, run_id=args.run_id), as_json=args.json)
+    if args.command == "eval-blind":
+        suite = load_eval_suite(Path(args.suite).resolve())
+        outputs = json.loads(Path(args.outputs).resolve().read_text(encoding="utf-8"))
+        if not isinstance(outputs, list):
+            raise ValueError("eval outputs must be a JSON array")
+        return emit(
+            build_blind_review_bundle(suite, outputs, run_id=args.run_id),
+            as_json=args.json,
+        )
+    if args.command == "eval-score":
+        suite = load_eval_suite(Path(args.suite).resolve())
+        results = json.loads(Path(args.results).resolve().read_text(encoding="utf-8"))
+        if not isinstance(results, list):
+            raise ValueError("eval results must be a JSON array")
+        if args.manifest:
+            manifest = json.loads(Path(args.manifest).resolve().read_text(encoding="utf-8"))
+            if not isinstance(manifest, dict):
+                raise ValueError("eval manifest must be a JSON object")
+            validate_result_import(suite, manifest, results)
+        return emit(score_eval_results(suite, results), as_json=args.json)
     if args.command == "pr":
         run_packet = load_packet_file(Path(args.run_packet).resolve()) if args.run_packet else None
         research_packet = (

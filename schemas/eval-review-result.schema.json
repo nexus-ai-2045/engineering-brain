@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/eval-review-result.schema.json",
+  "title": "Engineering Brain Blind Review Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "review_id",
+    "suite_id",
+    "suite_version",
+    "case_id",
+    "candidate_id",
+    "reviewer",
+    "dimensions",
+    "overall_score",
+    "critical_misses",
+    "boundary_violations",
+    "leakage",
+    "attestation",
+    "reviewed_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "eval-review-result-v1"},
+    "review_id": {"$ref": "#/$defs/id"},
+    "suite_id": {"$ref": "#/$defs/id"},
+    "suite_version": {"type": "integer", "minimum": 1},
+    "case_id": {"$ref": "#/$defs/id"},
+    "candidate_id": {"$ref": "#/$defs/id"},
+    "reviewer": {"$ref": "#/$defs/reviewer"},
+    "dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/dimension"}
+    },
+    "overall_score": {"type": "number", "minimum": 0, "maximum": 1},
+    "verdict": {"enum": ["pass", "fail", "abstain"]},
+    "critical_misses": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "boundary_violations": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "rationale": {"type": "string"},
+    "leakage": {"$ref": "#/$defs/leakage"},
+    "attestation": {"$ref": "#/$defs/attestation"},
+    "reviewed_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "identity", "rubric_version"],
+      "properties": {
+        "kind": {"enum": ["human", "model"]},
+        "identity": {"type": "string", "minLength": 1},
+        "model_revision": {"type": "string", "minLength": 1},
+        "rubric_version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "score", "max_score", "evidence"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "score": {"type": "number", "minimum": 0},
+        "max_score": {"type": "number", "exclusiveMinimum": 0},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "notes": {"type": "string"}
+      }
+    },
+    "leakage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arm_identity_hidden",
+        "ground_truth_hidden_until_scoring",
+        "detected"
+      ],
+      "properties": {
+        "arm_identity_hidden": {"type": "boolean"},
+        "ground_truth_hidden_until_scoring": {"type": "boolean"},
+        "detected": {"type": "boolean"},
+        "details": {"type": "string"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"detected": {"const": true}}, "required": ["detected"]},
+          "then": {"required": ["details"]}
+        }
+      ]
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blind_review",
+        "no_arm_identity_access",
+        "no_candidate_authorship",
+        "independent_judgment",
+        "signed_by",
+        "signed_at",
+        "review_input_hash"
+      ],
+      "properties": {
+        "blind_review": {"const": true},
+        "no_arm_identity_access": {"const": true},
+        "no_candidate_authorship": {"const": true},
+        "independent_judgment": {"const": true},
+        "signed_by": {"type": "string", "minLength": 1},
+        "signed_at": {"type": "string", "format": "date-time"},
+        "review_input_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}
