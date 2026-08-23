@@ -128,7 +128,7 @@ def test_build_forces_hold_when_precedent_outcome_is_hold_or_reject() -> None:
         assert any(outcome in item for item in packet["unknowns"])
 
 
-def test_cli_research_forces_hold_without_precedent_gate(capsys) -> None:
+def test_cli_research_forces_hold_without_precedent_gate(capfd) -> None:
     code = main([
         "research",
         "--task", "choose approach",
@@ -139,12 +139,12 @@ def test_cli_research_forces_hold_without_precedent_gate(capsys) -> None:
     ])
 
     assert code == 0
-    packet = json.loads(capsys.readouterr().out)
+    packet = json.loads(capfd.readouterr().out)
     assert packet["decision"]["status"] == "hold"
     assert any("precedent research" in item for item in packet["unknowns"])
 
 
-def test_cli_research_emits_gated_decision_with_precedent_inputs(capsys) -> None:
+def test_cli_research_emits_gated_decision_with_precedent_inputs(capfd) -> None:
     code = main([
         "research",
         "--task", "choose approach",
@@ -157,7 +157,7 @@ def test_cli_research_emits_gated_decision_with_precedent_inputs(capsys) -> None
     ])
 
     assert code == 0
-    packet = json.loads(capsys.readouterr().out)
+    packet = json.loads(capfd.readouterr().out)
     assert packet["decision"]["status"] == "adopt_oss"
     assert packet["precedent_research"]["outcome"] == "revise"
     assert packet["precedent_research"]["evidence"] == [
