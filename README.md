@@ -52,7 +52,7 @@ flowchart LR
 | 工程 | まず確認すること | 成果物・証拠 | 次へ進めない条件 |
 |---|---|---|---|
 | 1. 設計・壁打ち | Why、非目標、SSOT、owner、write scope、ADR要否 | task / design packet | repo・責任者・境界が不明 |
-| 2. リサーチ | repo-local → workspace共有 → 公式 → OSS → local fit | research packet、`reuse / wrap / extend / adopt_oss / build / hold` | 最新性・license・securityが不明 |
+| 2. リサーチ | repo-local → workspace共有 → 公式 → OSS → local fit | research packet v2、`implementation-precedent-research`による先行実装評価、`reuse / wrap / extend / adopt_oss / build / hold` | 最新性・license・securityが不明 |
 | 3. TDD計画 | 期待する失敗、対象Smoke、回帰範囲 | failing test、verification plan | 成功条件をテストできない |
 | 4. 実装 | 既存helper、shared script、最小差分 | implementation diff | secret・credential・production変更が未承認 |
 | 5. テスト | unit、integration、compile、negative path | test log | 必須testが未実行または失敗 |
@@ -104,6 +104,10 @@ python -m engineering_brain pr --repo . --json
 - `python -m engineering_brain pr --repo . --json`: 差分・closeout・stopline から plan-only の日本語 PR packet を作る（PR作成/pushはしない）。
 - `ai-ratchet-gate --repo .`: tracked∧ignored の新規矛盾を fail-closed で止める（Release wheel から導入）。
 - `python tools/run_repo_preflight.py --repo .`: upstream repo-preflight を shadow consistency 付きで実行する。
+
+research packet v2は、`nexus-ai-skills`を正本とする
+`implementation-precedent-research`のconsumer契約を含みます。engineering-brain内へ
+skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行実装評価を要求します。
 
 運用と後片付け:
 

@@ -17,3 +17,4 @@ ADR は作業ログではなく、後続 PR で同じ判断を繰り返さない
 | [ADR-0002 single runtime skill entrypoint](ADR-0002-single-autopilot-entrypoint.md) | accepted | runtime skillは`engineering-autopilot`へ一本化し、repoとmoduleを別skillにしない |
 | [ADR-0003 evidence-backed assurance gates](ADR-0003-evidence-backed-assurance-gates.md) | accepted | assurance gateはunit testではなく対象runの明示的evidenceを評価する |
 | [ADR-0004 safe FDE feedback boundary](ADR-0004-safe-fde-feedback-boundary.md) | accepted | feedbackは承認迂回と入力由来metadata漏洩を防ぎ、schemaをwheelへ同梱する |
+| [ADR-0005 先行実装リサーチのconsumer契約](ADR-0005-precedent-research-consumer-contract.md) | accepted | 横断skillを`nexus-ai-skills`正本とし、research packet v2からconsumerとして参照する |

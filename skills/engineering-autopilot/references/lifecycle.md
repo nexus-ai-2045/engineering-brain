@@ -14,6 +14,7 @@ owner: nexus_ai
 | route | task の種類と必要 gate を決める | `python -m engineering_brain route --task "<task>" --json` |
 | gate | trigger から必要な採用 unit を確認する | `python -m engineering_brain gate --trigger implementation --json` |
 | catalog | 技術・既存例・公式 source を候補として確認する | `python -m engineering_brain catalog --domain <domain> --json` |
+| precedent research | 公式仕様、正本コード、主要実装、失敗証拠から採用判断を作る | `$implementation-precedent-research`（正本: `nexus-ai-skills`） |
 | algorithm select | 問題シグナルと制約から定番アルゴリズム候補を順位付けする | `python -m engineering_brain algorithms select --signal <signal> --constraint <constraint> --json` |
 | algorithm compare | 前提・避ける条件・計算量・検証方法を同じ形式で比較する | `python -m engineering_brain algorithms compare --id <id> --id <id> --json` |
 | skill-sync | repo-owned skill source と Codex / Claude Code runtime install copy の drift を確認する | `python -m engineering_brain skill-sync --target all --json` |
@@ -38,6 +39,14 @@ owner: nexus_ai
 - credential / auth / hook / settings 変更
 - production DB / cloud mutation
 - public release / publish / external share
+
+## 先行実装リサーチ契約
+
+`wrap`、`extend`、`adopt_oss`、`build`へ進む前にprecedent researchを通す。
+engineering-brainは`implementation-precedent-research`のconsumerであり、skill本体を
+このrepoへ複製しない。調査結果は`adopt`、`revise`、`reject`、`hold`と、最小実装、
+意図的に持ち込まない複雑性、回帰テストを含む。正本skillが未配布または根拠不足なら
+`hold`として人間レビューへ戻す。
 
 ## アルゴリズム選定契約
 

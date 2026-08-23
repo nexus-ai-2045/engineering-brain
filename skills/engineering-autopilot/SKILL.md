@@ -14,10 +14,16 @@ description: engineering-brain を通して開発作業を設計し、定番ア�
 3. canonical `engineering-brain` repo で `python -m engineering_brain --help` を実行し、
    利用可能commandを実測する。
 4. `engineering-brain` repo から、現行 CLI で使える gate だけを実行する。
+5. `wrap`、`extend`、`adopt_oss`、`build`を判断する前に、
+   `$implementation-precedent-research`で先行実装を評価する。
 
 `engineering-brain`という別skillは作らない。これはrepo名であり、Codexからのruntime
 入口は`engineering-autopilot`へ一本化する。`engineering_brain`はPython module名として
 扱う。helpに出ない未確認のcommandを推測実行しない。
+
+`implementation-precedent-research`の正本は`nexus-ai-skills`が所有する。
+engineering-brainはconsumerとして呼び出し、本体を複製しない。利用できないruntimeでは
+調査済みと推測せず、research packetの判断を`hold`にして不足証拠を返す。
 
 ```powershell
 python -m engineering_brain route --task "<task>" --json
@@ -38,6 +44,8 @@ python -m engineering_brain closeout --repo . --json
 - 候補を自動採用しない。`preconditions` と `avoid_when` を実データで確認し、迷う候補は `algorithms compare` で計算量・交換条件・検証法を並べる。
 - シグナルが取れない場合は `unknown` のままにし、汎用アルゴリズムを推測採用しない。
 - source catalog は採用ではない。`candidate` / `adopted` / `hold` / `rejected` を分ける。
+- research packetの`precedent_research`契約に従い、先行実装調査の
+  `adopt` / `revise` / `reject` / `hold`を実装判断へ接続する。
 - TDD または対象 smoke なしに実装完了と言わない。
 - 非同期cloud処理では deploy、HTTP 2xx、job成功、marker存在を完了の代用にせず、executionから成果物・評価・費用・停止補償まで同一runへ束縛する。
 - OCR/structured outputでは JSON構文、schema、field意味精度、表構造、校正、劣化耐性、量子化artifact実測を分離する。

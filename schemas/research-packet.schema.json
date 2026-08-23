@@ -3,14 +3,44 @@
   "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/research-packet.schema.json",
   "title": "Engineering Brain Research Packet",
   "type": "object",
-  "required": ["packet_type", "version", "task", "repo", "domain", "candidates", "decision", "human_stoplines", "unknowns"],
+  "required": ["packet_type", "version", "task", "repo", "domain", "candidates", "precedent_research", "decision", "human_stoplines", "unknowns"],
   "properties": {
     "packet_type": {"const": "engineering_brain_research"},
-    "version": {"const": 1},
+    "version": {"const": 2},
     "task": {"type": "string", "minLength": 1},
     "repo": {"const": "<REPO>"},
     "domain": {"type": "string", "minLength": 1},
     "candidates": {"type": "array", "items": {"type": "object"}},
+    "precedent_research": {
+      "type": "object",
+      "required": ["skill", "source_owner", "role", "required_before", "decision_contract"],
+      "properties": {
+        "skill": {"const": "implementation-precedent-research"},
+        "source_owner": {"const": "nexus-ai-skills"},
+        "role": {"const": "consumer"},
+        "required_before": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "wrap"},
+            {"const": "extend"},
+            {"const": "adopt_oss"},
+            {"const": "build"}
+          ],
+          "items": false
+        },
+        "decision_contract": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "adopt"},
+            {"const": "revise"},
+            {"const": "reject"},
+            {"const": "hold"}
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
     "decision": {
       "type": "object",
       "required": ["status", "rationale", "rule"],
