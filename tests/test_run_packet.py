@@ -104,11 +104,11 @@ def test_build_run_packet_selects_algorithms_from_task_signals() -> None:
     assert "sorted_input" in packet["algorithms"]["signals"]
 
 
-def test_cli_run_emits_json_packet(capsys) -> None:
+def test_cli_run_emits_json_packet(capfd) -> None:
     code = main(["run", "--task", "implement CLI run packet", "--repo", str(ROOT), "--domain", "python", "--json"])
 
     assert code == 0
-    output = capsys.readouterr().out
+    output = capfd.readouterr().out
     assert '"packet_type": "engineering_autopilot_run"' in output
     assert '"task": "implement CLI run packet"' in output
     assert '"skill_sync"' in output

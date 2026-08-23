@@ -27,6 +27,7 @@ python -m engineering_brain algorithms select --signal <problem-signal> --constr
 python -m engineering_brain algorithms compare --id <candidate-a> --id <candidate-b> --json
 python -m engineering_brain skill-sync --target all --json
 python -m engineering_brain run --task "<task>" --domain <domain> --json
+python -m engineering_brain pr --repo . --json
 python -m engineering_brain closeout --repo . --json
 ```
 
@@ -58,6 +59,7 @@ python -m engineering_brain closeout --repo . --json
 - 同期: 現在会話で runtime write の承認を得た後だけ `python -m engineering_brain skill-sync --target all --apply --json`
 - Claude Code smoke: 通常モードで `/engineering-autopilot` を呼ぶ。個人スキルの発見確認には `--bare` を使わない。
 - run packet: `python -m engineering_brain run --task "<task>" --json`
+- PR packet: `python -m engineering_brain pr --repo . --json`（plan-only。PR作成/pushはしない）
 - algorithm registry: `engineering_brain/data/algorithms.json`
 - algorithm selection: `python -m engineering_brain algorithms select --signal <signal> --json`
 - algorithm comparison: `python -m engineering_brain algorithms compare --id <id> --id <id> --json`

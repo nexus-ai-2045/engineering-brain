@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 PERSONAL_PATH_PATTERN = re.compile(
-    r"(?:[A-Za-z]:[\\/]+Users[\\/]+[A-Za-z0-9._-]+|/(?:Users|home)/[A-Za-z0-9._-]+)"
+    r"(?<![A-Za-z0-9._-])(?:[A-Za-z]:[\\/]+Users[\\/]+[A-Za-z0-9._-]+|/(?:Users|home)/[A-Za-z0-9._-]+)"
 )
 
 TEXT_SUFFIXES = {
@@ -61,6 +61,11 @@ class PersonalPathFinding:
     path: str
     line: int
     match: str
+
+
+def redact_personal_paths(text: str) -> str:
+    """Replace personal absolute path prefixes with public-safe placeholders."""
+    return PERSONAL_PATH_PATTERN.sub("<USER_HOME>", text)
 
 
 def scan_personal_paths(repo: Path) -> list[PersonalPathFinding]:

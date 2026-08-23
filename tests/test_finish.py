@@ -52,7 +52,7 @@ def test_finish_plan_blocks_on_dirty_worktree(monkeypatch) -> None:
     assert result["local_merged_branches"] == []
 
 
-def test_cli_finish_outputs_plan(capsys, monkeypatch) -> None:
+def test_cli_finish_outputs_plan(capfd, monkeypatch) -> None:
     monkeypatch.setattr(
         cli,
         "finish_plan",
@@ -62,7 +62,7 @@ def test_cli_finish_outputs_plan(capsys, monkeypatch) -> None:
     code = main(["finish", "--json"])
 
     assert code == 0
-    assert '"status": "ok"' in capsys.readouterr().out
+    assert '"status": "ok"' in capfd.readouterr().out
 
 
 def test_hook_install_copies_repo_template(tmp_path: Path) -> None:
@@ -72,8 +72,11 @@ def test_hook_install_copies_repo_template(tmp_path: Path) -> None:
 
     result = finish.install_hooks(repo)
 
-    hook = hooks / "post-merge"
+    post_merge = hooks / "post-merge"
+    pre_commit = hooks / "pre-commit"
     assert result["status"] == "installed"
-    assert result["installed"] == ["post-merge"]
-    assert hook.exists()
-    assert "engineering_brain finish" in hook.read_text(encoding="utf-8")
+    assert set(result["installed"]) == {"post-merge", "pre-commit"}
+    assert post_merge.exists()
+    assert pre_commit.exists()
+    assert "engineering_brain finish" in post_merge.read_text(encoding="utf-8")
+    assert "ai-ratchet-gate" in pre_commit.read_text(encoding="utf-8")

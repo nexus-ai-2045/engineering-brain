@@ -23,7 +23,7 @@ owner: nexus_ai
 | async proof | 非同期runのexecution/job/artifact/evaluation/cost/cancel証拠を結ぶ | `async_orchestration_evidence_gate` |
 | model proof | syntax/schema/semantic/table/calibration/robustness/artifactを分離評価する | `structured_model_evaluation_gate` |
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m engineering_brain closeout --repo . --json` |
-| review packet | 外部操作前に見える範囲と未実施を分ける | PR body / closeout |
+| review packet | 外部操作前に見える範囲と未実施を分ける | `python -m engineering_brain pr --repo . --json` |
 | human stopline | push / PR / merge / cleanup / visibility を止める | current-turn explicit approval |
 | finish | merge 後の main 同期、local / remote branch cleanup 候補を plan する | `python -m engineering_brain finish --json` |
 | hook install | repo 同梱 hook を opt-in で local `.git/hooks/` へ入れる | `python -m engineering_brain hooks install --json` |

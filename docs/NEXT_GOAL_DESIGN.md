@@ -41,7 +41,7 @@ user task
 | 3 | run packet MVP | `schemas/run-packet.schema.json`, `engineering_brain/run_packet.py`, `engineering_brain run --task ... --json` | route / gate / closeout / human stopline が 1 packet に入る |
 | 4 | research packet | `schemas/research-packet.schema.json`, `engineering_brain/research.py` | candidate source と decision が `hold` 可能になる |
 | 5 | local learnings registry | `registry/local-learnings.yaml`, schema, intake tests | candidate packets 追加済み。field_review / adopt は未了 |
-| 6 | PR packet generator | `engineering_brain/review.py`, PR body template | visible scope / checks / unknown / stopline を日本語で生成できる |
+| 6 | PR packet generator | `engineering_brain/review.py`, PR body template | done: visible scope / checks / unknown / stopline を日本語で生成できる |
 | 7 | community learning intake | `docs/COMMUNITY_LEARNING_INTAKE.md`, source packet importer | Vision / GitHub / X / Web の詰まりを candidate 化できる |
 | 8 | field review loop | `docs/FIELD_REVIEW_LOOP.md`, experiment packet | browser / Obsidian capture をローカルで試し、人間が実地レビューできる |
 | 9 | PDCA feedback loop | `docs/PDCA_FEEDBACK_LOOP.md`, learning ledger | 実行結果とレビューを次の gate / docs / registry / tests へ戻せる |
@@ -134,6 +134,15 @@ PR 前に次を自動で揃える。
 - 未確認。
 - human stopline。
 - merge / cleanup は承認待ちか。
+
+実装:
+
+```powershell
+python -m engineering_brain pr --repo . --json
+python -m engineering_brain pr --repo . --purpose "<目的>" --run-packet run.json --research-packet research.json --json
+```
+
+既定は plan-only。GitHub 上の PR 作成 / push / merge は行わない。日本語 body だけ欲しいときは `--json` を外す。
 
 ## Human / AI responsibility
 

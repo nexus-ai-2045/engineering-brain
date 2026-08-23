@@ -13,6 +13,11 @@ public seed.
 
 ## Unreleased
 
+- CLI の PR stdout が catalog 外の residual と推論 purpose を消さないよう、secret/path scrub 後も残すようにした。
+- Codex review 指摘に沿い、PR packet の secret scrub、default branch 検出、添付 packet schema 検証、rename/copy 解析、絶対 home path のみ redaction、実測 verification 表示、research unknowns 統合を修正した。
+- `ai-ratchet-gate` v0.1.0 Release wheel と baseline、opt-in `pre-commit` hook を導入した。
+- upstream `repo-preflight` を `tools/run_repo_preflight.py` / CI から実行し、consistency は `shadow` とした。
+- `engineering_brain pr --json` を追加し、visible scope / checks / unknown / stopline 付きの日本語 PR packet を plan-only で生成できるようにした。
 - version sync guard を追加。
 - `engineering_brain version --json` を追加。
 - `engineering_brain finish --json` を追加し、merge 後の branch cleanup 候補を plan できるようにした。

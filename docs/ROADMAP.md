@@ -24,7 +24,7 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | F | run packet MVP | route / gate / closeout / stopline を run packet に統合する | done: MVP |
 | G | research packet | source / candidate / decision を packet 化する | done: PR #16 |
 | H | local learnings registry | local struggle を rule / failure pattern として蓄積 | partial: candidate packets in `registry/local-learnings.yaml` |
-| I | PR packet generator | 日本語 PR body、visible scope、checks、stopline を生成 | planned |
+| I | PR packet generator | 日本語 PR body、visible scope、checks、stopline を生成 | done: `engineering_brain pr` |
 | J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source |
 | K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | done: runtime copy synced |
 | L | autopilot run packet MVP | route / gate / catalog / skill-sync / closeout を 1 packet にまとめる | done: MVP |
@@ -32,7 +32,7 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | N | versioning baseline | public seed `0.1.0` と version sync guard を固定する | done: PR #14 |
 | O | finish planner / hook template | merge 後の cleanup 候補を plan し、opt-in hook で見落としを減らす | done: PR #15 |
 | P | README lifecycle visualization / docs drift cleanup | ゴールまでの見取り図と migration/public 状態を現実へ合わせる | current |
-| Q | PR packet generator | visible scope / checks / unknown / stopline を日本語 PR body にする | next |
+| Q | PR packet generator | visible scope / checks / unknown / stopline を日本語 PR body にする | done: `engineering_brain pr` |
 | R | verification profile / closeout v2 | task に応じた smoke / preflight / evidence schema を返す | next |
 
 ## Cutover policy

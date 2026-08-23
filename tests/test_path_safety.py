@@ -20,6 +20,24 @@ def test_scan_personal_paths_allows_placeholders(tmp_path: Path) -> None:
     assert scan_personal_paths(tmp_path) == []
 
 
+def test_redact_personal_paths_replaces_unix_and_windows_homes() -> None:
+    from engineering_brain.path_safety import redact_personal_paths
+
+    unix = "/Users/" + "alice" + "/Projects/demo"
+    windows = "C:" + "/Users/" + "bob" + "/Projects/demo"
+    assert redact_personal_paths(unix) == "<USER_HOME>/Projects/demo"
+    assert "<USER_HOME>" in redact_personal_paths(windows)
+    assert "bob" not in redact_personal_paths(windows)
+
+
+def test_redact_personal_paths_ignores_relative_home_segments() -> None:
+    from engineering_brain.path_safety import PERSONAL_PATH_PATTERN, redact_personal_paths
+
+    relative = "packages/home/alice/settings.py"
+    assert redact_personal_paths(relative) == relative
+    assert PERSONAL_PATH_PATTERN.search(relative) is None
+
+
 def test_scan_personal_paths_checks_public_config_files(tmp_path: Path) -> None:
     env_example = tmp_path / ".env.example"
     env_example.write_text("LOCAL_PATH=" + "C:" + "/Users/" + "alice/Projects/demo\n", encoding="utf-8")

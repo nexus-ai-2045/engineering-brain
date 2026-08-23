@@ -7,7 +7,7 @@ from typing import Any
 
 
 PROTECTED_BRANCHES = {"main", "master", "develop", "dev"}
-HOOK_NAMES = ["post-merge"]
+HOOK_NAMES = ["pre-commit", "post-merge"]
 
 
 def finish_plan(repo: Path) -> dict[str, Any]:
@@ -102,6 +102,7 @@ def install_hooks(repo: Path, *, force: bool = False) -> dict[str, Any]:
             skipped.append(hook_name)
             continue
         shutil.copyfile(source, target)
+        target.chmod(0o755)
         installed.append(hook_name)
 
     return {
