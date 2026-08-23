@@ -105,7 +105,7 @@ units:
       - <REPO>/engineering_brain/path_safety.py
     applies_when: [public_release, publish, push, pr, public_path, absolute_path, personal_path, path_redaction]
     timing: [before_external_action, before_done]
-    boundary: 公開候補 artifact に `C:/Users/<name>` / `C:\Users\<name>` / `/Users/<name>` 形式の個人ホーム絶対パスを残さない。
+    boundary: 公開候補 artifact に実ユーザー名入りの個人ホーム絶対パスを残さない。形式の正本は docs/PUBLIC_PATH_POLICY.md。
     route: public-path-redaction
     guarantee_tier: G4 operational
     checks:
@@ -190,7 +190,7 @@ units:
     status: candidate
     source_refs:
       - <REPO>/docs/BORIS_CHERNY_AI_ADOPTION_AND_CC_TIPS.md
-      - <REPO>/engineering_brain/data/local-learnings.yaml
+      - <REPO>/registry/local-learnings.yaml
       - https://x.com/bcherny/status/2077929379661844559
     applies_when: [ai_adoption_review, tooling_migration, orchestration_design, team_scaling]
     timing: [before_work, periodic_review]

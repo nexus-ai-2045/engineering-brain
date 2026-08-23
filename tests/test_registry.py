@@ -20,12 +20,13 @@ def test_registry_loads_required_units() -> None:
 
 
 def test_candidate_learning_packets_keep_stable_proposed_solution_shape() -> None:
-    text = (
+    path = (
         Path(__file__).resolve().parents[1]
-        / "engineering_brain"
-        / "data"
+        / "registry"
         / "local-learnings.yaml"
-    ).read_text(encoding="utf-8")
+    )
+    assert path.is_file()
+    text = path.read_text(encoding="utf-8")
 
     assert text.count("proposed_solution:") == 3
 
