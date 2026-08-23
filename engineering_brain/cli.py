@@ -280,10 +280,16 @@ def emit(payload: dict[str, Any], *, as_json: bool) -> int:
 
 
 def write_stdout(text: str) -> None:
-    """Write only secret-scrubbed text to stdout (CodeQL clear-text logging barrier)."""
-    sys.stdout.write(scrub_stdout_text(text))
-    if not text.endswith("\n"):
-        sys.stdout.write("\n")
+    """Write only secret-scrubbed text to stdout.
+
+    Attached run/research packets and closeout evidence may contain secret-like
+    tokens. Those are removed with SECRET_LIKE_PATTERN before any stdout write.
+    """
+    safe = scrub_stdout_text(text)
+    if not safe.endswith("\n"):
+        safe = safe + "\n"
+    # Application-level redaction above is the barrier; CodeQL cannot prove the regex sanitizer.
+    sys.stdout.write(safe)  # codeql[py/clear-text-logging-sensitive-data]
 
 
 def scrub_stdout_text(text: str) -> str:
