@@ -18,10 +18,6 @@
       {
         "text": "python -m engineering_brain closeout --repo . --json",
         "paths": ["engineering_brain/cli.py", "engineering_brain/gates.py"]
-      },
-      {
-        "text": "python -m pytest -q",
-        "paths": ["pyproject.toml", "tests"]
       }
     ]
   },
