@@ -20,6 +20,7 @@
         "role": {"const": "consumer"},
         "required_before": {
           "type": "array",
+          "minItems": 4,
           "prefixItems": [
             {"const": "wrap"},
             {"const": "extend"},
@@ -30,6 +31,7 @@
         },
         "decision_contract": {
           "type": "array",
+          "minItems": 4,
           "prefixItems": [
             {"const": "adopt"},
             {"const": "revise"},
