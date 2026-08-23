@@ -16,11 +16,18 @@ SCHEMA = json.loads((ROOT / "schemas" / "pr-packet.schema.json").read_text(encod
 def _valid_research_packet(**overrides):
     packet = {
         "packet_type": "engineering_brain_research",
-        "version": 1,
+        "version": 2,
         "task": "PR packet",
         "repo": "<REPO>",
         "domain": "python",
         "candidates": [],
+        "precedent_research": {
+            "skill": "implementation-precedent-research",
+            "source_owner": "nexus-ai-skills",
+            "role": "consumer",
+            "required_before": ["wrap", "extend", "adopt_oss", "build"],
+            "decision_contract": ["adopt", "revise", "reject", "hold"],
+        },
         "decision": {
             "status": "extend",
             "rationale": "reuse closeout helpers",
