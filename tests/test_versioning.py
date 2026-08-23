@@ -22,11 +22,11 @@ def test_version_surfaces_are_synced_to_public_seed() -> None:
     assert packet["surfaces"]["skill_manifest"] == "0.1.0"
 
 
-def test_cli_version_emits_json(capsys) -> None:
+def test_cli_version_emits_json(capfd) -> None:
     code = main(["version", "--json"])
 
     assert code == 0
-    output = capsys.readouterr().out
+    output = capfd.readouterr().out
     assert '"version": "0.1.0"' in output
     assert '"status": "ok"' in output
 

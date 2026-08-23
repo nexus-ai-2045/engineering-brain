@@ -34,7 +34,7 @@ def test_research_packet_rejects_unsupported_decision() -> None:
         raise AssertionError("unsupported decision must fail")
 
 
-def test_cli_research_emits_json(capsys) -> None:
+def test_cli_research_emits_json(capfd) -> None:
     code = main([
         "research",
         "--task", "choose a Python test approach",
@@ -45,7 +45,7 @@ def test_cli_research_emits_json(capsys) -> None:
     ])
 
     assert code == 0
-    packet = json.loads(capsys.readouterr().out)
+    packet = json.loads(capfd.readouterr().out)
     assert packet["packet_type"] == "engineering_brain_research"
     assert packet["decision"]["status"] == "hold"
     assert packet["repo"] == "<REPO>"

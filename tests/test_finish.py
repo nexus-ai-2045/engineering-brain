@@ -52,7 +52,7 @@ def test_finish_plan_blocks_on_dirty_worktree(monkeypatch) -> None:
     assert result["local_merged_branches"] == []
 
 
-def test_cli_finish_outputs_plan(capsys, monkeypatch) -> None:
+def test_cli_finish_outputs_plan(capfd, monkeypatch) -> None:
     monkeypatch.setattr(
         cli,
         "finish_plan",
@@ -62,7 +62,7 @@ def test_cli_finish_outputs_plan(capsys, monkeypatch) -> None:
     code = main(["finish", "--json"])
 
     assert code == 0
-    assert '"status": "ok"' in capsys.readouterr().out
+    assert '"status": "ok"' in capfd.readouterr().out
 
 
 def test_hook_install_copies_repo_template(tmp_path: Path) -> None:

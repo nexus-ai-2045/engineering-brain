@@ -73,11 +73,11 @@ def test_compare_skill_detects_runtime_drift(tmp_path: Path) -> None:
     assert "SKILL.md" in result["changed_files"]
 
 
-def test_cli_skill_sync_dry_run_uses_runtime_root(tmp_path: Path, capsys) -> None:
+def test_cli_skill_sync_dry_run_uses_runtime_root(tmp_path: Path, capfd) -> None:
     code = main(["skill-sync", "--runtime-root", str(tmp_path), "--json"])
 
     assert code == 0
-    output = capsys.readouterr().out
+    output = capfd.readouterr().out
     assert '"status": "missing"' in output
     assert '"target": "<RUNTIME_SKILLS>/engineering-autopilot"' in output
     assert not (tmp_path / "engineering-autopilot").exists()
@@ -85,7 +85,7 @@ def test_cli_skill_sync_dry_run_uses_runtime_root(tmp_path: Path, capsys) -> Non
 
 def test_cli_skill_sync_resolves_default_source_outside_source_checkout(
     tmp_path: Path,
-    capsys,
+    capfd,
     monkeypatch,
 ) -> None:
     external_cwd = tmp_path / "consumer"
@@ -96,14 +96,14 @@ def test_cli_skill_sync_resolves_default_source_outside_source_checkout(
     code = main(["skill-sync", "--runtime-root", str(runtime_root), "--json"])
 
     assert code == 0
-    output = capsys.readouterr().out
+    output = capfd.readouterr().out
     assert '"status": "missing"' in output
     assert '"status": "source_missing"' not in output
 
 
 def test_cli_skill_sync_all_targets_reports_both_runtimes(
     tmp_path: Path,
-    capsys,
+    capfd,
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -111,7 +111,7 @@ def test_cli_skill_sync_all_targets_reports_both_runtimes(
     code = main(["skill-sync", "--target", "all", "--json"])
 
     assert code == 0
-    payload = __import__("json").loads(capsys.readouterr().out)
+    payload = __import__("json").loads(capfd.readouterr().out)
     assert payload["status"] == "action_required"
     assert [item["runtime"] for item in payload["targets"]] == ["codex", "claude-code"]
     assert all(item["status"] == "missing" for item in payload["targets"])

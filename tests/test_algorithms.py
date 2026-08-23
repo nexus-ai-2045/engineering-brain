@@ -127,7 +127,7 @@ def test_algorithm_schema_is_valid_json_and_requires_decision_fields() -> None:
     }.issubset(schema["required"])
 
 
-def test_cli_algorithms_select_and_compare_emit_json(capsys) -> None:
+def test_cli_algorithms_select_and_compare_emit_json(capfd) -> None:
     code = main(
         [
             "algorithms",
@@ -141,7 +141,7 @@ def test_cli_algorithms_select_and_compare_emit_json(capsys) -> None:
             "--json",
         ]
     )
-    selected = json.loads(capsys.readouterr().out)
+    selected = json.loads(capfd.readouterr().out)
 
     assert code == 0
     assert selected["selection"][0]["id"] == "binary_search"
@@ -157,7 +157,7 @@ def test_cli_algorithms_select_and_compare_emit_json(capsys) -> None:
             "--json",
         ]
     )
-    compared = json.loads(capsys.readouterr().out)
+    compared = json.loads(capfd.readouterr().out)
 
     assert code == 0
     assert [item["id"] for item in compared["comparison"]] == ["binary_search", "hash_index"]

@@ -318,7 +318,7 @@ def test_parse_name_status_rename_and_copy() -> None:
     assert copy["new_path"] == "src/b.py"
 
 
-def test_cli_pr_is_plan_only_and_does_not_mutate_github(capsys, monkeypatch) -> None:
+def test_cli_pr_is_plan_only_and_does_not_mutate_github(capfd, monkeypatch) -> None:
     calls: list[list[str]] = []
 
     def fake_run(command: list[str], *, cwd: Path) -> dict:
@@ -353,7 +353,7 @@ def test_cli_pr_is_plan_only_and_does_not_mutate_github(capsys, monkeypatch) -> 
     code = main(["pr", "--repo", str(ROOT), "--purpose", "PR packet", "--json", "--no-closeout"])
 
     assert code == 0
-    output = capsys.readouterr().out
+    output = capfd.readouterr().out
     packet = json.loads(output)
     assert packet["external_actions"]["performed"] is False
     assert packet["external_actions"]["allowed"] is False
@@ -364,7 +364,7 @@ def test_cli_pr_is_plan_only_and_does_not_mutate_github(capsys, monkeypatch) -> 
     assert "compileall" not in packet["pr_body_ja"]
 
 
-def test_cli_pr_scrubs_secret_like_stdout(tmp_path: Path, capsys, monkeypatch) -> None:
+def test_cli_pr_scrubs_secret_like_stdout(tmp_path: Path, capfd, monkeypatch) -> None:
     token = "ghp_" + ("b" * 36)
     research = {
         "packet_type": "engineering_brain_research",
@@ -424,12 +424,12 @@ def test_cli_pr_scrubs_secret_like_stdout(tmp_path: Path, capsys, monkeypatch) -
         "--json",
     ])
     assert code == 0
-    out = capsys.readouterr().out
+    out = capfd.readouterr().out
     assert token not in out
     assert "safe purpose" in out
 
 
-def test_cli_pr_text_mode_prints_japanese_body(capsys, monkeypatch) -> None:
+def test_cli_pr_text_mode_prints_japanese_body(capfd, monkeypatch) -> None:
     monkeypatch.setattr(
         review,
         "build_pr_packet",
@@ -445,10 +445,10 @@ def test_cli_pr_text_mode_prints_japanese_body(capsys, monkeypatch) -> None:
     code = main(["pr", "--repo", str(ROOT), "--no-closeout"])
 
     assert code == 0
-    assert "## 目的" in capsys.readouterr().out
+    assert "## 目的" in capfd.readouterr().out
 
 
-def test_cli_pr_accepts_explicit_base(monkeypatch, capsys) -> None:
+def test_cli_pr_accepts_explicit_base(monkeypatch, capfd) -> None:
     seen: dict[str, str | None] = {}
 
     def fake_build(**kwargs):
