@@ -17,7 +17,11 @@ from .feedback import (
 )
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
-from .research import DECISIONS, build_research_packet
+from .research import (
+    DECISIONS,
+    PRECEDENT_DECISION_CONTRACT,
+    build_research_packet,
+)
 from .review import build_pr_packet, load_packet_file, public_stdout_packet
 from .run_packet import build_run_packet
 from .skill_sync import (
@@ -89,6 +93,18 @@ def main(argv: list[str] | None = None) -> int:
     research_parser.add_argument("--domain", required=True)
     research_parser.add_argument("--decision", choices=DECISIONS, default="hold")
     research_parser.add_argument("--rationale", default="")
+    research_parser.add_argument(
+        "--precedent-outcome",
+        choices=PRECEDENT_DECISION_CONTRACT,
+        default=None,
+        help="Outcome from implementation-precedent-research. Required with evidence before wrap/extend/adopt_oss/build.",
+    )
+    research_parser.add_argument(
+        "--precedent-evidence",
+        action="append",
+        default=None,
+        help="Evidence pointer from implementation-precedent-research. Repeatable. Required with outcome before wrap/extend/adopt_oss/build.",
+    )
     research_parser.add_argument("--json", action="store_true")
 
     pr_parser = sub.add_parser(
@@ -228,6 +244,8 @@ def main(argv: list[str] | None = None) -> int:
                 domain=args.domain,
                 decision=args.decision,
                 rationale=args.rationale,
+                precedent_outcome=args.precedent_outcome,
+                precedent_evidence=args.precedent_evidence,
             ),
             as_json=args.json,
         )

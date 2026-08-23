@@ -27,6 +27,8 @@ def _valid_research_packet(**overrides):
             "role": "consumer",
             "required_before": ["wrap", "extend", "adopt_oss", "build"],
             "decision_contract": ["adopt", "revise", "reject", "hold"],
+            "outcome": "adopt",
+            "evidence": ["engineering_brain/review.py"],
         },
         "decision": {
             "status": "extend",
