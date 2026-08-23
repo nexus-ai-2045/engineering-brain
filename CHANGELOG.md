@@ -13,6 +13,8 @@ public seed.
 
 ## Unreleased
 
+- research packetをv2へ更新し、`implementation-precedent-research`のconsumer契約を追加。
+- `engineering-autopilot`から先行実装リサーチを呼び、本体は`nexus-ai-skills`正本として維持。
 - CLI の PR stdout が catalog 外の residual と推論 purpose を消さないよう、secret/path scrub 後も残すようにした。
 - Codex review 指摘に沿い、PR packet の secret scrub、default branch 検出、添付 packet schema 検証、rename/copy 解析、絶対 home path のみ redaction、実測 verification 表示、research unknowns 統合を修正した。
 - `ai-ratchet-gate` v0.1.0 Release wheel と baseline、opt-in `pre-commit` hook を導入した。

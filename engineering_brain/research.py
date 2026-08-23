@@ -14,11 +14,18 @@ def build_research_packet(*, task: str, domain: str, decision: str, rationale: s
 
     return {
         "packet_type": "engineering_brain_research",
-        "version": 1,
+        "version": 2,
         "task": task,
         "repo": "<REPO>",
         "domain": domain,
         "candidates": [_candidate(source) for source in select_technology_sources(domain)],
+        "precedent_research": {
+            "skill": "implementation-precedent-research",
+            "source_owner": "nexus-ai-skills",
+            "role": "consumer",
+            "required_before": ["wrap", "extend", "adopt_oss", "build"],
+            "decision_contract": ["adopt", "revise", "reject", "hold"],
+        },
         "decision": {
             "status": decision,
             "rationale": rationale,
