@@ -19,16 +19,70 @@ def test_registry_loads_required_units() -> None:
     assert "human_publication_review_gate" in ids
 
 
-def test_candidate_learning_packets_keep_stable_proposed_solution_shape() -> None:
+IMPORTED_RUNTIME_LEARNING_IDS = (
+    "clean-ci-dependency-contract",
+    "executable-path-contract",
+    "artifact-lineage-contract",
+    "workflow-runtime-stopline-contract",
+)
+RUNTIME_LEARNING_OBSERVATION_SHA = "e7cac84f0f25b2c623b15b177e302544ca505ceb"
+RUNTIME_LEARNING_OBSERVATION_DATE = "2026-07-19"
+
+
+def _local_learnings_text() -> str:
     path = (
         Path(__file__).resolve().parents[1]
         / "registry"
         / "local-learnings.yaml"
     )
     assert path.is_file()
-    text = path.read_text(encoding="utf-8")
+    return path.read_text(encoding="utf-8")
 
-    assert text.count("proposed_solution:") == 3
+
+def _learning_blocks(text: str) -> dict[str, str]:
+    blocks: dict[str, str] = {}
+    parts = text.split("\n  - id: ")
+    for part in parts[1:]:
+        learning_id, _, rest = part.partition("\n")
+        blocks[learning_id.strip()] = rest
+    return blocks
+
+
+def test_candidate_learning_packets_keep_stable_proposed_solution_shape() -> None:
+    text = _local_learnings_text()
+
+    assert text.count("proposed_solution:") == 7
+    for learning_id in IMPORTED_RUNTIME_LEARNING_IDS:
+        assert f"id: {learning_id}" in text
+
+
+def test_imported_runtime_learnings_keep_retrievable_memory_evidence() -> None:
+    blocks = _learning_blocks(_local_learnings_text())
+
+    for learning_id in IMPORTED_RUNTIME_LEARNING_IDS:
+        block = blocks[learning_id]
+        assert "source_lane: memory" in block
+        assert RUNTIME_LEARNING_OBSERVATION_SHA in block
+        assert RUNTIME_LEARNING_OBSERVATION_DATE in block
+        assert "PR review:" not in block
+        assert "local learning; field review pending" not in block
+
+
+def test_clean_ci_rule_requires_isolated_manifest_environment() -> None:
+    block = _learning_blocks(_local_learnings_text())["clean-ci-dependency-contract"]
+    rule = next(line for line in block.splitlines() if line.startswith("    reusable_rule:"))
+    assert "isolated" in rule
+    assert "manifest" in rule
+
+
+def test_workflow_runtime_rule_preserves_immutable_invariants() -> None:
+    block = _learning_blocks(_local_learnings_text())["workflow-runtime-stopline-contract"]
+    rule = next(line for line in block.splitlines() if line.startswith("    reusable_rule:"))
+    lowered = rule.lower()
+    assert "deadline" in lowered
+    assert "oidc" in lowered
+    assert "budget" in lowered
+    assert "immutable" in lowered or "固定" in rule
 
 
 def test_select_units_matches_triggers() -> None:
