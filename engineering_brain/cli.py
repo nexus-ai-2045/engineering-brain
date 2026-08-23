@@ -8,7 +8,7 @@ from typing import Any
 
 from .algorithms import algorithm_catalog, compare_algorithms, select_algorithms
 from .finish import apply_local_cleanup, finish_plan, install_hooks
-from .feedback import build_next_plan_context, load_feedback_packet, validate_feedback_packet
+from .feedback import SECRET_LIKE_PATTERN, build_next_plan_context, load_feedback_packet, validate_feedback_packet
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
@@ -234,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         if args.json:
             return emit(packet, as_json=True)
-        print(packet["pr_body_ja"])
+        write_stdout(packet["pr_body_ja"])
         return 0
     if args.command == "version":
         return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
@@ -273,10 +273,21 @@ def main(argv: list[str] | None = None) -> int:
 
 def emit(payload: dict[str, Any], *, as_json: bool) -> int:
     if as_json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        write_stdout(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
-        print(render_text(payload))
+        write_stdout(render_text(payload))
     return 0
+
+
+def write_stdout(text: str) -> None:
+    """Write only secret-scrubbed text to stdout (CodeQL clear-text logging barrier)."""
+    sys.stdout.write(scrub_stdout_text(text))
+    if not text.endswith("\n"):
+        sys.stdout.write("\n")
+
+
+def scrub_stdout_text(text: str) -> str:
+    return SECRET_LIKE_PATTERN.sub("<REDACTED_SECRET>", text)
 
 
 def emit_feedback_error(error: Exception, *, as_json: bool) -> int:

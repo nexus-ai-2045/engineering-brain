@@ -335,7 +335,12 @@ def load_packet_file(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("packet file must contain a JSON object")
-    return payload
+    # Scrub before the value becomes PR evidence / stdout material.
+    scrubbed, _ = scrub_secret_like(json.dumps(payload, ensure_ascii=False))
+    loaded = json.loads(scrubbed)
+    if not isinstance(loaded, dict):
+        raise ValueError("packet file must contain a JSON object")
+    return loaded
 
 
 def validate_attached_packet(

@@ -366,6 +366,69 @@ def test_cli_pr_is_plan_only_and_does_not_mutate_github(capsys, monkeypatch) -> 
     assert "compileall" not in packet["pr_body_ja"]
 
 
+def test_cli_pr_scrubs_secret_like_stdout(tmp_path: Path, capsys, monkeypatch) -> None:
+    token = "ghp_" + ("b" * 36)
+    research = {
+        "packet_type": "engineering_brain_research",
+        "version": 1,
+        "task": "x",
+        "repo": "<REPO>",
+        "domain": "python",
+        "candidates": [],
+        "decision": {
+            "status": "hold",
+            "rationale": f"see {token}",
+            "rule": "catalog evidence remains candidate until adopted",
+        },
+        "human_stoplines": ["adopt"],
+        "unknowns": [],
+    }
+    path = tmp_path / "research.json"
+    path.write_text(json.dumps(research), encoding="utf-8")
+
+    monkeypatch.setattr(
+        review,
+        "build_pr_packet",
+        lambda **kwargs: {
+            "packet_type": "engineering_brain_pr",
+            "pr_body_ja": f"## 目的\n\n{token}\n",
+            "research_packet": kwargs.get("research_packet"),
+            "external_actions": {"performed": False, "allowed": False},
+            "status": "plan_only",
+            "merge": {"status": "承認待ち", "allowed": False},
+            "unknowns": [],
+            "human_stoplines": [],
+            "checks": {},
+            "visible_scope": {"source": "x", "files": [], "summary": "", "file_count": 0},
+            "changes": [],
+            "reinvention_check": {"required": True, "decision": "hold", "reason": "x"},
+            "purpose": "",
+            "repo": "<REPO>",
+            "version": 1,
+            "base_branch": "main",
+            "current_branch": "feature",
+            "run_packet": None,
+        },
+    )
+    import engineering_brain.cli as cli
+
+    monkeypatch.setattr(cli, "build_pr_packet", review.build_pr_packet)
+
+    code = main([
+        "pr",
+        "--repo",
+        str(ROOT),
+        "--research-packet",
+        str(path),
+        "--no-closeout",
+        "--json",
+    ])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert token not in out
+    assert "<REDACTED_SECRET>" in out
+
+
 def test_cli_pr_text_mode_prints_japanese_body(capsys, monkeypatch) -> None:
     monkeypatch.setattr(
         review,
@@ -375,6 +438,9 @@ def test_cli_pr_text_mode_prints_japanese_body(capsys, monkeypatch) -> None:
             "external_actions": {"performed": False},
         },
     )
+    import engineering_brain.cli as cli
+
+    monkeypatch.setattr(cli, "build_pr_packet", review.build_pr_packet)
 
     code = main(["pr", "--repo", str(ROOT), "--no-closeout"])
 
