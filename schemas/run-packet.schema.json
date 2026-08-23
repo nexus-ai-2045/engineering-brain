@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/run-packet.schema.json",
+  "title": "Engineering Brain Run Packet",
+  "type": "object",
+  "required": [
+    "packet_type",
+    "version",
+    "task",
+    "repo",
+    "status",
+    "route",
+    "gates",
+    "closeout",
+    "human_stoplines"
+  ],
+  "properties": {
+    "packet_type": {"const": "engineering_autopilot_run"},
+    "version": {"const": 1},
+    "task": {"type": "string", "minLength": 1},
+    "repo": {"const": "<REPO>"},
+    "status": {"type": "string", "minLength": 1},
+    "route": {"type": "object"},
+    "gates": {"type": "object"},
+    "catalog": {"type": "object"},
+    "algorithms": {"type": "object"},
+    "skill_sync": {"type": "object"},
+    "closeout": {"type": "object"},
+    "verification": {"type": "object"},
+    "reinvention_check": {"type": "object"},
+    "human_stoplines": {"type": "array", "items": {"type": "string"}},
+    "next_actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

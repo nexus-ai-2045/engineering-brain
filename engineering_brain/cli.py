@@ -90,6 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     pr_parser.add_argument("--repo", default=".")
     pr_parser.add_argument("--purpose", default="")
+    pr_parser.add_argument("--base", default=None, help="Explicit diff base ref (overrides default-branch detection).")
     pr_parser.add_argument("--run-packet", dest="run_packet")
     pr_parser.add_argument("--research-packet", dest="research_packet")
     pr_parser.add_argument("--no-closeout", action="store_true")
@@ -227,6 +228,7 @@ def main(argv: list[str] | None = None) -> int:
             repo=Path(args.repo).resolve(),
             purpose=args.purpose,
             closeout=not args.no_closeout,
+            base=args.base,
             run_packet=run_packet,
             research_packet=research_packet,
         )

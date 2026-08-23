@@ -102,6 +102,8 @@ python -m engineering_brain pr --repo . --json
 - `python -m engineering_brain algorithms compare --id <id> --id <id> --json`: 候補の前提・計算量・交換条件・検証法を比較する。
 - `python -m engineering_brain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
 - `python -m engineering_brain pr --repo . --json`: 差分・closeout・stopline から plan-only の日本語 PR packet を作る（PR作成/pushはしない）。
+- `ai-ratchet-gate --repo .`: tracked∧ignored の新規矛盾を fail-closed で止める（Release wheel から導入）。
+- `python tools/run_repo_preflight.py --repo .`: upstream repo-preflight を shadow consistency 付きで実行する。
 
 運用と後片付け:
 

@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from jsonschema import Draft202012Validator
+
+from .feedback import SECRET_LIKE_PATTERN
 from .finish import run
 from .gates import closeout_repo
 from .path_safety import redact_personal_paths, scan_personal_paths
@@ -19,11 +22,10 @@ HUMAN_STOPLINES = [
     "release_tag",
 ]
 
-DEFAULT_BRANCH_CANDIDATES = (
-    "origin/main",
-    "main",
-    "origin/master",
-    "master",
+SCHEMA_ROOT = Path(__file__).resolve().parents[1] / "schemas"
+RUN_PACKET_SCHEMA = json.loads((SCHEMA_ROOT / "run-packet.schema.json").read_text(encoding="utf-8"))
+RESEARCH_PACKET_SCHEMA = json.loads(
+    (SCHEMA_ROOT / "research-packet.schema.json").read_text(encoding="utf-8")
 )
 
 
@@ -32,11 +34,12 @@ def build_pr_packet(
     repo: Path,
     purpose: str = "",
     closeout: bool = True,
+    base: str | None = None,
     run_packet: dict[str, Any] | None = None,
     research_packet: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     resolved_repo = repo.resolve()
-    base_branch = detect_default_branch(resolved_repo)
+    base_branch = base or detect_default_branch(resolved_repo)
     current_branch = _current_branch(resolved_repo)
     visible_scope = collect_visible_scope(resolved_repo, base_branch=base_branch)
     closeout_payload = (
@@ -48,15 +51,22 @@ def build_pr_packet(
         }
     )
     personal_findings = scan_personal_paths(resolved_repo)
+
+    validated_run, run_errors = validate_attached_packet(run_packet, kind="run")
+    validated_research, research_errors = validate_attached_packet(research_packet, kind="research")
+
     unknowns = _collect_unknowns(
         base_branch=base_branch,
         closeout_payload=closeout_payload,
-        research_packet=research_packet,
+        research_packet=validated_research,
+        research_errors=research_errors,
+        run_errors=run_errors,
         personal_findings=personal_findings,
     )
-    reinvention = _reinvention_check(research_packet=research_packet, run_packet=run_packet)
+    reinvention = _reinvention_check(research_packet=validated_research, run_packet=validated_run)
     purpose_text = redact_personal_paths(
-        purpose.strip() or _infer_purpose(run_packet=run_packet, research_packet=research_packet)
+        purpose.strip()
+        or _infer_purpose(run_packet=validated_run, research_packet=validated_research)
     )
     checks = {
         "closeout": closeout_payload,
@@ -64,7 +74,24 @@ def build_pr_packet(
             "status": "ok" if not personal_findings else "blocked",
             "findings_count": len(personal_findings),
         },
+        "attachment_validation": {
+            "run_packet": "ok" if validated_run is not None else ("missing" if run_packet is None else "invalid"),
+            "research_packet": (
+                "ok"
+                if validated_research is not None
+                else ("missing" if research_packet is None else "invalid")
+            ),
+            "run_errors": run_errors,
+            "research_errors": research_errors,
+        },
     }
+    safe_checks, checks_scrubbed = _safe_attached_packet(checks)
+    safe_run, run_scrubbed = _safe_attached_packet(validated_run)
+    safe_research, research_scrubbed = _safe_attached_packet(validated_research)
+    safe_reinvention, _ = _safe_attached_packet(reinvention)
+    if checks_scrubbed or run_scrubbed or research_scrubbed:
+        unknowns.append("secret-like content was scrubbed from attached evidence")
+
     packet: dict[str, Any] = {
         "packet_type": "engineering_brain_pr",
         "version": 1,
@@ -75,10 +102,10 @@ def build_pr_packet(
         "current_branch": current_branch,
         "visible_scope": visible_scope,
         "changes": visible_scope.get("files", []),
-        "checks": _safe_attached_packet(checks) or checks,
-        "run_packet": _safe_attached_packet(run_packet),
-        "research_packet": _safe_attached_packet(research_packet),
-        "reinvention_check": _safe_attached_packet(reinvention) or reinvention,
+        "checks": safe_checks or checks,
+        "run_packet": safe_run,
+        "research_packet": safe_research,
+        "reinvention_check": safe_reinvention or reinvention,
         "unknowns": [redact_personal_paths(item) for item in unknowns],
         "human_stoplines": list(HUMAN_STOPLINES),
         "merge": {
@@ -97,10 +124,27 @@ def build_pr_packet(
 
 
 def detect_default_branch(repo: Path) -> str | None:
-    for candidate in DEFAULT_BRANCH_CANDIDATES:
-        result = run(["git", "rev-parse", "--verify", candidate], cwd=repo)
-        if result["returncode"] == 0:
-            return candidate
+    symbolic = run(["git", "symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"], cwd=repo)
+    if symbolic["returncode"] == 0 and symbolic["stdout"].strip():
+        ref = symbolic["stdout"].strip()
+        if ref.startswith("refs/remotes/"):
+            return ref.removeprefix("refs/remotes/")
+        return ref
+
+    remote_show = run(["git", "remote", "show", "origin"], cwd=repo)
+    if remote_show["returncode"] == 0:
+        for line in remote_show["stdout"].splitlines():
+            stripped = line.strip()
+            if stripped.lower().startswith("head branch:"):
+                name = stripped.split(":", maxsplit=1)[1].strip()
+                if name:
+                    origin_ref = f"origin/{name}"
+                    verified = run(["git", "rev-parse", "--verify", origin_ref], cwd=repo)
+                    if verified["returncode"] == 0:
+                        return origin_ref
+                    local = run(["git", "rev-parse", "--verify", name], cwd=repo)
+                    if local["returncode"] == 0:
+                        return name
     return None
 
 
@@ -113,11 +157,10 @@ def collect_visible_scope(repo: Path, *, base_branch: str | None) -> dict[str, A
         if name_status["returncode"] == 0 and name_status["stdout"].strip():
             source = f"diff:{base_branch}...HEAD"
             for line in name_status["stdout"].splitlines():
-                parts = line.split("\t", maxsplit=1)
-                if len(parts) != 2:
+                parsed = _parse_name_status_line(line)
+                if parsed is None:
                     continue
-                status, path = parts
-                files.append({"status": status.strip(), "path": redact_personal_paths(path.strip())})
+                files.append(parsed)
             stat = run(["git", "diff", "--stat", f"{base_branch}...HEAD"], cwd=repo)
             if stat["returncode"] == 0:
                 summary = redact_personal_paths(stat["stdout"])
@@ -130,12 +173,38 @@ def collect_visible_scope(repo: Path, *, base_branch: str | None) -> dict[str, A
                 continue
             file_status, path = parsed
             files.append({"status": file_status, "path": redact_personal_paths(path)})
-        summary = redact_personal_paths(status["stdout"]) if status["stdout"] else "差分なし（または base branch 未検出）"
+        summary = (
+            redact_personal_paths(status["stdout"])
+            if status["stdout"]
+            else "差分なし（または base branch 未検出）"
+        )
     return {
         "source": source,
         "files": files,
         "summary": summary or "差分なし",
         "file_count": len(files),
+    }
+
+
+def _parse_name_status_line(line: str) -> dict[str, str] | None:
+    """Parse `git diff --name-status` including rename/copy (`R100\\told\\tnew`)."""
+    raw = line.rstrip()
+    if not raw.strip():
+        return None
+    parts = raw.split("\t")
+    if len(parts) < 2:
+        return None
+    status = parts[0].strip()
+    if status[:1] in {"R", "C"} and len(parts) >= 3:
+        return {
+            "status": status,
+            "old_path": redact_personal_paths(parts[1].strip()),
+            "new_path": redact_personal_paths(parts[2].strip()),
+            "path": redact_personal_paths(parts[2].strip()),
+        }
+    return {
+        "status": status,
+        "path": redact_personal_paths(parts[1].strip()),
     }
 
 
@@ -157,11 +226,18 @@ def render_pr_body_ja(packet: dict[str, Any]) -> str:
     purpose = packet.get("purpose") or "（目的未記入）"
     changes = packet.get("changes") or []
     if changes:
-        change_lines = "\n".join(
-            f"- `{item.get('status', '?')}` `{item.get('path', '')}`" for item in changes
-        )
+        change_lines = []
+        for item in changes:
+            status = item.get("status", "?")
+            if item.get("old_path") and item.get("new_path"):
+                change_lines.append(
+                    f"- `{status}` `{item['old_path']}` → `{item['new_path']}`"
+                )
+            else:
+                change_lines.append(f"- `{status}` `{item.get('path', '')}`")
+        change_block = "\n".join(change_lines)
     else:
-        change_lines = "- （差分なし / base branch 未検出）"
+        change_block = "- （差分なし / base branch 未検出）"
 
     reinvention = packet.get("reinvention_check") or {}
     reinvention_lines = [
@@ -176,8 +252,7 @@ def render_pr_body_ja(packet: dict[str, Any]) -> str:
     verification_lines = [
         f"- closeout: `{closeout_overall}`",
         f"- public_path_redaction: `{path_status}`",
-        "- `python -m pytest -q`",
-        "- `python -m compileall -q engineering_brain tests`",
+        *_verification_command_lines(closeout),
     ]
 
     visible = packet.get("visible_scope") or {}
@@ -195,7 +270,7 @@ def render_pr_body_ja(packet: dict[str, Any]) -> str:
 
 ## 変更内容
 
-{change_lines}
+{change_block}
 
 ## Research / reinvention check
 
@@ -233,7 +308,27 @@ def render_pr_body_ja(packet: dict[str, Any]) -> str:
 - status: **{merge_status}**
 - push / PR create / merge は current-turn の明示承認が必要
 """
-    return redact_personal_paths(body.strip() + "\n")
+    scrubbed, _ = scrub_secret_like(redact_personal_paths(body.strip() + "\n"))
+    return scrubbed
+
+
+def _verification_command_lines(closeout: dict[str, Any]) -> list[str]:
+    if closeout.get("status") == "skipped":
+        return ["- verification commands: （closeout 未実行）"]
+    verification = closeout.get("verification") or {}
+    lines: list[str] = []
+    for key in ("pytest", "compileall"):
+        result = verification.get(key)
+        if not isinstance(result, dict):
+            continue
+        command = result.get("command")
+        if not command:
+            continue
+        code = result.get("returncode")
+        lines.append(f"- `{command}` → returncode={code}")
+    if not lines:
+        lines.append("- verification commands: （closeout payload に command 記録なし）")
+    return lines
 
 
 def load_packet_file(path: Path) -> dict[str, Any]:
@@ -241,6 +336,34 @@ def load_packet_file(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("packet file must contain a JSON object")
     return payload
+
+
+def validate_attached_packet(
+    packet: dict[str, Any] | None,
+    *,
+    kind: str,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    if packet is None:
+        return None, []
+    schema = RUN_PACKET_SCHEMA if kind == "run" else RESEARCH_PACKET_SCHEMA
+    expected_type = (
+        "engineering_autopilot_run" if kind == "run" else "engineering_brain_research"
+    )
+    errors: list[str] = []
+    if packet.get("packet_type") != expected_type:
+        errors.append(f"{kind} packet_type must be {expected_type}")
+    validator = Draft202012Validator(schema)
+    for error in sorted(validator.iter_errors(packet), key=lambda item: list(item.absolute_path)):
+        path = "/".join(str(part) for part in error.absolute_path) or "<root>"
+        errors.append(f"{path}: {error.message}")
+    if errors:
+        return None, errors
+    return packet, []
+
+
+def scrub_secret_like(text: str) -> tuple[str, bool]:
+    found = bool(SECRET_LIKE_PATTERN.search(text))
+    return SECRET_LIKE_PATTERN.sub("<REDACTED_SECRET>", text), found
 
 
 def _current_branch(repo: Path) -> str | None:
@@ -251,11 +374,12 @@ def _current_branch(repo: Path) -> str | None:
     return branch or None
 
 
-def _safe_attached_packet(packet: dict[str, Any] | None) -> dict[str, Any] | None:
+def _safe_attached_packet(packet: dict[str, Any] | None) -> tuple[dict[str, Any] | None, bool]:
     if packet is None:
-        return None
+        return None, False
     serialized = redact_personal_paths(json.dumps(packet, ensure_ascii=False))
-    return json.loads(serialized)
+    scrubbed, found = scrub_secret_like(serialized)
+    return json.loads(scrubbed), found
 
 
 def _reinvention_check(
@@ -302,6 +426,8 @@ def _collect_unknowns(
     base_branch: str | None,
     closeout_payload: dict[str, Any],
     research_packet: dict[str, Any] | None,
+    research_errors: list[str],
+    run_errors: list[str],
     personal_findings: list[Any],
 ) -> list[str]:
     unknowns: list[str] = []
@@ -312,8 +438,15 @@ def _collect_unknowns(
     elif closeout_payload.get("overall") not in {None, "ok"} and closeout_payload.get("status") != "ok":
         if closeout_payload.get("overall") == "blocked":
             unknowns.append("closeout overall=blocked")
-    if research_packet is None:
+    if research_errors:
+        unknowns.append("attached research packet failed schema validation")
+    elif research_packet is None:
         unknowns.append("research / reinvention evidence 未添付")
+    else:
+        for item in research_packet.get("unknowns") or []:
+            unknowns.append(str(item))
+    if run_errors:
+        unknowns.append("attached run packet failed schema validation")
     if personal_findings:
         unknowns.append("personal path findings remain in repo text files")
     return unknowns

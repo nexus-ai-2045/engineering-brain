@@ -72,8 +72,11 @@ def test_hook_install_copies_repo_template(tmp_path: Path) -> None:
 
     result = finish.install_hooks(repo)
 
-    hook = hooks / "post-merge"
+    post_merge = hooks / "post-merge"
+    pre_commit = hooks / "pre-commit"
     assert result["status"] == "installed"
-    assert result["installed"] == ["post-merge"]
-    assert hook.exists()
-    assert "engineering_brain finish" in hook.read_text(encoding="utf-8")
+    assert set(result["installed"]) == {"post-merge", "pre-commit"}
+    assert post_merge.exists()
+    assert pre_commit.exists()
+    assert "engineering_brain finish" in post_merge.read_text(encoding="utf-8")
+    assert "ai-ratchet-gate" in pre_commit.read_text(encoding="utf-8")

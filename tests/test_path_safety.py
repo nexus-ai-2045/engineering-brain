@@ -30,6 +30,14 @@ def test_redact_personal_paths_replaces_unix_and_windows_homes() -> None:
     assert "bob" not in redact_personal_paths(windows)
 
 
+def test_redact_personal_paths_ignores_relative_home_segments() -> None:
+    from engineering_brain.path_safety import PERSONAL_PATH_PATTERN, redact_personal_paths
+
+    relative = "packages/home/alice/settings.py"
+    assert redact_personal_paths(relative) == relative
+    assert PERSONAL_PATH_PATTERN.search(relative) is None
+
+
 def test_scan_personal_paths_checks_public_config_files(tmp_path: Path) -> None:
     env_example = tmp_path / ".env.example"
     env_example.write_text("LOCAL_PATH=" + "C:" + "/Users/" + "alice/Projects/demo\n", encoding="utf-8")

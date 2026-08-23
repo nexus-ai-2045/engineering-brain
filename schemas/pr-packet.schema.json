@@ -39,7 +39,9 @@
             "required": ["status", "path"],
             "properties": {
               "status": {"type": "string"},
-              "path": {"type": "string"}
+              "path": {"type": "string"},
+              "old_path": {"type": "string"},
+              "new_path": {"type": "string"}
             },
             "additionalProperties": false
           }
