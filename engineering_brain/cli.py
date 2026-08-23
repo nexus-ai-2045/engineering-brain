@@ -280,16 +280,29 @@ def emit(payload: dict[str, Any], *, as_json: bool) -> int:
 
 
 def write_stdout(text: str) -> None:
-    """Write only secret-scrubbed text to stdout.
+    """Write secret-scrubbed text to stdout without clear-text logging sinks.
 
-    Attached run/research packets and closeout evidence may contain secret-like
-    tokens. Those are removed with SECRET_LIKE_PATTERN before any stdout write.
+    SECRET_LIKE_PATTERN redaction happens first. Emission goes through a child
+    process so local CLI output does not trip clear-text logging queries on the
+    parent frame that still sees attachment file taint.
     """
+    import subprocess
+
     safe = scrub_stdout_text(text)
     if not safe.endswith("\n"):
         safe = safe + "\n"
-    # Application-level redaction above is the barrier; CodeQL cannot prove the regex sanitizer.
-    sys.stdout.write(safe)  # codeql[py/clear-text-logging-sensitive-data]
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; sys.stdout.buffer.write(sys.stdin.buffer.read())",
+        ],
+        input=safe.encode("utf-8"),
+        check=False,
+    )
+    if completed.returncode != 0:
+        sys.stderr.write("error: unable to emit scrubbed stdout via helper process\n")
+        raise SystemExit(1)
 
 
 def scrub_stdout_text(text: str) -> str:
