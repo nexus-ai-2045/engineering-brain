@@ -44,6 +44,8 @@ def build_research_packet(
             "role": "consumer",
             "required_before": ["wrap", "extend", "adopt_oss", "build"],
             "decision_contract": ["adopt", "revise", "reject", "hold"],
+            "outcome": precedent_outcome,
+            "evidence": evidence,
         },
         "decision": {
             "status": effective_decision,

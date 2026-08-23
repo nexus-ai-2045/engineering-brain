@@ -13,7 +13,7 @@
     "candidates": {"type": "array", "items": {"type": "object"}},
     "precedent_research": {
       "type": "object",
-      "required": ["skill", "source_owner", "role", "required_before", "decision_contract"],
+      "required": ["skill", "source_owner", "role", "required_before", "decision_contract", "outcome", "evidence"],
       "properties": {
         "skill": {"const": "implementation-precedent-research"},
         "source_owner": {"const": "nexus-ai-skills"},
@@ -39,6 +39,11 @@
             {"const": "hold"}
           ],
           "items": false
+        },
+        "outcome": {"enum": ["adopt", "revise", "reject", "hold", null]},
+        "evidence": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
         }
       },
       "additionalProperties": false

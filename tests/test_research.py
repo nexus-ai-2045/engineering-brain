@@ -30,6 +30,8 @@ def test_research_packet_keeps_catalog_sources_as_candidates() -> None:
         "role": "consumer",
         "required_before": ["wrap", "extend", "adopt_oss", "build"],
         "decision_contract": ["adopt", "revise", "reject", "hold"],
+        "outcome": None,
+        "evidence": [],
     }
     assert "adopt" in packet["human_stoplines"]
 
@@ -105,6 +107,10 @@ def test_build_allows_gated_decision_with_precedent_outcome_and_evidence() -> No
     )
 
     assert packet["decision"]["status"] == "build"
+    assert packet["precedent_research"]["outcome"] == "adopt"
+    assert packet["precedent_research"]["evidence"] == [
+        "docs/adr/ADR-0005-precedent-research-consumer-contract.md"
+    ]
     assert packet["unknowns"] == []
 
 
@@ -153,6 +159,10 @@ def test_cli_research_emits_gated_decision_with_precedent_inputs(capsys) -> None
     assert code == 0
     packet = json.loads(capsys.readouterr().out)
     assert packet["decision"]["status"] == "adopt_oss"
+    assert packet["precedent_research"]["outcome"] == "revise"
+    assert packet["precedent_research"]["evidence"] == [
+        "https://example.invalid/precedent"
+    ]
     assert packet["unknowns"] == []
 
 
