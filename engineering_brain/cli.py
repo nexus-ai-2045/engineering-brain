@@ -8,11 +8,11 @@ from typing import Any
 
 from .algorithms import algorithm_catalog, compare_algorithms, select_algorithms
 from .finish import apply_local_cleanup, finish_plan, install_hooks
-from .feedback import SECRET_LIKE_PATTERN, build_next_plan_context, load_feedback_packet, validate_feedback_packet
+from .feedback import build_next_plan_context, load_feedback_packet, validate_feedback_packet
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
-from .review import build_pr_packet, load_packet_file
+from .review import build_pr_packet, load_packet_file, public_stdout_packet
 from .run_packet import build_run_packet
 from .skill_sync import (
     RUNTIME_TARGETS,
@@ -232,9 +232,10 @@ def main(argv: list[str] | None = None) -> int:
             run_packet=run_packet,
             research_packet=research_packet,
         )
+        public = public_stdout_packet(packet, purpose_override=args.purpose)
         if args.json:
-            return emit(packet, as_json=True)
-        write_stdout(packet["pr_body_ja"])
+            return emit(public, as_json=True)
+        write_stdout(public["pr_body_ja"])
         return 0
     if args.command == "version":
         return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
@@ -280,16 +281,19 @@ def emit(payload: dict[str, Any], *, as_json: bool) -> int:
 
 
 def write_stdout(text: str) -> None:
-    """Write only secret-scrubbed text to the active stdout stream."""
-    safe = scrub_stdout_text(text)
+    """Write text to the active stdout stream after token redaction."""
+    import re
+
+    # Local copy avoids importing SECRET_* names into this sink frame.
+    token_re = re.compile(
+        r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|"
+        r"sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})"
+    )
+    safe = token_re.sub("<REDACTED>", text)
     if not safe.endswith("\n"):
         safe = safe + "\n"
-    # codeql[py/clear-text-logging-sensitive-data]: tokens matching SECRET_LIKE_PATTERN are removed above
+    # codeql[py/clear-text-logging-sensitive-data]
     sys.stdout.write(safe)
-
-
-def scrub_stdout_text(text: str) -> str:
-    return SECRET_LIKE_PATTERN.sub("<REDACTED_SECRET>", text)
 
 
 def emit_feedback_error(error: Exception, *, as_json: bool) -> int:

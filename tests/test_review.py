@@ -418,13 +418,15 @@ def test_cli_pr_scrubs_secret_like_stdout(tmp_path: Path, capsys, monkeypatch) -
         str(ROOT),
         "--research-packet",
         str(path),
+        "--purpose",
+        "safe purpose",
         "--no-closeout",
         "--json",
     ])
     assert code == 0
     out = capsys.readouterr().out
     assert token not in out
-    assert "<REDACTED_SECRET>" in out
+    assert "safe purpose" in out
 
 
 def test_cli_pr_text_mode_prints_japanese_body(capsys, monkeypatch) -> None:

@@ -123,6 +123,190 @@ def build_pr_packet(
     return packet
 
 
+def public_stdout_packet(
+    packet: dict[str, Any],
+    *,
+    purpose_override: str | None = None,
+) -> dict[str, Any]:
+    """Return a stdout-safe copy without nested command transcripts or raw attachments."""
+    closeout = (packet.get("checks") or {}).get("closeout") or {}
+    verification = closeout.get("verification") or {}
+    public_closeout: dict[str, Any] = {
+        "overall": closeout.get("overall"),
+        "status": closeout.get("status"),
+        "reason": closeout.get("reason"),
+    }
+    if verification:
+        public_closeout["verification"] = {
+            "status": verification.get("status"),
+            "pytest": _command_summary(verification.get("pytest")),
+            "compileall": _command_summary(verification.get("compileall")),
+        }
+    attachment = (packet.get("checks") or {}).get("attachment_validation") or {}
+    purpose = purpose_override if purpose_override is not None else ""
+    safe = {
+        "packet_type": "engineering_brain_pr",
+        "version": 1,
+        "repo": "<REPO>",
+        "status": "plan_only",
+        "purpose": purpose,
+        "base_branch": packet.get("base_branch"),
+        "current_branch": packet.get("current_branch"),
+        "visible_scope": {
+            "source": (packet.get("visible_scope") or {}).get("source"),
+            "files": list((packet.get("visible_scope") or {}).get("files") or []),
+            "summary": str((packet.get("visible_scope") or {}).get("summary") or ""),
+            "file_count": (packet.get("visible_scope") or {}).get("file_count", 0),
+        },
+        "changes": list(packet.get("changes") or []),
+        "checks": {
+            "closeout": public_closeout,
+            "public_path_redaction": (packet.get("checks") or {}).get("public_path_redaction"),
+            "attachment_validation": {
+                "run_packet": attachment.get("run_packet"),
+                "research_packet": attachment.get("research_packet"),
+                "run_errors": list(attachment.get("run_errors") or []),
+                "research_errors": list(attachment.get("research_errors") or []),
+            },
+        },
+        "run_packet": _attachment_summary(packet.get("run_packet")),
+        "research_packet": _attachment_summary(packet.get("research_packet")),
+        "reinvention_check": {
+            "required": True,
+            "decision": _allowlisted_decision((packet.get("reinvention_check") or {}).get("decision")),
+            "reason": "research packet attached"
+            if attachment.get("research_packet") == "ok"
+            else "research packet not yet attached",
+        },
+        "unknowns": _allowlisted_unknowns(packet.get("unknowns") or []),
+        "human_stoplines": list(HUMAN_STOPLINES),
+        "merge": {
+            "status": "承認待ち",
+            "allowed": False,
+            "reason": "current-turn merge approval required",
+        },
+        "external_actions": {
+            "allowed": False,
+            "performed": False,
+            "reason": "plan-only; push / PR create / merge require current-turn approval",
+        },
+    }
+    safe["pr_body_ja"] = _safe_pr_body({**packet, "purpose": purpose, "checks": safe["checks"]})
+    return safe
+
+
+def _allowlisted_decision(value: Any) -> str:
+    allowed = {
+        "reuse": "reuse",
+        "wrap": "wrap",
+        "extend": "extend",
+        "adopt_oss": "adopt_oss",
+        "build": "build",
+        "hold": "hold",
+        "rejected": "rejected",
+    }
+    return allowed.get(str(value), "hold")
+
+
+def _allowlisted_unknowns(items: list[Any]) -> list[str]:
+    catalog = {
+        "default branch を検出できず、diff scope が worktree 依存": "default branch を検出できず、diff scope が worktree 依存",
+        "closeout 未実行（--no-closeout）": "closeout 未実行（--no-closeout）",
+        "closeout overall=blocked": "closeout overall=blocked",
+        "research / reinvention evidence 未添付": "research / reinvention evidence 未添付",
+        "attached research packet failed schema validation": "attached research packet failed schema validation",
+        "attached run packet failed schema validation": "attached run packet failed schema validation",
+        "personal path findings remain in repo text files": "personal path findings remain in repo text files",
+        "secret-like content was scrubbed from attached evidence": "secret-like content was scrubbed from attached evidence",
+        "decision rationale is not recorded": "decision rationale is not recorded",
+    }
+    return [catalog[str(item)] for item in items if str(item) in catalog]
+
+
+def _safe_pr_body(packet: dict[str, Any]) -> str:
+    """Rebuild Japanese body from allowlisted fields only (no raw attachment free text)."""
+    safe_packet = {
+        "purpose": str(packet.get("purpose") or "（目的未記入）"),
+        "changes": list(packet.get("changes") or []),
+        "reinvention_check": {
+            "decision": _allowlisted_decision((packet.get("reinvention_check") or {}).get("decision")),
+            "reason": "research packet attached"
+            if (packet.get("checks") or {}).get("attachment_validation", {}).get("research_packet") == "ok"
+            else "research packet not yet attached",
+        },
+        "checks": {
+            "closeout": {
+                "overall": ((packet.get("checks") or {}).get("closeout") or {}).get("overall")
+                or ((packet.get("checks") or {}).get("closeout") or {}).get("status"),
+                "verification": {
+                    "pytest": _command_summary(
+                        (((packet.get("checks") or {}).get("closeout") or {}).get("verification") or {}).get(
+                            "pytest"
+                        )
+                    ),
+                    "compileall": _command_summary(
+                        (((packet.get("checks") or {}).get("closeout") or {}).get("verification") or {}).get(
+                            "compileall"
+                        )
+                    ),
+                },
+            },
+            "public_path_redaction": (packet.get("checks") or {}).get("public_path_redaction")
+            or {"status": "unknown"},
+        },
+        "visible_scope": {
+            "source": (packet.get("visible_scope") or {}).get("source", "unknown"),
+            "summary": str((packet.get("visible_scope") or {}).get("summary") or "（未収集）"),
+            "file_count": (packet.get("visible_scope") or {}).get("file_count", 0),
+        },
+        "unknowns": _allowlisted_unknowns(packet.get("unknowns") or []),
+        "human_stoplines": list(HUMAN_STOPLINES),
+        "merge": {"status": "承認待ち"},
+        "external_actions": {"performed": False},
+    }
+    return render_pr_body_ja(safe_packet)
+
+
+def _command_summary(result: Any) -> dict[str, Any] | None:
+    if not isinstance(result, dict):
+        return None
+    return {
+        "command": result.get("command"),
+        "returncode": result.get("returncode"),
+    }
+
+
+def _attachment_summary(packet: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(packet, dict):
+        return None
+    decision = packet.get("decision")
+    raw_status = decision.get("status") if isinstance(decision, dict) else packet.get("status")
+    allowed = {
+        "reuse": "reuse",
+        "wrap": "wrap",
+        "extend": "extend",
+        "adopt_oss": "adopt_oss",
+        "build": "build",
+        "hold": "hold",
+        "rejected": "rejected",
+        "blocked_until_human_review": "blocked_until_human_review",
+        "ready_for_local_work": "ready_for_local_work",
+        "skipped": "skipped",
+    }
+    status = allowed.get(str(raw_status), "hold")
+    packet_type = (
+        "engineering_autopilot_run"
+        if packet.get("packet_type") == "engineering_autopilot_run"
+        else "engineering_brain_research"
+    )
+    return {
+        "packet_type": packet_type,
+        "version": 1,
+        "status": status,
+        "attached": True,
+    }
+
+
 def detect_default_branch(repo: Path) -> str | None:
     """Resolve the remote default branch without calling `git remote show`.
 
