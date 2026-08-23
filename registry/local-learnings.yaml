@@ -79,12 +79,12 @@ learnings:
   - id: clean-ci-dependency-contract
     source_lane: memory
     source_pointer:
-      - "local failure_log: CI が開発端末専用 package で通る / clean CI で import error"
+      - "local commit e7cac84f0f25b2c623b15b177e302544ca505ceb (branch codex/runtime-contract-learnings, observed 2026-07-19): clean-ci-dependency-contract"
     observed_problem: 開発端末にだけ存在する package で local test が通り、clean CI で import error になる
     proposed_solution: null
-    reusable_rule: CI と local verification は同じ test dependency manifest を正本として使う
-    evidence: "clean environment での dependency install と full preflight で再現する"
-    freshness: "local learning; field review pending"
+    reusable_rule: CI と local verification は同じ test dependency manifest を正本とし、検証は manifest だけから構築した isolated environment で実行する
+    evidence: "clean isolated environment での dependency install と full preflight で再現する"
+    freshness: "2026-07-19 / revision e7cac84f0f25b2c623b15b177e302544ca505ceb"
     rights_and_privacy: 実 package 名と project 固有 path は各 repo へ残し、共通 skill へ埋め込まない
     adoption_target: tests
     decision: candidate
@@ -95,14 +95,14 @@ learnings:
       再利用 rule は明確。現行 schema へ載せ替えただけで、この repo の CI に対する field review は未実施のため candidate。
 
   - id: executable-path-contract
-    source_lane: github
+    source_lane: memory
     source_pointer:
-      - "PR review: unit test green でも container entrypoint が module に到達できない"
+      - "local commit e7cac84f0f25b2c623b15b177e302544ca505ceb (branch codex/runtime-contract-learnings, observed 2026-07-19): executable-path-contract"
     observed_problem: unit test は通るが container image に import 対象 file が含まれず起動直後に停止する
     proposed_solution: null
     reusable_rule: CI green だけで完了とせず、container entrypoint から全 local module と runtime dependency へ到達できることを smoke で確認する
     evidence: "immutable image build と container entrypoint smoke"
-    freshness: "local learning; field review pending"
+    freshness: "2026-07-19 / revision e7cac84f0f25b2c623b15b177e302544ca505ceb"
     rights_and_privacy: GPU や外部 service が必要な実行は明示承認済み環境で行う
     adoption_target: tests
     decision: candidate
@@ -113,14 +113,14 @@ learnings:
       実行経路の欠落は closeout の verification と operation を分ける既存 gate に接続できる。この repo は container を必須にしていないため candidate。
 
   - id: artifact-lineage-contract
-    source_lane: github
+    source_lane: memory
     source_pointer:
-      - "PR review: candidate id だけを lineage identity にすると古い artifact が混ざる"
+      - "local commit e7cac84f0f25b2c623b15b177e302544ca505ceb (branch codex/runtime-contract-learnings, observed 2026-07-19): artifact-lineage-contract"
     observed_problem: 同じ candidate id の古い artifact や異なる manifest digest を現在 run へ混成できる
     proposed_solution: null
     reusable_rule: 評価・変換成果物を run 固有 digest、revision、attempt、source marker で結合する
     evidence: "cross-run rejection regression と marker payload digest verification"
-    freshness: "local learning; field review pending"
+    freshness: "2026-07-19 / revision e7cac84f0f25b2c623b15b177e302544ca505ceb"
     rights_and_privacy: 表示名や candidate id だけを lineage identity として信用しない
     adoption_target: tests
     decision: candidate
@@ -131,14 +131,14 @@ learnings:
       eval harness 吸収後の field review で adopt / hold を判断する。単体では candidate。
 
   - id: workflow-runtime-stopline-contract
-    source_lane: github
+    source_lane: memory
     source_pointer:
-      - "PR review: instance 起動時刻 deadline と path 付き OIDC audience の drift"
+      - "local commit e7cac84f0f25b2c623b15b177e302544ca505ceb (branch codex/runtime-contract-learnings, observed 2026-07-19): workflow-runtime-stopline-contract"
     observed_problem: instance 起動時刻による deadline drift、path 付き OIDC audience、後段 stage の budget bypass が起きる
     proposed_solution: null
-    reusable_rule: budget、deadline、認証 audience は全 stage で run 単位に評価する
+    reusable_rule: run 作成時に immutable な deadline を1つ固定し、OIDC audience は canonical な full endpoint から導出し、残 budget は各 stage 開始前に評価する
     evidence: "workflow render test、authenticated endpoint smoke、per-stage budget regression"
-    freshness: "local learning; field review pending"
+    freshness: "2026-07-19 / revision e7cac84f0f25b2c623b15b177e302544ca505ceb"
     rights_and_privacy: process global state を workflow run identity として使わない
     adoption_target: tests
     decision: candidate
