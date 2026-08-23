@@ -39,8 +39,5 @@ jobs:
         run: ai-ratchet-gate --repo .
       - name: repo-preflight (shadow consistency + readiness evidence)
         run: |
-          # shadow mode: findings are observational materials; do not fail the job on shadow_findings.
           BASE_REF="origin/${{ github.event.pull_request.base.ref || 'main' }}"
-          python .tools/repo-preflight/scripts/consistency_gate.py --repo . --base-ref "$BASE_REF" --json || true
-          python .tools/repo-preflight/scripts/readiness_scan.py --repo . || true
           python tools/run_repo_preflight.py --repo . --base-ref "$BASE_REF"

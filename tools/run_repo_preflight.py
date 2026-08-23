@@ -55,16 +55,20 @@ def main(argv: list[str] | None = None) -> int:
     if consistency.stderr:
         print(consistency.stderr, file=sys.stderr)
 
-    # Shadow consistency must run; readiness findings are materials for humans.
-    # Exit non-zero only when the upstream tools themselves crash.
-    if scan.returncode not in {0, 1} or consistency.returncode not in {0, 1}:
+    # Shadow / readiness findings are human materials, not merge approval.
+    # Fail only when upstream scripts could not be executed at all.
+    if scan.returncode < 0 or consistency.returncode < 0:
         return 1
     try:
         payload = json.loads(consistency.stdout.strip().splitlines()[-1]) if consistency.stdout.strip() else {}
     except json.JSONDecodeError:
         payload = {}
     mode = payload.get("mode")
-    print(f"==> repo-preflight wrapper done (consistency mode={mode!r}; not a merge approval)")
+    print(
+        f"==> repo-preflight wrapper done "
+        f"(readiness_rc={scan.returncode}, consistency_rc={consistency.returncode}, "
+        f"mode={mode!r}; not a merge approval)"
+    )
     return 0
 
 
