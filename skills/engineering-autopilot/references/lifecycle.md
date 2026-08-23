@@ -21,7 +21,7 @@ owner: nexus_ai
 | run packet | route / gate / catalog / skill-sync / closeout stopline を 1 packet にまとめる | `python -m engineering_brain run --task "<task>" --json` |
 | implement | 対象 repo の既存パターンに沿って最小差分で実装する | repo-local tests / docs |
 | verify | test / smoke / compile / closeout を実行する | `python -m pytest -q`, `python -m engineering_brain closeout --repo . --json` |
-| review packet | 外部操作前に見える範囲と未実施を分ける | PR body / closeout |
+| review packet | 外部操作前に見える範囲と未実施を分ける | `python -m engineering_brain pr --repo . --json` |
 | human stopline | push / PR / merge / cleanup / visibility を止める | current-turn explicit approval |
 | finish | merge 後の main 同期、local / remote branch cleanup 候補を plan する | `python -m engineering_brain finish --json` |
 | hook install | repo 同梱 hook を opt-in で local `.git/hooks/` へ入れる | `python -m engineering_brain hooks install --json` |

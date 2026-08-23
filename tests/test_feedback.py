@@ -69,7 +69,7 @@ def test_next_plan_context_carries_act_without_replaying_raw_history() -> None:
     }
 
 
-def test_cli_feedback_validate_emits_next_plan_context(tmp_path, capsys) -> None:
+def test_cli_feedback_validate_emits_next_plan_context(tmp_path, capfd) -> None:
     from engineering_brain.cli import main
 
     input_path = tmp_path / "feedback.json"
@@ -78,7 +78,7 @@ def test_cli_feedback_validate_emits_next_plan_context(tmp_path, capsys) -> None
     code = main(["feedback", "--input", str(input_path), "--json"])
 
     assert code == 0
-    output = json.loads(capsys.readouterr().out)
+    output = json.loads(capfd.readouterr().out)
     assert output["overall"] == "ok"
     assert output["next_plan"]["source_feedback_id"] == packet()["feedback_id"]
 
@@ -125,7 +125,7 @@ def test_validate_feedback_packet_rejects_personal_path_in_next_plan() -> None:
     assert any("personal path" in error for error in errors)
 
 
-def test_cli_feedback_returns_structured_error_for_invalid_json(tmp_path, capsys) -> None:
+def test_cli_feedback_returns_structured_error_for_invalid_json(tmp_path, capfd) -> None:
     from engineering_brain.cli import main
 
     input_path = tmp_path / "invalid.json"
@@ -134,7 +134,7 @@ def test_cli_feedback_returns_structured_error_for_invalid_json(tmp_path, capsys
     code = main(["feedback", "--input", str(input_path), "--json"])
 
     assert code == 1
-    output = json.loads(capsys.readouterr().out)
+    output = json.loads(capfd.readouterr().out)
     assert output["overall"] == "error"
     assert output["errors"] == ["JSONDecodeError: invalid feedback input"]
     assert output["next_plan"] is None
@@ -197,7 +197,7 @@ def test_feedback_rejects_all_field_paths_tokens_and_rejected_adoption() -> None
     assert any("conflicts with rejected" in error for error in errors)
 
 
-def test_cli_redacts_secret_bearing_feedback_id(tmp_path, capsys) -> None:
+def test_cli_redacts_secret_bearing_feedback_id(tmp_path, capfd) -> None:
     from engineering_brain.cli import main
 
     payload = packet()
@@ -206,7 +206,7 @@ def test_cli_redacts_secret_bearing_feedback_id(tmp_path, capsys) -> None:
     input_path.write_text(json.dumps(payload), encoding="utf-8")
 
     assert main(["feedback", "--input", str(input_path), "--json"]) == 1
-    output = json.loads(capsys.readouterr().out)
+    output = json.loads(capfd.readouterr().out)
     assert output["feedback_id"] is None
 
 
@@ -248,7 +248,7 @@ def test_feedback_rejects_personal_path_in_evidence_reference() -> None:
     assert any("personal path" in error for error in errors)
 
 
-def test_cli_redacts_all_metadata_for_sensitive_rejection(tmp_path, capsys) -> None:
+def test_cli_redacts_all_metadata_for_sensitive_rejection(tmp_path, capfd) -> None:
     from engineering_brain.cli import main
 
     payload = packet()
@@ -260,7 +260,7 @@ def test_cli_redacts_all_metadata_for_sensitive_rejection(tmp_path, capsys) -> N
     input_path.write_text(json.dumps(payload), encoding="utf-8")
 
     assert main(["feedback", "--input", str(input_path), "--json"]) == 1
-    output = json.loads(capsys.readouterr().out)
+    output = json.loads(capfd.readouterr().out)
     assert output["schema_version"] is None
     assert output["feedback_id"] is None
 

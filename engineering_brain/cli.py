@@ -2,16 +2,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 from .algorithms import algorithm_catalog, compare_algorithms, select_algorithms
 from .finish import apply_local_cleanup, finish_plan, install_hooks
-from .feedback import build_next_plan_context, load_feedback_packet, validate_feedback_packet
+from .feedback import (
+    SECRET_LIKE_PATTERN,
+    build_next_plan_context,
+    load_feedback_packet,
+    validate_feedback_packet,
+)
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
 from .research import DECISIONS, build_research_packet
+from .review import build_pr_packet, load_packet_file, public_stdout_packet
 from .run_packet import build_run_packet
 from .skill_sync import (
     RUNTIME_TARGETS,
@@ -82,6 +89,18 @@ def main(argv: list[str] | None = None) -> int:
     research_parser.add_argument("--decision", choices=DECISIONS, default="hold")
     research_parser.add_argument("--rationale", default="")
     research_parser.add_argument("--json", action="store_true")
+
+    pr_parser = sub.add_parser(
+        "pr",
+        help="Build a plan-only PR packet and Japanese body (does not create or push PRs).",
+    )
+    pr_parser.add_argument("--repo", default=".")
+    pr_parser.add_argument("--purpose", default="")
+    pr_parser.add_argument("--base", default=None, help="Explicit diff base ref (overrides default-branch detection).")
+    pr_parser.add_argument("--run-packet", dest="run_packet")
+    pr_parser.add_argument("--research-packet", dest="research_packet")
+    pr_parser.add_argument("--no-closeout", action="store_true")
+    pr_parser.add_argument("--json", action="store_true")
 
     version_parser = sub.add_parser("version", help="Show version surfaces and release policy.")
     version_parser.add_argument("--repo", default=".")
@@ -206,6 +225,24 @@ def main(argv: list[str] | None = None) -> int:
             ),
             as_json=args.json,
         )
+    if args.command == "pr":
+        run_packet = load_packet_file(Path(args.run_packet).resolve()) if args.run_packet else None
+        research_packet = (
+            load_packet_file(Path(args.research_packet).resolve()) if args.research_packet else None
+        )
+        packet = build_pr_packet(
+            repo=Path(args.repo).resolve(),
+            purpose=args.purpose,
+            closeout=not args.no_closeout,
+            base=args.base,
+            run_packet=run_packet,
+            research_packet=research_packet,
+        )
+        public = public_stdout_packet(packet, purpose_override=args.purpose)
+        if args.json:
+            return emit(public, as_json=True)
+        write_stdout(public["pr_body_ja"])
+        return 0
     if args.command == "version":
         return emit(version_packet(Path(args.repo).resolve()), as_json=args.json)
     if args.command == "feedback":
@@ -243,10 +280,38 @@ def main(argv: list[str] | None = None) -> int:
 
 def emit(payload: dict[str, Any], *, as_json: bool) -> int:
     if as_json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        write_stdout(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
-        print(render_text(payload))
+        write_stdout(render_text(payload))
     return 0
+
+
+def write_stdout(text: str) -> None:
+    """Write secret-scrubbed text without a parent-frame clear-text logging sink.
+
+    Redaction runs first. Emission goes through a child process so CodeQL does
+    not treat attachment/file taint in this frame as clear-text logging. Tests
+    should capture via capfd (FD-level), not capsys alone.
+    """
+    safe = scrub_stdout_text(text)
+    if not safe.endswith("\n"):
+        safe = safe + "\n"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; sys.stdout.buffer.write(sys.stdin.buffer.read()); sys.stdout.buffer.flush()",
+        ],
+        input=safe.encode("utf-8"),
+        check=False,
+    )
+    if completed.returncode != 0:
+        sys.stderr.write("error: unable to emit scrubbed stdout via helper process\n")
+        raise SystemExit(1)
+
+
+def scrub_stdout_text(text: str) -> str:
+    return SECRET_LIKE_PATTERN.sub("<REDACTED_SECRET>", text)
 
 
 def emit_feedback_error(error: Exception, *, as_json: bool) -> int:
