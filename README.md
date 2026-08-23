@@ -4,6 +4,10 @@ engineering-brain は、開発判断・実装・検証・運用保証を「読�
 
 Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の OS だとすると、engineering-brain は開発実装の保証 OS です。ここでの「100%」はバグゼロ断定ではありません。保証できること、未確認、残リスク、人間承認が必要な境界を、毎回 100% 分離して返すという意味です。
 
+## 目的
+
+開発のたびに判断・調査・実装・検証・PR・公開判断が散らばる問題を、毎回同じ入口で分離する。作るべきか、既存で足りるか、何をテストしたか、何は人間承認かを、run ごとに証拠付きで返す。
+
 ## 名前の整理
 
 | name | 意味 |
@@ -70,7 +74,7 @@ flowchart LR
 python -m engineering_brain run --task "implement small python CLI feature and prepare PR" --domain python --json
 python -m engineering_brain algorithms select --signal shortest_path --signal weighted_graph --constraint negative_edge --json
 python -m engineering_brain algorithms compare --id dijkstra --id bellman_ford --json
-python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --json
+python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --precedent-outcome hold --json
 python -m engineering_brain pr --repo . --json
 python -m engineering_brain closeout --repo . --json
 ```
@@ -120,12 +124,12 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 
 | item | status |
 |---|---|
-| version | `0.1.0` public seed |
+| version | `0.2.0`（public seed は `0.1.0`） |
 | visibility | public |
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
-| release / GitHub tag | not created; separate approval |
-| primary next work | verification profile / closeout v2 |
+| GitHub Release / tag | 未作成。別承認 |
+| primary next work | verification profile / closeout v2。未吸収: research-review eval、runtime-contract learnings |
 
 ## Local SSOT
 
@@ -133,7 +137,7 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 
 `dev-brain` からの private recreate については [Migration notes](docs/MIGRATION_NOTES.md)、[engineering-brain cutover plan](docs/ENGINEERING_CUTOVER_PLAN.md)、[private cutover packet](docs/PRIVATE_CUTOVER_PACKET.md) を参照します。
 
-## Guardrails
+## 安全境界
 
 | gate | 目的 |
 |---|---|
@@ -168,7 +172,7 @@ Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` te
 
 設計判断は [ADR](docs/adr/README.md) に残します。Obsidian や local memory は正本ではなく入口として扱い、採用済みの知見だけを [Knowledge intake](docs/KNOWLEDGE_INTAKE.md) の流れで docs / registry / tests / ADR / skill source へ昇格します。
 
-version 管理は [Versioning](docs/VERSIONING.md) を参照します。public seed は `0.1.0` で、tag / GitHub Release は別承認です。
+version 管理は [Versioning](docs/VERSIONING.md) を参照します。現行は `0.2.0` です。
 
 Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community learning intake](docs/COMMUNITY_LEARNING_INTAKE.md) の source packet として扱います。
 
@@ -176,7 +180,7 @@ Vision、GitHub、X、Web 上の他者の詰まりや解決策は [Community lea
 
 実行結果とレビューを次の gate / docs / registry / tests へ戻す仕組みは [PDCA feedback loop](docs/PDCA_FEEDBACK_LOOP.md) を参照します。
 
-FDEへ学びを返す場合は、`python -m devbrain feedback --input <feedback.json> --json`で`fde.feedback.v1`を検証し、会話全文ではなくevidence pointerと次Plan入力だけを返します。
+FDEへ学びを返す場合は、`python -m engineering_brain feedback --input <feedback.json> --json`で`fde.feedback.v1`を検証し、会話全文ではなくevidence pointerと次Plan入力だけを返します。
 
 必須概念がどこまで入っているかは [Concept coverage](docs/CONCEPT_COVERAGE.md) を参照します。
 

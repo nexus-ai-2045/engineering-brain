@@ -13,6 +13,10 @@ public seed.
 
 ## Unreleased
 
+## 0.2.0 - 2026-08-23
+
+capability release。public seed `0.1.0` 以降の local capability を tag する。
+
 - research packetをv2へ更新し、`implementation-precedent-research`のconsumer契約を追加。
 - `engineering-autopilot`から先行実装リサーチを呼び、本体は`nexus-ai-skills`正本として維持。
 - CLI の PR stdout が catalog 外の residual と推論 purpose を消さないよう、secret/path scrub 後も残すようにした。
