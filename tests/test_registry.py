@@ -28,7 +28,14 @@ def test_candidate_learning_packets_keep_stable_proposed_solution_shape() -> Non
     assert path.is_file()
     text = path.read_text(encoding="utf-8")
 
-    assert text.count("proposed_solution:") == 3
+    assert text.count("proposed_solution:") == 7
+    for learning_id in (
+        "clean-ci-dependency-contract",
+        "executable-path-contract",
+        "artifact-lineage-contract",
+        "workflow-runtime-stopline-contract",
+    ):
+        assert f"id: {learning_id}" in text
 
 
 def test_select_units_matches_triggers() -> None:
