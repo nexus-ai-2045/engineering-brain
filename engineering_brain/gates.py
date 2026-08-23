@@ -1,16 +1,25 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
 from .path_safety import scan_personal_paths
 from .registry import AdoptionUnit, select_units
+from .assurance import evaluate_async_orchestration, evaluate_structured_model
 
 
 PUBLIC_TRIGGERS = {"public_release", "external_send", "github_visibility", "announcement", "publish", "push", "pr"}
 PUBLIC_PATH_TRIGGERS = {"public_path", "path_redaction", "absolute_path", "personal_path"}
+
+
+def _contains_signal(text: str, signal: str) -> bool:
+    if signal.isascii() and all(character.isalnum() or character == "_" for character in signal):
+        return re.search(rf"(?<![a-z0-9_]){re.escape(signal)}(?![a-z0-9_])", text) is not None
+    return signal in text
 
 
 def route_task(task: str) -> dict[str, Any]:
@@ -23,6 +32,18 @@ def route_task(task: str) -> dict[str, Any]:
         inferred.add("implementation")
     if {"security", "credential", "secret", "agent", "browser", "connector", "hook"}.intersection(words):
         inferred.add("security")
+    orchestration_tokens = (
+        "gcp", "gcloud", "google cloud", "vertex", "cloud run", "cloud workflow",
+        "workflow", "ワークフロー", "cloud build", "custom job", "gce", "gke", "gpu", "wif",
+    )
+    model_tokens = (
+        "ocr", "帳票", "document ai", "structured output", "構造化出力", "distillation",
+        "蒸留", "quantization", "quantized", "量子化", "schema", "teacher",
+    )
+    if any(_contains_signal(normalized_task, token) for token in orchestration_tokens):
+        inferred.add("orchestration")
+    if any(_contains_signal(normalized_task, token) for token in model_tokens):
+        inferred.add("model_eval")
     if {"publish", "public", "release", "github", "push", "pr", "公開"}.intersection(words):
         inferred.add("public_release")
     if {"path", "paths", "absolute", "redaction", "personal", "user", "home", "絶対パス"}.intersection(words):
@@ -52,13 +73,28 @@ def route_task(task: str) -> dict[str, Any]:
     }
 
 
-def evaluate_triggers(triggers: list[str]) -> dict[str, Any]:
+def evaluate_triggers(
+    triggers: list[str],
+    evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     selected = select_units(triggers, include_candidates=True)
     requested_public_action = any(trigger in PUBLIC_TRIGGERS for trigger in triggers)
+    assurance: dict[str, Any] = {}
+    selected_ids = {unit.id for unit in selected}
+    if "async_orchestration_evidence_gate" in selected_ids:
+        assurance["async_orchestration"] = evaluate_async_orchestration(
+            (evidence or {}).get("async_orchestration", {})
+        )
+    if "structured_model_evaluation_gate" in selected_ids:
+        assurance["structured_model"] = evaluate_structured_model(
+            (evidence or {}).get("structured_model", {})
+        )
+    assurance_blocked = any(result["status"] != "pass" for result in assurance.values())
     return {
         "triggers": triggers,
-        "overall": "blocked" if requested_public_action else "ok",
+        "overall": "blocked" if requested_public_action or assurance_blocked else "ok",
         "units": [serialize_unit(unit) for unit in selected],
+        "assurance": assurance,
     }
 
 
@@ -76,7 +112,19 @@ def serialize_unit(unit: AdoptionUnit) -> dict[str, Any]:
 
 def closeout_repo(repo: Path) -> dict[str, Any]:
     git_status = run(["git", "status", "--short", "--branch"], cwd=repo)
-    pytest_result = run(["python", "-m", "pytest", "-q"], cwd=repo)
+    with tempfile.TemporaryDirectory(prefix="engineering-brain-closeout-") as temp_dir:
+        pytest_result = run(
+            [
+                "python",
+                "-m",
+                "pytest",
+                "-q",
+                "--basetemp",
+                str(Path(temp_dir) / "pytest"),
+            ],
+            cwd=repo,
+        )
+    pytest_result["command"] = "python -m pytest -q --basetemp <TEMP>"
     tracked = run(["git", "ls-files", "*.py"], cwd=repo)
     python_files = tracked["stdout"].splitlines() if tracked["returncode"] == 0 else []
     compile_result = (

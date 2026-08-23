@@ -1,0 +1,77 @@
+version: 1
+updated_at: "2026-07-19"
+
+# SSOT: registry/local-learnings.yaml
+# Community Learning Intake の candidate/hold/adopt を格納する registry。
+# packet schema は docs/COMMUNITY_LEARNING_INTAKE.md に準拠(+ growth/assurance 拡張)。
+# X/web lane は source pointer + digest。adopt でも field_review: pending の間は運用保証未達を明示。
+# review_trigger は turn/cycle ベース(blind-spot 10: 「N週間後」禁止)。
+# source_pointer は全 packet で list に統一(consumer の型仮定を安定化)。
+learnings:
+  - id: x-claudeai-fable5-access-2026-07
+    source_lane: x
+    source_pointer:
+      - "@claudeai X post (2026-07-18頃, https://x.com/claudeai): claim=7/20 から Fable5 が Max/Team Premium に 50% limit で included(本文 verbatim は保持しない)"
+    observed_problem: Fable の使い分け/コスト前提が plan 別 access に依存する
+    proposed_solution: null
+    reusable_rule: Fable 選定前に「現行 plan で Fable がどこまで included か」を確認してから effort/model を決める
+    evidence: "@claudeai 公式ポスト(claude.com pricing/changelog で未裏取り)"
+    freshness: "post 2026-07-18 / effective 2026-07-20"
+    rights_and_privacy: 投稿本文は保存しない。source pointer + 短い claim のみ
+    adoption_target: registry
+    decision: candidate
+    field_review: pending
+    review_trigger: "次に Fable/コスト判断が発生した intake cycle、または claude.com pricing 突合時"
+    assurance_gate: null
+    decision_reason: >
+      operating rule は再利用可なので candidate。pricing/date は snapshot で陳腐化しやすく
+      full adopt は claude.com 突合後(CEO 指示あれば adopt)。
+
+  - id: x-bcherny-steps-of-ai-adoption-2026-07
+    source_lane: x
+    source_pointer:
+      - "https://x.com/bcherny/status/2077929379661844559 (2026-07-17, thread)"
+      - "artifact 'Steps of AI Adoption' (claude.ai) — 描画型で本文未抽出=pointer 参照"
+      - "https://www.explainx.ai/blog/boris-cherny-steps-ai-adoption-claude-code-july-2026 (二次解説。docs digest の 0-4 表細部の出所)"
+    observed_problem: 組織の AI 定着が個人依存で頭打ち(1人 10x、残り追随せず)。定着は個人技でなく組織の段階問題
+    proposed_solution: null
+    reusable_rule: >
+      AI 定着を step 0(Gated)〜4(AI-native)の ladder で評価。前進は tokens 増でなく
+      「次ボトルネック除去 + 次ガードレール構築」の対。骨子(段階名/役割/ボトルネック)は
+      一次スレッドに pointer のみ(本文突合は field review 残)。各段の products/guardrails 細部は二次解説由来・一次未突合。
+    evidence: "@bcherny 公式スレッド(骨子)+ explainx 二次解説(細部)。骨子・細部とも一次 artifact 本文とは未突合(pointer のみ)"
+    freshness: "2026-07-17"
+    rights_and_privacy: 投稿本文は保存しない。digest 化。full 表 verbatim は保存せず
+    adoption_target: docs
+    adopted_doc: docs/BORIS_CHERNY_AI_ADOPTION_AND_CC_TIPS.md
+    decision: candidate
+    field_review: pending
+    review_trigger: "次の tooling/移行レビュー cycle で自環境の step を再判定し advisory unit を回す"
+    assurance_gate: ai_adoption_maturity_advisory
+    decision_reason: >
+      digest doc + assurance unit へ接続済(採用意向は達成)。実地 field review 未実施のため ladder は candidate
+      に留める(field review 1回で adopt 昇格)。骨子・細部とも本文突合は field_review 残。運用保証は advisory unit 経由(G1)。
+
+  - id: web-bcherny-claude-code-workflow-tips
+    source_lane: web
+    source_pointer:
+      - "https://howborisusesclaudecode.com/ (Boris の使い方まとめ 121+ tips・community 集約)"
+      - "https://github.com/shanraisshan/claude-code-best-practice (Boris+community tips 集約 repo)"
+    observed_problem: Boris の Claude Code 実運用ノウハウが多数あり未吸収。棚卸しの入口が要る
+    proposed_solution: null
+    reusable_rule: >
+      13 tips を digest(docs 参照)。検証ループ(tip #13)は新規でなく既存 tdd_regression_gate に
+      写像=reinvent しない。未実装候補=web 並列 / @claude PR / 検証ループの明文化。
+      モデル指定(Opus 4.5)は Opus 4.8/難所 Fable に読替。
+    evidence: "community 集約(howborisusesclaudecode / github)。一次(本人ポスト)未突合・自環境未適用"
+    freshness: "集約物。tip により 2026-01〜04 の日付。モデル指定は要更新(現行 Opus 4.8/Fable 期)"
+    rights_and_privacy: source pointer + digest のみ。集約ページ本文は保存しない
+    adoption_target: docs
+    adopted_doc: docs/BORIS_CHERNY_AI_ADOPTION_AND_CC_TIPS.md
+    decision: candidate
+    field_review: pending
+    review_trigger: "自環境ギャップ(web並列/@claude PR/検証ループ明文化)を field review する cycle"
+    assurance_gate: tdd_regression_gate
+    decision_reason: >
+      digest doc + 既存 tdd_regression_gate へ接続済(採用意向は達成)。実地 field review 未実施のため ladder は candidate
+      (field review 1回で adopt 昇格)。検証ループは既存 gate へ写像(reinvent 回避)。個別 tip は field review で精緻化。

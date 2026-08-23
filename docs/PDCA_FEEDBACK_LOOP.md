@@ -127,7 +127,7 @@ Act の原則:
 
 ## Learning Ledger
 
-将来 `registry/local-learnings.yaml` を追加したら、PDCA の Act は次の形に畳む。
+PDCA の Act は `registry/local-learnings.yaml` へ次の形で畳む。candidate のままなら field_review 前に採用しない。
 
 ```yaml
 - id:

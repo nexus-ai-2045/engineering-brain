@@ -41,6 +41,7 @@ def main(argv: list[str] | None = None) -> int:
 
     gate_parser = sub.add_parser("gate", help="Evaluate gates for triggers.")
     gate_parser.add_argument("--trigger", action="append", default=[])
+    gate_parser.add_argument("--evidence", type=Path)
     gate_parser.add_argument("--json", action="store_true")
 
     closeout_parser = sub.add_parser("closeout", help="Run local closeout checks.")
@@ -129,7 +130,12 @@ def main(argv: list[str] | None = None) -> int:
         return emit(route_task(args.task), as_json=args.json)
     if args.command == "gate":
         triggers = args.trigger or ["implementation"]
-        return emit(evaluate_triggers(triggers), as_json=args.json)
+        evidence = None
+        if args.evidence is not None:
+            evidence = json.loads(args.evidence.read_text(encoding="utf-8"))
+            if not isinstance(evidence, dict):
+                raise ValueError("evidence must be a JSON object")
+        return emit(evaluate_triggers(triggers, evidence), as_json=args.json)
     if args.command == "closeout":
         return emit(closeout_repo(Path(args.repo).resolve()), as_json=args.json)
     if args.command == "list":

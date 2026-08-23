@@ -12,7 +12,7 @@
 | Public GitHub surface | covered | `README.md`, `docs/LOCAL_SSOT.md`, `PUBLIC_READY.md` | release / tag / announcement は別承認のまま維持 |
 | ADR | covered | `docs/adr/` | 後続の設計判断で継続追加 |
 | Obsidian intake | covered | `docs/KNOWLEDGE_INTAKE.md` | 自動候補抽出は別 slice |
-| Local learning absorption | partial | `docs/KNOWLEDGE_INTAKE.md` | `registry/local-learnings.yaml` を追加する |
+| Local learning absorption | partial | `docs/KNOWLEDGE_INTAKE.md`, `registry/local-learnings.yaml` | candidate packets は追加済み。field_review / adopt は未了 |
 | Reinvention avoidance | covered | `docs/AUTOPILOT_GOAL_DESIGN.md`, `engineering_brain/data/adoption-units.yaml` | run packet 実装で evidence 付き検査へ昇格 |
 | Research / GitHub method | covered | `engineering_brain research`, `docs/AUTOPILOT_GOAL_DESIGN.md`, `reinvention_candidate_research_gate` | PR packet と closeout evidence へ接続する |
 | TDD / regression | covered | `README.md`, `tests/` | lifecycle command で選択可能にする |
@@ -51,13 +51,13 @@
 
 1. `engineering_brain lifecycle` は設計済みだが未実装。`engineering_brain run` は MVP 実装済み。
 2. runtime install copy は同期済み。継続的な drift check を運用に入れる。
-3. `registry/local-learnings.yaml` がまだない。
+3. `registry/local-learnings.yaml` の candidate packets は追加済み。adopt / field_review は未了。
 4. GitHub identity gate は local skill に依存しており、repo-owned command ではない。
 5. verification profile と closeout v2 evidence schema は未実装。
 
 ## Next slices
 
-1. `registry/local-learnings.yaml` と schema を追加する。
+1. `registry/local-learnings.yaml` の candidate を field_review し、adopt / hold を判断する。
 2. verification profile を追加する。
 3. `engineering_brain run --closeout` の evidence schema を強化する。
 4. Obsidian / memory から候補 packet を作る read-only importer を追加する。
