@@ -216,13 +216,29 @@ def main(argv: list[str] | None = None) -> int:
             as_json=args.json,
         )
     if args.command == "verify":
-        return emit(
-            plan_verification(
+        try:
+            payload = plan_verification(
                 Path(args.repo).resolve(),
                 profile_ids=args.profile or None,
-            ),
-            as_json=args.json,
-        )
+            )
+        except ValueError as error:
+            if args.json:
+                write_stdout(
+                    json.dumps(
+                        {
+                            "status": "blocked",
+                            "error": str(error),
+                            "schema_version": 2,
+                            "mode": "plan",
+                        },
+                        ensure_ascii=False,
+                        indent=2,
+                    )
+                )
+            else:
+                write_stdout(str(error))
+            return 1
+        return emit(payload, as_json=args.json)
     if args.command == "list":
         return emit({"units": [unit.id for unit in adoption_units()]}, as_json=args.json)
     if args.command == "catalog":
