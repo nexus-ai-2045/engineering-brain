@@ -19,9 +19,7 @@
     "provenance"
   ],
   "properties": {
-    "schema_version": {
-      "const": "fde.feedback.v1"
-    },
+    "schema_version": { "const": "fde.feedback.v1" },
     "feedback_id": {
       "type": "string",
       "minLength": 1,
@@ -40,31 +38,24 @@
       "maxLength": 128,
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
     },
-    "consumer": {
-      "const": "fde"
-    },
-    "observed_at": {
-      "type": "string",
-      "format": "date-time"
-    },
+    "consumer": { "const": "fde" },
+    "observed_at": { "type": "string", "format": "date-time" },
     "plan": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "hypothesis",
-        "expected_effect",
-        "verification_plan"
-      ],
+      "required": ["hypothesis", "expected_effect", "verification_plan"],
       "properties": {
         "hypothesis": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 1000
+          "maxLength": 1000,
+          "pattern": ".*\\S.*"
         },
         "expected_effect": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 1000
+          "maxLength": 1000,
+          "pattern": ".*\\S.*"
         },
         "verification_plan": {
           "type": "array",
@@ -73,7 +64,8 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 500
+            "maxLength": 500,
+            "pattern": ".*\\S.*"
           }
         }
       }
@@ -81,10 +73,7 @@
     "do": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "actions",
-        "changed_artifacts"
-      ],
+      "required": ["actions", "changed_artifacts"],
       "properties": {
         "actions": {
           "type": "array",
@@ -93,7 +82,8 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 500
+            "maxLength": 500,
+            "pattern": ".*\\S.*"
           }
         },
         "changed_artifacts": {
@@ -102,7 +92,8 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 256
+            "maxLength": 256,
+            "pattern": ".*\\S.*"
           }
         }
       }
@@ -110,19 +101,10 @@
     "check": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "outcome",
-        "evidence",
-        "human_review"
-      ],
+      "required": ["outcome", "evidence", "human_review"],
       "properties": {
         "outcome": {
-          "enum": [
-            "met",
-            "not_met",
-            "partial",
-            "unknown"
-          ]
+          "enum": ["met", "not_met", "partial", "unknown"]
         },
         "evidence": {
           "type": "array",
@@ -131,20 +113,10 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "kind",
-              "ref"
-            ],
+            "required": ["kind", "ref"],
             "properties": {
               "kind": {
-                "enum": [
-                  "test",
-                  "log",
-                  "trace",
-                  "receipt",
-                  "review",
-                  "source"
-                ]
+                "enum": ["test", "log", "trace", "receipt", "review", "source"]
               },
               "ref": {
                 "type": "string",
@@ -156,12 +128,7 @@
           }
         },
         "human_review": {
-          "enum": [
-            "not_required",
-            "pending",
-            "approved",
-            "rejected"
-          ]
+          "enum": ["not_required", "pending", "approved", "rejected"]
         }
       }
     },
@@ -177,14 +144,7 @@
         "next_plan_input"
       ],
       "properties": {
-        "decision": {
-          "enum": [
-            "adopt",
-            "hold",
-            "reject",
-            "revise"
-          ]
-        },
+        "decision": { "enum": ["adopt", "hold", "reject", "revise"] },
         "failure_kind": {
           "type": "string",
           "minLength": 1,
@@ -197,15 +157,7 @@
           "maxItems": 16,
           "uniqueItems": true,
           "items": {
-            "enum": [
-              "route",
-              "skill",
-              "gate",
-              "test",
-              "ssot",
-              "roadmap",
-              "none"
-            ]
+            "enum": ["route", "skill", "gate", "test", "ssot", "roadmap", "none"]
           }
         },
         "regression_test": {
@@ -231,25 +183,16 @@
     "boundaries": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "external_actions_performed",
-        "human_gate_required"
-      ],
+      "required": ["external_actions_performed", "human_gate_required"],
       "properties": {
-        "external_actions_performed": {
-          "type": "boolean"
-        },
-        "human_gate_required": {
-          "type": "boolean"
-        }
+        "external_actions_performed": { "type": "boolean" },
+        "human_gate_required": { "type": "boolean" }
       }
     },
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "source_refs"
-      ],
+      "required": ["source_refs"],
       "properties": {
         "source_refs": {
           "type": "array",
@@ -258,21 +201,9 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "kind",
-              "ref"
-            ],
+            "required": ["kind", "ref"],
             "properties": {
-              "kind": {
-                "enum": [
-                  "source",
-                  "test",
-                  "log",
-                  "trace",
-                  "receipt",
-                  "review"
-                ]
-              },
+              "kind": { "enum": ["source", "test", "log", "trace", "receipt", "review"] },
               "ref": {
                 "type": "string",
                 "minLength": 1,

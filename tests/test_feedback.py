@@ -291,6 +291,8 @@ def test_human_readable_output_preserves_unicode() -> None:
 # 正本を変更したときは、ここも同時に更新すること。ここが落ちたら
 # 「複製が正本から離れた」か「正本が変わった」のどちらかであり、
 # どちらの場合も人間が同期を判断する必要がある。
+# plan/do/act の free-text nonblank pattern も正本へ固定する（第二の
+# feedback OS を作らない）。
 
 FDE_ACT_REQUIRED = [
     "decision",
@@ -310,6 +312,11 @@ FDE_UPDATE_TARGET_VALUES = [
     "none",
 ]
 FDE_ID_PATTERN = "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+FDE_NONBLANK_PATTERN = ".*\\S.*"
+FDE_CANONICAL_SCHEMA_URL = (
+    "https://github.com/nexus-ai-2045/fractal-decision-ecosystem/"
+    "blob/main/schemas/fde_feedback_packet.v1.schema.json"
+)
 
 
 def _schema() -> dict:
@@ -322,9 +329,7 @@ def _schema() -> dict:
 
 def test_schema_declares_fde_as_its_canonical_source() -> None:
     """複製であることを $id が示し続けること。"""
-    assert _schema()["$id"].endswith(
-        "fractal-decision-ecosystem/blob/main/schemas/fde_feedback_packet.v1.schema.json"
-    )
+    assert _schema()["$id"] == FDE_CANONICAL_SCHEMA_URL
 
 
 def test_act_required_matches_the_fde_contract() -> None:
@@ -348,6 +353,24 @@ def test_identifier_fields_keep_the_fde_pattern() -> None:
     props = _schema()["properties"]
     for field in ("feedback_id", "source_run_id", "producer"):
         assert props[field].get("pattern") == FDE_ID_PATTERN, field
+
+
+def test_plan_and_do_free_text_keep_the_fde_nonblank_pattern() -> None:
+    """正本は plan/do の free-text でも空白のみを reject する。"""
+    props = _schema()["properties"]
+    plan = props["plan"]["properties"]
+    do = props["do"]["properties"]
+    assert plan["hypothesis"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert plan["expected_effect"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert plan["verification_plan"]["items"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert do["actions"]["items"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert do["changed_artifacts"]["items"].get("pattern") == FDE_NONBLANK_PATTERN
+
+
+def test_act_free_text_keep_the_fde_nonblank_pattern() -> None:
+    props = _schema()["properties"]["act"]["properties"]
+    for field in ("failure_kind", "regression_test", "rollback_path", "next_plan_input"):
+        assert props[field].get("pattern") == FDE_NONBLANK_PATTERN, field
 
 
 def test_packet_missing_failure_kind_is_rejected() -> None:
@@ -387,4 +410,11 @@ def test_consumer_other_than_fde_is_rejected() -> None:
 def test_identifier_with_whitespace_is_rejected() -> None:
     broken = packet()
     broken["feedback_id"] = "has space"
+    assert validate_feedback_packet(broken) != []
+
+
+def test_plan_hypothesis_whitespace_only_is_rejected() -> None:
+    """正本の nonblank pattern が効いていること。"""
+    broken = packet()
+    broken["plan"]["hypothesis"] = "   "
     assert validate_feedback_packet(broken) != []
