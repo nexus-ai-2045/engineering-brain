@@ -89,6 +89,21 @@ def finish_plan(repo: Path) -> dict[str, Any]:
             ["git", "branch", "--merged", base_refs["local"], "--format", "%(refname:short)"],
             cwd=resolved_repo,
         )
+        if local_result["returncode"] != 0:
+            # returncode を握りつぶすと「候補ゼロ」と誤認する（bare main と同型）
+            return {
+                "status": "blocked",
+                "reason": "merged_local_list_failed",
+                "repo": "<REPO>",
+                "current_branch": current_branch,
+                "base_refs": base_refs,
+                "git_result": local_result,
+                "local_merged_branches": [],
+                "remote_merged_branches": [],
+                "human_stoplines": _human_stoplines(),
+                "suggested_commands": [],
+                "cleanup_ssot": CLEANUP_SSOT,
+            }
         local_branches = _cleanup_local_branches(
             local_result["stdout"], current_branch=current_branch
         )
@@ -98,6 +113,20 @@ def finish_plan(repo: Path) -> dict[str, Any]:
             ["git", "branch", "-r", "--merged", base_refs["remote"], "--format", "%(refname:short)"],
             cwd=resolved_repo,
         )
+        if remote_result["returncode"] != 0:
+            return {
+                "status": "blocked",
+                "reason": "merged_remote_list_failed",
+                "repo": "<REPO>",
+                "current_branch": current_branch,
+                "base_refs": base_refs,
+                "git_result": remote_result,
+                "local_merged_branches": local_branches,
+                "remote_merged_branches": [],
+                "human_stoplines": _human_stoplines(),
+                "suggested_commands": [],
+                "cleanup_ssot": CLEANUP_SSOT,
+            }
         remote_branches = _cleanup_remote_branches(remote_result["stdout"])
     suggested = _suggested_commands(local_branches, remote_branches)
 
@@ -218,13 +247,10 @@ def _cleanup_remote_branches(stdout: str) -> list[str]:
 
 
 def _suggested_commands(local_branches: list[str], remote_branches: list[str]) -> list[str]:
-    commands = []
-    if local_branches:
-        commands.append(f"git branch -d {' '.join(local_branches)}")
-    if remote_branches:
-        remote_names = [branch.removeprefix("origin/") for branch in remote_branches]
-        commands.append(f"git push origin --delete {' '.join(remote_names)}")
-    return commands
+    # 削除コマンドは本 repo で組み立てない。実行正本への委譲だけを示す。
+    if local_branches or remote_branches:
+        return [CLEANUP_SSOT_COMMAND]
+    return []
 
 
 def _human_stoplines() -> list[str]:

@@ -46,7 +46,8 @@ def test_finish_plan_reports_merged_local_and_remote_candidates(monkeypatch) -> 
     assert result["local_merged_branches"] == ["codex/done-one", "codex/done-two"]
     assert result["remote_merged_branches"] == ["origin/codex/done-one"]
     assert "remote_branch_delete" in result["human_stoplines"]
-    assert "git branch -d codex/done-one codex/done-two" in result["suggested_commands"]
+    assert result["suggested_commands"] == [finish.CLEANUP_SSOT_COMMAND]
+    assert "post_merge_cleanup.py" in result["cleanup_ssot"]
 
 
 def test_finish_plan_blocks_on_dirty_worktree(monkeypatch) -> None:
@@ -187,3 +188,32 @@ def test_apply_local_never_deletes_and_names_the_ssot(tmp_path: Path) -> None:
 def test_plan_names_the_cleanup_ssot(tmp_path: Path) -> None:
     repo = _make_repo(tmp_path)
     assert "post_merge_cleanup.py" in finish.finish_plan(repo)["cleanup_ssot"]
+
+
+def test_finish_plan_blocks_when_merged_list_fails(monkeypatch) -> None:
+    """一覧の returncode 失敗を『候補ゼロ』と混同しない。"""
+
+    def fake_run(command: list[str], *, cwd: Path) -> dict:
+        joined = " ".join(command)
+        ref = _fake_ref_exists(joined, {"refs/heads/main", "refs/remotes/origin/main"})
+        if ref is not None:
+            return ref
+        if joined == "git status --short --branch":
+            return {"command": joined, "returncode": 0, "stdout": "## main...origin/main", "stderr": ""}
+        if joined.startswith("git branch --merged "):
+            return {
+                "command": joined,
+                "returncode": 128,
+                "stdout": "",
+                "stderr": "fatal: malformed object name main",
+            }
+        raise AssertionError(f"unexpected command: {joined}")
+
+    monkeypatch.setattr(finish, "run", fake_run)
+
+    plan = finish.finish_plan(Path("."))
+
+    assert plan["status"] == "blocked"
+    assert plan["reason"] == "merged_local_list_failed"
+    assert plan["local_merged_branches"] == []
+    assert plan["remote_merged_branches"] == []
