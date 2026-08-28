@@ -28,7 +28,7 @@ profiles:
     layer: smoke
     status: adopted
     detect_any:
-      - pyproject.toml
+      - skills/engineering-autopilot/manifest.yaml
     required: true
     execute: true
     checks:
@@ -47,7 +47,9 @@ profiles:
     execute: true
     checks:
       - id: skill_sync_drift
+        kind: json_status
         argv: ["python", "-m", "engineering_brain", "skill-sync", "--target", "all", "--json"]
+        ok_statuses: ["ok"]
     insufficient_if:
       - runtime skill drift を無視して完了扱いする
 

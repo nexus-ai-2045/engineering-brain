@@ -35,12 +35,16 @@
           "id": {"type": "string", "minLength": 1},
           "kind": {
             "type": "string",
-            "enum": ["argv", "compile_tracked_python", "human"],
+            "enum": ["argv", "compile_tracked_python", "human", "json_status"],
             "default": "argv"
           },
           "argv": {
             "type": "array",
             "items": {"type": "string"}
+          },
+          "ok_statuses": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
           }
         },
         "additionalProperties": false

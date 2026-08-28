@@ -43,7 +43,7 @@ def test_closeout_compiles_tracked_python_files_not_fixed_package(
     ] in commands
 
 
-def test_closeout_without_matching_profile_does_not_invent_pass_for_missing_stack(
+def test_closeout_without_matching_profile_reports_not_applicable_not_fake_pass(
     monkeypatch,
     tmp_path: Path,
 ) -> None:
@@ -62,5 +62,8 @@ def test_closeout_without_matching_profile_does_not_invent_pass_for_missing_stac
     result = gates.closeout_repo(tmp_path)
 
     assert result["verification"]["status"] == "ok"
-    assert result["verification"]["evidence"] == []
     assert result["verification"]["selected_profiles"] == []
+    assert result["verification"]["summary"]["not_applicable"] >= 1
+    assert all(
+        item["status"] == "not_applicable" for item in result["verification"]["evidence"]
+    )
