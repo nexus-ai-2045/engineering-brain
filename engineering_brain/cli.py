@@ -164,9 +164,16 @@ def main(argv: list[str] | None = None) -> int:
     feedback_parser.add_argument("--input", required=True)
     feedback_parser.add_argument("--json", action="store_true")
 
-    finish_parser = sub.add_parser("finish", help="Plan or apply post-merge branch cleanup.")
+    finish_parser = sub.add_parser(
+        "finish",
+        help="Plan post-merge branch cleanup. Deletion is delegated to the cleanup SSOT.",
+    )
     finish_parser.add_argument("--repo", default=".")
-    finish_parser.add_argument("--apply-local", action="store_true")
+    finish_parser.add_argument(
+        "--apply-local",
+        action="store_true",
+        help="Show the delegation target. This command never deletes branches itself.",
+    )
     finish_parser.add_argument("--json", action="store_true")
 
     hooks_parser = sub.add_parser("hooks", help="Install repo-provided local Git hooks.")
