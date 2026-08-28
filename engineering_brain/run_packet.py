@@ -7,6 +7,7 @@ from .algorithms import infer_algorithm_inputs, select_algorithms
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import select_technology_sources
 from .skill_sync import compare_skill_targets, default_skill_source
+from .verification import plan_verification
 
 
 HUMAN_STOPLINES = [
@@ -33,6 +34,7 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
     )
     skill_source = default_skill_source()
     skill_sync = compare_skill_targets(source_dir=skill_source)
+    verification_plan = plan_verification(resolved_repo)
     closeout_payload: dict[str, Any]
     if closeout:
         closeout_payload = closeout_repo(resolved_repo)
@@ -71,6 +73,14 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
         "verification": {
             "closeout_status": closeout_payload.get("overall", closeout_payload.get("status")),
             "skill_sync_status": skill_sync["status"],
+            "profile_plan": {
+                "schema_version": verification_plan["schema_version"],
+                "detected_signals": verification_plan["detected_signals"],
+                "selected_profile_ids": [
+                    profile["id"] for profile in verification_plan["selected_profiles"]
+                ],
+                "summary": verification_plan["summary"],
+            },
         },
         "human_stoplines": sorted(blocked),
         "next_actions": [

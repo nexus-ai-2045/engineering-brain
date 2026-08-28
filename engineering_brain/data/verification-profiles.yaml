@@ -1,0 +1,122 @@
+version: 1
+updated_at: "2026-08-28"
+# SSOT: engineering_brain/data/verification-profiles.yaml (packaged with the wheel).
+# closeout v2 は detect_any で適用可否を決め、required∧applicable の fail / not_run だけを overall block にする。
+# execute=false の check は計画だけ返し、外部状態を変える command を勝手に走らせない。
+profiles:
+  - id: python_unit
+    layer: unit
+    status: adopted
+    detect_any:
+      - pyproject.toml
+      - setup.cfg
+      - setup.py
+      - requirements.txt
+    required: true
+    execute: true
+    checks:
+      - id: pytest
+        argv: ["python", "-m", "pytest", "-q"]
+      - id: compile_tracked_python
+        kind: compile_tracked_python
+    insufficient_if:
+      - required unit checks failed
+      - required unit checks were not run
+      - CI と local で違う dependency set を使っている
+
+  - id: python_smoke_cli
+    layer: smoke
+    status: adopted
+    detect_any:
+      - pyproject.toml
+    required: true
+    execute: true
+    checks:
+      - id: version_packet
+        argv: ["python", "-m", "engineering_brain", "version", "--json"]
+    insufficient_if:
+      - package entrypoint smoke failed
+      - unit green だけで runtime entrypath 未確認
+
+  - id: python_integration_skill_sync
+    layer: integration
+    status: adopted
+    detect_any:
+      - skills/engineering-autopilot/SKILL.md
+    required: false
+    execute: true
+    checks:
+      - id: skill_sync_drift
+        argv: ["python", "-m", "engineering_brain", "skill-sync", "--target", "all", "--json"]
+    insufficient_if:
+      - runtime skill drift を無視して完了扱いする
+
+  - id: node_unit
+    layer: unit
+    status: candidate
+    detect_any:
+      - package.json
+    required: false
+    execute: false
+    checks:
+      - id: npm_test
+        argv: ["npm", "test"]
+    insufficient_if:
+      - Node repo なのに unit evidence がない
+
+  - id: go_unit
+    layer: unit
+    status: candidate
+    detect_any:
+      - go.mod
+    required: false
+    execute: false
+    checks:
+      - id: go_test
+        argv: ["go", "test", "./..."]
+    insufficient_if:
+      - Go repo なのに unit evidence がない
+
+  - id: docker_smoke
+    layer: smoke
+    status: candidate
+    detect_any:
+      - Dockerfile
+      - compose.yaml
+      - docker-compose.yml
+    required: false
+    execute: false
+    checks:
+      - id: docker_build
+        argv: ["docker", "build", "."]
+    insufficient_if:
+      - container image に実行経路が含まれているか未確認
+
+  - id: terraform_validate
+    layer: integration
+    status: candidate
+    detect_any:
+      - main.tf
+      - versions.tf
+    required: false
+    execute: false
+    checks:
+      - id: terraform_fmt_check
+        argv: ["terraform", "fmt", "-check"]
+      - id: terraform_validate
+        argv: ["terraform", "validate"]
+    insufficient_if:
+      - Terraform 変更なのに fmt/validate evidence がない
+
+  - id: e2e_opt_in
+    layer: e2e
+    status: adopted
+    detect_any: []
+    selection: opt_in
+    required: false
+    execute: false
+    checks:
+      - id: human_e2e_review
+        kind: human
+    insufficient_if:
+      - e2e を required にしたのに人間レビュー証拠がない

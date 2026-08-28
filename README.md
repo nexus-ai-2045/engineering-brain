@@ -66,7 +66,7 @@ flowchart LR
 | 9. マージ | latest head、checks、review、merge可否 | merge commit | current conversation のmerge承認なし |
 | 10. 後片付け | merged proof、dirty state、他者worktree | main同期、cleanup plan | 未merge・dirty・削除承認なし |
 
-現在のCLIはこのうち run packet、research packet、gate、closeout、PR packet、skill drift check、version、merge後cleanup planを実装済みです。verification profileの拡張はロードマップ上の次段階です。
+現在のCLIはこのうち run packet、research packet、gate、closeout v2、verification profile、PR packet、skill drift check、version、merge後cleanup planを実装済みです。
 
 ## Quick Start
 
@@ -76,6 +76,7 @@ python -m engineering_brain algorithms select --signal shortest_path --signal we
 python -m engineering_brain algorithms compare --id dijkstra --id bellman_ford --json
 python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --precedent-outcome hold --json
 python -m engineering_brain pr --repo . --json
+python -m engineering_brain verify --repo . --json
 python -m engineering_brain closeout --repo . --json
 ```
 
@@ -85,6 +86,7 @@ python -m engineering_brain closeout --repo . --json
 
 ```powershell
 engineering-brain run --task "<task>" --json
+engineering-brain verify --repo . --json
 engineering-brain closeout --repo . --json
 engineering-brain pr --repo . --json
 ```
@@ -93,6 +95,7 @@ module として実行する場合:
 
 ```powershell
 python -m engineering_brain run --task "<task>" --json
+python -m engineering_brain verify --repo . --json
 python -m engineering_brain closeout --repo . --json
 python -m engineering_brain pr --repo . --json
 ```
@@ -106,6 +109,7 @@ python -m engineering_brain pr --repo . --json
 - `python -m engineering_brain algorithms compare --id <id> --id <id> --json`: 候補の前提・計算量・交換条件・検証法を比較する。
 - `python -m engineering_brain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
 - `python -m engineering_brain pr --repo . --json`: 差分・closeout・stopline から plan-only の日本語 PR packet を作る（PR作成/pushはしない）。
+- `python -m engineering_brain verify --repo . --json`: repo 検出に応じた verification profile を plan-only で返す（実行しない）。
 - `ai-ratchet-gate --repo .`: tracked∧ignored の新規矛盾を fail-closed で止める（Release wheel から導入）。
 - `python tools/run_repo_preflight.py --repo .`: upstream repo-preflight を shadow consistency 付きで実行する。
 
@@ -129,7 +133,7 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
 | GitHub Release / tag | 未作成。別承認 |
-| primary next work | verification profile / closeout v2。未吸収: research-review eval、runtime-contract learnings |
+| primary next work | candidate verification profile の execute 昇格、local-learnings field_review。verification profile / closeout v2 は実装済み |
 
 ## Local SSOT
 
@@ -192,13 +196,15 @@ FDEへ学びを返す場合は、`python -m engineering_brain feedback --input <
 
 ## 完了判定
 
-`closeout` は次を分けて返します。
+`closeout` は closeout v2 として次を分けて返します。
 
 - `implementation`: 実装差分や構成があるか
-- `verification`: test / compile / smoke が揃うか
+- `verification`: verification profile に基づく evidence（`pass` / `fail` / `not_run` / `not_applicable`）
 - `operation`: 継続運用に必要な gate が揃うか
 - `external_public`: 公開・外部送信・GitHub visibility などの人間承認境界
 - `public_path_redaction`: `<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` へ置換されているか
+
+verification profile の正本は `engineering_brain/data/verification-profiles.yaml` です。計画だけ見るときは `python -m engineering_brain verify --repo . --json` を使います。
 
 ## 公開境界
 

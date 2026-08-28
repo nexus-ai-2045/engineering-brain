@@ -16,14 +16,14 @@
 | Reinvention avoidance | covered | `docs/AUTOPILOT_GOAL_DESIGN.md`, `engineering_brain/data/adoption-units.yaml` | run packet 実装で evidence 付き検査へ昇格 |
 | Research / GitHub method | covered | `engineering_brain research`, `docs/AUTOPILOT_GOAL_DESIGN.md`, `reinvention_candidate_research_gate` | PR packet と closeout evidence へ接続する |
 | TDD / regression | covered | `README.md`, `tests/` | lifecycle command で選択可能にする |
-| Smoke / preflight / E2E | partial | `docs/AUTOPILOT_GOAL_DESIGN.md` | `registry/verification-profiles.yaml` を追加する |
+| Smoke / preflight / E2E | covered | `engineering_brain/data/verification-profiles.yaml`, `engineering_brain verify`, closeout v2 | candidate stack（Node/Go/Docker/Terraform）の execute 昇格は別 slice |
 | Security / containment | covered | `docs/OPERATING_MODEL.md`, `SECURITY.md` | codex-security scan slice を追加する |
 | Public path redaction | covered | `docs/PUBLIC_PATH_POLICY.md`, `tests/test_path_safety.py`, `engineering_brain pr` | keep redaction on PR body / packet |
 | GitHub identity gate | partial | local skill + docs | repo-owned identity command を追加する |
-| PR lifecycle | covered | `.github/`, `CONTRIBUTING.md`, `engineering_brain pr` | verification profile と接続する |
+| PR lifecycle | covered | `.github/`, `CONTRIBUTING.md`, `engineering_brain pr` | verification profile 接続済み。release/tag は別承認 |
 | Human visual review | partial | `engineering_brain run`, `engineering_brain pr`, `docs/AUTOPILOT_GOAL_DESIGN.md` | review state を merge gate へ接続する |
 | Merge / branch cleanup | covered | `engineering_brain finish`, `tools/hooks/post-merge`, `docs/AUTOPILOT_GOAL_DESIGN.md` | remote cleanup は approval / identity gate を維持する |
-| Operation guarantee | covered | `engineering_brain closeout`, `docs/OPERATING_MODEL.md` | evidence-based closeout v2 を追加する |
+| Operation guarantee | covered | `engineering_brain closeout` v2, `docs/OPERATING_MODEL.md` | evidence status 分離済み。外部 preflight 実行は既存 wrapper を維持 |
 | PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
 | Runtime skill | covered | `skills/engineering-autopilot/` repo-owned source, Codex / Claude Code runtime copies, `engineering_brain skill-sync --target all` | runtime drift を継続監視する |
 | Best-practice source catalog | covered | `engineering_brain/data/technology-sources.yaml` | adopted / candidate / hold status を強める |
@@ -53,11 +53,11 @@
 2. runtime install copy は同期済み。継続的な drift check を運用に入れる。
 3. `registry/local-learnings.yaml` の candidate packets は追加済み。adopt / field_review は未了。
 4. GitHub identity gate は local skill に依存しており、repo-owned command ではない。
-5. verification profile と closeout v2 evidence schema は未実装。
+5. Node / Go / Docker / Terraform verification profile は candidate + plan-only。execute 昇格は未了。
 
 ## Next slices
 
 1. `registry/local-learnings.yaml` の candidate を field_review し、adopt / hold を判断する。
-2. verification profile を追加する。
-3. `engineering_brain run --closeout` の evidence schema を強化する。
-4. Obsidian / memory から候補 packet を作る read-only importer を追加する。
+2. candidate verification profile の execute 昇格（必要な stack だけ）。
+3. Obsidian / memory から候補 packet を作る read-only importer を追加する。
+4. first GitHub Release packet（tag / announcement は別承認）。

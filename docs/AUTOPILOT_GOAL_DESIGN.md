@@ -333,9 +333,9 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 | 0.5 | migration ledger | [PR #1 migration ledger](PR1_MIGRATION_LEDGER.md) | adopt / rewrite / reject が file 単位で決まる |
 | 1 | lifecycle contract | schema / phase registry / lifecycle tests | 不正遷移が fail-closed |
 | 2 | planner | task から TDD / research / verification plan | unknown / public / credential fixture が通る |
-| 3 | executor | allowlist command + evidence | arbitrary shell が拒否される |
-| 4 | closeout v2 | run evidence based closeout | 未実行 / 失敗 / not-applicable を分離 |
-| 5 | PR packet | 日本語 PR body generator | GitHub 操作なしで packet 生成 |
+| 3 | executor / verification profile | allowlist command + evidence | done: profile registry + plan/execute 分離 |
+| 4 | closeout v2 | run evidence based closeout | done: pass / fail / not_run / not_applicable |
+| 5 | PR packet | 日本語 PR body generator | done: GitHub 操作なしで packet 生成 |
 | 6 | finish planner | merge / sync / cleanup plan | dirty / unmerged / stale が止まる |
 | 7 | skill | repo-owned thin skill | runtime copy なしで CLI 完結 |
 | 8 | cutover | engineering-* migration packet | 実 rename / public 化は別承認 |

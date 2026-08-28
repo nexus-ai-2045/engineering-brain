@@ -139,6 +139,8 @@ def public_stdout_packet(
     if verification:
         public_closeout["verification"] = {
             "status": verification.get("status"),
+            "schema_version": verification.get("schema_version"),
+            "summary": verification.get("summary"),
             "pytest": _command_summary(verification.get("pytest")),
             "compileall": _command_summary(verification.get("compileall")),
         }
@@ -518,6 +520,22 @@ def _verification_command_lines(closeout: dict[str, Any]) -> list[str]:
         return ["- verification commands: （closeout 未実行）"]
     verification = closeout.get("verification") or {}
     lines: list[str] = []
+    summary = verification.get("summary")
+    if isinstance(summary, dict) and summary:
+        lines.append(
+            "- evidence summary: "
+            + ", ".join(
+                f"{key}={summary.get(key, 0)}"
+                for key in ("pass", "fail", "not_run", "not_applicable")
+            )
+        )
+    selected = verification.get("selected_profiles") or []
+    if selected:
+        profile_ids = ", ".join(
+            str(item.get("id")) for item in selected if isinstance(item, dict)
+        )
+        if profile_ids:
+            lines.append(f"- verification profiles: `{profile_ids}`")
     for key in ("pytest", "compileall"):
         result = verification.get(key)
         if not isinstance(result, dict):
@@ -526,7 +544,22 @@ def _verification_command_lines(closeout: dict[str, Any]) -> list[str]:
         if not command:
             continue
         code = result.get("returncode")
-        lines.append(f"- `{command}` → returncode={code}")
+        status = result.get("status")
+        if status:
+            lines.append(f"- `{command}` → status={status} returncode={code}")
+        else:
+            lines.append(f"- `{command}` → returncode={code}")
+    evidence = verification.get("evidence") or []
+    for item in evidence:
+        if not isinstance(item, dict):
+            continue
+        if item.get("check_id") in {"pytest", "compile_tracked_python"}:
+            continue
+        command = item.get("command") or item.get("check_id")
+        lines.append(
+            f"- {item.get('profile_id')}/{item.get('check_id')}: "
+            f"`{command}` → status={item.get('status')}"
+        )
     if not lines:
         lines.append("- verification commands: （closeout payload に command 記録なし）")
     return lines
