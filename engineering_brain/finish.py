@@ -11,8 +11,15 @@ HOOK_NAMES = ["pre-commit", "post-merge"]
 
 # 削除の実行正本。FDE の ADR-0006 が宣言している。
 # 本 repo は plan と stopline の提示に徹し、削除自体は委譲する。
+# CLEANUP_SSOT_COMMAND は FDE checkout 上で動くテンプレートであり、
+# この repo の cwd から直接実行できるパスではない。
 CLEANUP_SSOT = "fractal-decision-ecosystem scripts/post_merge_cleanup.py"
-CLEANUP_SSOT_COMMAND = "python scripts/post_merge_cleanup.py --apply"
+CLEANUP_SSOT_COMMAND = "python scripts/post_merge_cleanup.py --apply --cwd <REPO>"
+CLEANUP_SSOT_COMMAND_NOTE = (
+    "Run from a fractal-decision-ecosystem checkout. "
+    "Replace <REPO> with the absolute path of the target git root. "
+    "This engineering-brain tree does not contain the SSOT script."
+)
 
 _LOCAL_BASE_CANDIDATES = ("refs/heads/main", "refs/heads/master")
 _REMOTE_BASE_CANDIDATES = ("refs/remotes/origin/main", "refs/remotes/origin/master")
@@ -127,7 +134,9 @@ def finish_plan(repo: Path) -> dict[str, Any]:
                 "suggested_commands": [],
                 "cleanup_ssot": CLEANUP_SSOT,
             }
-        remote_branches = _cleanup_remote_branches(remote_result["stdout"])
+        remote_branches = _cleanup_remote_branches(
+            remote_result["stdout"], remote_base=base_refs["remote"]
+        )
     suggested = _suggested_commands(local_branches, remote_branches)
 
     return {
@@ -141,6 +150,8 @@ def finish_plan(repo: Path) -> dict[str, Any]:
         "human_stoplines": _human_stoplines(),
         "suggested_commands": suggested,
         "cleanup_ssot": CLEANUP_SSOT,
+        "cleanup_ssot_command": CLEANUP_SSOT_COMMAND,
+        "cleanup_ssot_command_note": CLEANUP_SSOT_COMMAND_NOTE,
         "apply_policy": {
             "default": "plan_only",
             "local_cleanup": "delegated_to_cleanup_ssot",
@@ -165,6 +176,7 @@ def apply_local_cleanup(repo: Path) -> dict[str, Any]:
     plan["applied"] = False
     plan["delegated_to"] = CLEANUP_SSOT
     plan["delegated_command"] = CLEANUP_SSOT_COMMAND
+    plan["delegated_command_note"] = CLEANUP_SSOT_COMMAND_NOTE
     plan["reason_not_applied"] = "local_delete_delegated_to_cleanup_ssot"
     return plan
 
@@ -234,11 +246,15 @@ def _cleanup_local_branches(stdout: str, *, current_branch: str | None) -> list[
     return branches
 
 
-def _cleanup_remote_branches(stdout: str) -> list[str]:
+def _cleanup_remote_branches(stdout: str, *, remote_base: str | None = None) -> list[str]:
+    # origin/main だけでなく、解決済み remote base（例: origin/master）も除外する。
+    excluded = {"origin/main", "origin/master", "origin/HEAD"}
+    if remote_base is not None:
+        excluded.add(remote_base.removeprefix("refs/remotes/"))
     branches = []
     for line in stdout.splitlines():
         branch = line.strip()
-        if not branch or branch in {"origin/main", "origin/HEAD"}:
+        if not branch or branch in excluded:
             continue
         if " -> " in branch:
             continue
@@ -247,9 +263,9 @@ def _cleanup_remote_branches(stdout: str) -> list[str]:
 
 
 def _suggested_commands(local_branches: list[str], remote_branches: list[str]) -> list[str]:
-    # 削除コマンドは本 repo で組み立てない。実行正本への委譲だけを示す。
-    if local_branches or remote_branches:
-        return [CLEANUP_SSOT_COMMAND]
+    # この checkout には SSOT script が無いので、cwd 相対の実行コマンドは出さない。
+    # 委譲先は cleanup_ssot / cleanup_ssot_command(_note) を機械可読に載せる。
+    _ = (local_branches, remote_branches)
     return []
 
 

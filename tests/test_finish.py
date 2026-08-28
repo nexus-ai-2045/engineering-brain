@@ -46,8 +46,10 @@ def test_finish_plan_reports_merged_local_and_remote_candidates(monkeypatch) -> 
     assert result["local_merged_branches"] == ["codex/done-one", "codex/done-two"]
     assert result["remote_merged_branches"] == ["origin/codex/done-one"]
     assert "remote_branch_delete" in result["human_stoplines"]
-    assert result["suggested_commands"] == [finish.CLEANUP_SSOT_COMMAND]
+    assert result["suggested_commands"] == []
     assert "post_merge_cleanup.py" in result["cleanup_ssot"]
+    assert "--cwd <REPO>" in result["cleanup_ssot_command"]
+    assert "fractal-decision-ecosystem" in result["cleanup_ssot_command_note"]
 
 
 def test_finish_plan_blocks_on_dirty_worktree(monkeypatch) -> None:
@@ -174,7 +176,10 @@ def test_apply_local_never_deletes_and_names_the_ssot(tmp_path: Path) -> None:
     assert result["applied"] is False
     assert result["mode"] == "apply-local"
     assert "post_merge_cleanup.py" in result["delegated_to"]
+    assert "--cwd <REPO>" in result["delegated_command"]
+    assert "fractal-decision-ecosystem" in result["delegated_command_note"]
     assert result["reason_not_applied"] == "local_delete_delegated_to_cleanup_ssot"
+    assert result["suggested_commands"] == []
     # 実物の repo で branch が残っていることを確認する
     branches = _subprocess.run(
         ["git", "branch", "--format", "%(refname:short)"],
@@ -188,6 +193,26 @@ def test_apply_local_never_deletes_and_names_the_ssot(tmp_path: Path) -> None:
 def test_plan_names_the_cleanup_ssot(tmp_path: Path) -> None:
     repo = _make_repo(tmp_path)
     assert "post_merge_cleanup.py" in finish.finish_plan(repo)["cleanup_ssot"]
+
+
+def test_finish_plan_excludes_resolved_remote_base_master(tmp_path: Path) -> None:
+    """origin/master が base のとき、それ自体を削除候補にしない。"""
+    repo = _make_repo(tmp_path, default_branch="feature")
+    _git(repo, "update-ref", "refs/remotes/origin/master", "HEAD")
+
+    plan = finish.finish_plan(repo)
+
+    assert plan["base_refs"]["remote"] == "refs/remotes/origin/master"
+    assert "origin/master" not in plan["remote_merged_branches"]
+    assert plan["status"] == "ok"
+    assert plan["reason"] == "nothing_to_clean"
+
+
+def test_cleanup_remote_branches_excludes_resolved_base() -> None:
+    stdout = "origin/master\norigin/HEAD -> origin/master\norigin/codex/done\n"
+    assert finish._cleanup_remote_branches(
+        stdout, remote_base="refs/remotes/origin/master"
+    ) == ["origin/codex/done"]
 
 
 def test_finish_plan_blocks_when_merged_list_fails(monkeypatch) -> None:
