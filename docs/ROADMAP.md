@@ -33,7 +33,7 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | O | finish planner / hook template | merge 後の cleanup 候補を plan し、opt-in hook で見落としを減らす | done: PR #15 |
 | P | README lifecycle visualization / docs drift cleanup | ゴールまでの見取り図と migration/public 状態を現実へ合わせる | done: PR #17 |
 | Q | first GitHub Release packet | tag / GitHub Release / announcement は別承認のまま、version surface と settings を揃える | current |
-| R | verification profile / closeout v2 | task に応じた smoke / preflight / evidence schema を返す | next |
+| R | verification profile / closeout v2 | task に応じた smoke / preflight / evidence schema を返す | done: profile registry + closeout v2 |
 
 ## Cutover policy
 

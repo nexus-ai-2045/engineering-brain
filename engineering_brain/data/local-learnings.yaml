@@ -93,6 +93,7 @@ learnings:
     assurance_gate: null
     decision_reason: >
       再利用 rule は明確。現行 schema へ載せ替えただけで、この repo の CI に対する field review は未実施のため candidate。
+      verification profile の python_unit.insufficient_if へ rule を wrap 済み。adopt は field_review 後。
 
   - id: executable-path-contract
     source_lane: memory
@@ -111,6 +112,7 @@ learnings:
     assurance_gate: null
     decision_reason: >
       実行経路の欠落は closeout の verification と operation を分ける既存 gate に接続できる。この repo は container を必須にしていないため candidate。
+      verification profile の python_smoke_cli / docker_smoke へ rule を wrap 済み。container execute 昇格は別 slice。
 
   - id: artifact-lineage-contract
     source_lane: memory

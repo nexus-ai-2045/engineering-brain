@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/verification-profile.schema.json",
+  "title": "Engineering Brain Verification Profile",
+  "type": "object",
+  "required": [
+    "id",
+    "layer",
+    "status",
+    "detect_any",
+    "required",
+    "execute",
+    "checks",
+    "insufficient_if"
+  ],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "layer": {"type": "string", "enum": ["unit", "integration", "smoke", "e2e"]},
+    "status": {"type": "string", "enum": ["adopted", "candidate", "hold", "rejected"]},
+    "detect_any": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "required": {"type": "boolean"},
+    "execute": {"type": "boolean"},
+    "selection": {"type": "string", "enum": ["auto", "opt_in"], "default": "auto"},
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {
+            "type": "string",
+            "enum": ["argv", "compile_tracked_python", "human"],
+            "default": "argv"
+          },
+          "argv": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "insufficient_if": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "additionalProperties": false
+}

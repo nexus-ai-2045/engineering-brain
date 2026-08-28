@@ -46,6 +46,8 @@ def test_build_run_packet_combines_route_gates_catalog_skill_sync_and_closeout(
         "claude-code",
     ]
     assert packet["closeout"]["status"] == "skipped"
+    assert "python_unit" in packet["verification"]["profile_plan"]["selected_profile_ids"]
+    assert packet["verification"]["profile_plan"]["schema_version"] == 2
     assert "push" in packet["human_stoplines"]
     assert "pr_create" in packet["human_stoplines"]
     assert packet["next_actions"][0] == "review run packet"
