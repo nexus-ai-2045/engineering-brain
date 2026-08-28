@@ -23,6 +23,7 @@ from .registry import (
     adoption_units,
     check_learning_assurance,
     get_local_learning,
+    is_operationally_adopted,
     list_local_learnings,
     plan_adopt_learning,
     select_technology_sources,
@@ -261,7 +262,7 @@ def main(argv: list[str] | None = None) -> int:
                 "counts": {
                     "total": len(items),
                     "pending_field_review": sum(1 for item in items if item.field_review == "pending"),
-                    "adopted": sum(1 for item in items if item.decision == "adopted"),
+                    "adopted": sum(1 for item in items if is_operationally_adopted(item)),
                 },
             }
             return emit(payload, as_json=args.json)

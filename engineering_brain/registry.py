@@ -8,13 +8,13 @@ from typing import Any
 PACKAGE_ROOT = Path(__file__).resolve().parent
 DEFAULT_REGISTRY = PACKAGE_ROOT / "data" / "adoption-units.yaml"
 DEFAULT_TECHNOLOGY_SOURCES = PACKAGE_ROOT / "data" / "technology-sources.yaml"
-DEFAULT_LOCAL_LEARNINGS = PACKAGE_ROOT.parent / "registry" / "local-learnings.yaml"
+DEFAULT_LOCAL_LEARNINGS = PACKAGE_ROOT / "data" / "local-learnings.yaml"
 
 LEARNING_DECISIONS = frozenset({"candidate", "field_review", "adopted", "hold", "rejected"})
 LEARNING_DECISION_ALIASES = {"adopt": "adopted", "reject": "rejected"}
 FIELD_REVIEW_STATES = frozenset({"pending", "in_progress", "passed"})
 LEARNING_TRANSITIONS: dict[str, frozenset[str]] = {
-    "candidate": frozenset({"field_review", "hold", "rejected"}),
+    "candidate": frozenset({"field_review"}),
     "field_review": frozenset({"adopted", "hold", "rejected"}),
     "hold": frozenset({"field_review"}),
     "adopted": frozenset(),
@@ -140,12 +140,10 @@ def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, Any]:
             continue
         if current is None or indent < 4:
             continue
-        if current_folded_key is not None and indent >= 6 and not text.startswith("- "):
-            if ":" in text and indent == 4:
-                flush_folded()
-            else:
-                folded_parts.append(text)
-                continue
+        if current_folded_key is not None and indent >= 6:
+            # Keep list-looking lines (e.g. "- reason") inside active > / | scalars.
+            folded_parts.append(text)
+            continue
         if indent == 4 and ":" in text:
             flush_folded()
             key, raw_value = text.split(":", 1)
@@ -376,7 +374,11 @@ def list_local_learnings(
     selected = local_learnings(path)
     if decision is not None:
         wanted = normalize_learning_decision(decision)
-        selected = [item for item in selected if item.decision == wanted]
+        if wanted == "adopted":
+            # Fail-closed: decision string alone is not enough while field_review is pending.
+            selected = [item for item in selected if is_operationally_adopted(item)]
+        else:
+            selected = [item for item in selected if item.decision == wanted]
     if field_review is not None:
         if field_review not in FIELD_REVIEW_STATES:
             raise ValueError(f"invalid field_review filter: {field_review}")
@@ -413,6 +415,10 @@ def check_learning_assurance(learning: LocalLearning) -> dict[str, Any]:
     }
 
 
+def is_operationally_adopted(learning: LocalLearning) -> bool:
+    return check_learning_assurance(learning)["operationally_guaranteed"] is True
+
+
 def _field_review_for_target(current: LocalLearning, target: str) -> str:
     if target == "field_review":
         return "in_progress"
@@ -435,7 +441,7 @@ def plan_learning_transition(
 
     Ladder: candidate -> field_review -> adopted|hold|rejected.
     Adopt remains plan/evidence only unless current-turn approval is present.
-    This API never mutates ``registry/local-learnings.yaml``.
+    This API never mutates ``engineering_brain/data/local-learnings.yaml``.
     """
     current = normalize_learning_decision(learning.decision)
     target = normalize_learning_decision(target_decision)

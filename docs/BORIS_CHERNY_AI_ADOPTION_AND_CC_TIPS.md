@@ -55,7 +55,7 @@ source_pointers:
 
 - **maturity 自己評価** → `registry/adoption-units.yaml` の `ai_adoption_maturity_advisory`(G1 advisory / status: candidate)。`ai_adoption_review` / `tooling_migration` 時に「現 step + 次ボトルネック + 次ガードレール」を対で挙げる。
 - **検証ループ(tip #13)** → 新規 gate を作らず既存 `tdd_regression_gate`(G4 operational)へ写像(reinvention 回避)。
-- **成長(compounding)** → `registry/local-learnings.yaml` の各 packet に `review_trigger`(cycle ベース)+ `field_review: pending`。field review を通すたび adopt を精緻化し、二次由来細部を一次突合へ格上げする。
+- **成長(compounding)** → `engineering_brain/data/local-learnings.yaml` の各 packet に `review_trigger`(cycle ベース)+ `field_review: pending`。field review を通すたび adopt を精緻化し、二次由来細部を一次突合へ格上げする。
 - **durable decision** → ADR 化は未実施(theme-grep + 目視 GO が要るため保留)。
 
 ## 停止線 / 注意

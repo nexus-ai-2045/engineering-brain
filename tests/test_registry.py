@@ -5,10 +5,15 @@ import pytest
 
 from engineering_brain.cli import main
 from engineering_brain.registry import (
+    DEFAULT_LOCAL_LEARNINGS,
+    DEFAULT_REGISTRY,
     LocalLearning,
+    PACKAGE_ROOT,
     adoption_units,
     check_learning_assurance,
+    is_operationally_adopted,
     list_local_learnings,
+    load_registry,
     local_learnings,
     plan_adopt_learning,
     plan_learning_transition,
@@ -42,7 +47,8 @@ RUNTIME_LEARNING_OBSERVATION_DATE = "2026-07-19"
 def _local_learnings_text() -> str:
     path = (
         Path(__file__).resolve().parents[1]
-        / "registry"
+        / "engineering_brain"
+        / "data"
         / "local-learnings.yaml"
     )
     assert path.is_file()
@@ -193,6 +199,11 @@ def test_invalid_learning_transitions_fail_closed() -> None:
     assert skipped["status"] == "error"
     assert any("invalid transition" in error or "field_review first" in error for error in skipped["errors"])
 
+    for terminal in ("hold", "rejected"):
+        bypass = plan_learning_transition(learning, target_decision=terminal)
+        assert bypass["status"] == "error"
+        assert any(f"invalid transition: candidate -> {terminal}" in error for error in bypass["errors"])
+
     rejected = replace(learning, decision="rejected", field_review="passed")
     reopen = plan_learning_transition(rejected, target_decision="adopted", current_turn_approval=True)
     assert reopen["status"] == "error"
@@ -231,6 +242,113 @@ def test_field_review_then_adopt_requires_current_turn_approval() -> None:
         )["status"]
         == "pass"
     )
+
+
+def test_default_local_learnings_resolves_like_packaged_registry_data() -> None:
+    assert DEFAULT_LOCAL_LEARNINGS.parent == DEFAULT_REGISTRY.parent
+    assert DEFAULT_LOCAL_LEARNINGS == PACKAGE_ROOT / "data" / "local-learnings.yaml"
+    assert DEFAULT_LOCAL_LEARNINGS.is_file()
+    assert local_learnings(DEFAULT_LOCAL_LEARNINGS)
+
+
+def test_adopted_list_and_count_ignore_pending_field_review(tmp_path: Path, capfd) -> None:
+    fixture = tmp_path / "mixed-learnings.yaml"
+    fixture.write_text(
+        """
+version: 1
+updated_at: "2026-08-28"
+learnings:
+  - id: pending-but-claims-adopted
+    source_lane: memory
+    source_pointer:
+      - "fixture pointer"
+    observed_problem: mixed fail-closed case
+    proposed_solution: null
+    reusable_rule: pending field_review is never adopted
+    evidence: fixture
+    freshness: "2026-08-28"
+    rights_and_privacy: fixture only
+    adoption_target: tests
+    decision: adopted
+    field_review: pending
+    review_trigger: "fixture cycle"
+    assurance_gate: null
+    decision_reason: forged adopted with pending review
+  - id: truly-adopted
+    source_lane: memory
+    source_pointer:
+      - "fixture pointer adopted"
+    observed_problem: real adopt
+    proposed_solution: null
+    reusable_rule: field_review passed
+    evidence: fixture
+    freshness: "2026-08-28"
+    rights_and_privacy: fixture only
+    adoption_target: tests
+    decision: adopted
+    field_review: passed
+    review_trigger: "fixture cycle"
+    assurance_gate: null
+    decision_reason: operationally adopted
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    pending_claim = next(
+        item for item in local_learnings(fixture) if item.id == "pending-but-claims-adopted"
+    )
+    assert is_operationally_adopted(pending_claim) is False
+    assert list_local_learnings(fixture, decision="adopted") == [
+        item for item in local_learnings(fixture) if item.id == "truly-adopted"
+    ]
+
+    assert main(["learnings", "list", "--registry", str(fixture), "--json"]) == 0
+    listed = capfd.readouterr().out
+    assert '"adopted": 1' in listed
+    assert '"pending_field_review": 1' in listed
+    assert main(["learnings", "list", "--registry", str(fixture), "--decision", "adopted", "--json"]) == 0
+    adopted_list = capfd.readouterr().out
+    assert "truly-adopted" in adopted_list
+    assert "pending-but-claims-adopted" not in adopted_list
+
+
+def test_block_scalar_keeps_list_looking_lines(tmp_path: Path) -> None:
+    fixture = tmp_path / "block-scalar-learnings.yaml"
+    fixture.write_text(
+        """
+version: 1
+updated_at: "2026-08-28"
+learnings:
+  - id: block-scalar-bullets
+    source_lane: memory
+    source_pointer:
+      - "fixture pointer"
+    observed_problem: parser must keep bullets inside scalars
+    proposed_solution: null
+    reusable_rule: keep indented bullet lines
+    evidence: fixture
+    freshness: "2026-08-28"
+    rights_and_privacy: fixture only
+    adoption_target: tests
+    decision: candidate
+    field_review: pending
+    review_trigger: "fixture cycle"
+    assurance_gate: null
+    decision_reason: |
+      summary line
+      - first reason
+      - second reason
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    raw = load_registry(fixture)["learnings"][0]
+    reason = raw["decision_reason"]
+    assert "summary line" in reason
+    assert "- first reason" in reason
+    assert "- second reason" in reason
+    learning = local_learnings(fixture)[0]
+    assert "- first reason" in learning.decision_reason
 
 
 def test_existing_candidate_packets_remain_unchanged_in_decision() -> None:
