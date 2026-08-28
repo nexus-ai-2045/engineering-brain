@@ -121,7 +121,7 @@ def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, Any]:
             flush_folded()
             data["updated_at"] = _parse_scalar(text.split(":", 1)[1])
             continue
-        if indent == 0 and text in {"units:", "sources:", "learnings:"}:
+        if indent == 0 and text in {"units:", "sources:", "learnings:", "profiles:"}:
             flush_folded()
             current_section = text[:-1]
             data[current_section] = []

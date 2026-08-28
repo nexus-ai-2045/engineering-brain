@@ -13,6 +13,8 @@ public seed.
 
 ## Unreleased
 
+- verification profile / closeout v2 を追加。`engineering_brain verify` と profile 駆動の evidence（pass / fail / not_run / not_applicable）を closeout に載せた。
+
 ## 0.2.0 - 2026-08-23
 
 capability release。public seed `0.1.0` 以降の local capability を tag する。

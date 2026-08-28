@@ -23,6 +23,8 @@ def test_adr_index_and_first_decision_exist() -> None:
     assert "複製せず" in workspace_entrypoint
     assert "ADR-0005" in workspace_entrypoint
     assert "ADR-0005-precedent-research-consumer-contract.md" in workspace_entrypoint
+    assert "ADR-0006" in workspace_entrypoint
+    assert "ADR-0006-verification-profile-closeout-v2.md" in workspace_entrypoint
 
 
 def test_knowledge_intake_keeps_obsidian_as_intake() -> None:
