@@ -121,6 +121,10 @@ def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, Any]:
             flush_folded()
             data["updated_at"] = _parse_scalar(text.split(":", 1)[1])
             continue
+        if indent == 0 and text.startswith("profile_load_mode:"):
+            flush_folded()
+            data["profile_load_mode"] = _parse_scalar(text.split(":", 1)[1])
+            continue
         if indent == 0 and text in {"units:", "sources:", "learnings:", "profiles:"}:
             flush_folded()
             current_section = text[:-1]

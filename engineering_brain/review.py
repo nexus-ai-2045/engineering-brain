@@ -137,10 +137,14 @@ def public_stdout_packet(
         "reason": closeout.get("reason"),
     }
     if verification:
+        selected = verification.get("selected_profiles") or []
         public_closeout["verification"] = {
             "status": verification.get("status"),
             "schema_version": verification.get("schema_version"),
-            "summary": verification.get("summary"),
+            "summary": verification.get("summary")
+            if isinstance(verification.get("summary"), dict)
+            else None,
+            "selected_profiles": _public_selected_profiles(selected),
             "pytest": _command_summary(verification.get("pytest")),
             "compileall": _command_summary(verification.get("compileall")),
         }
@@ -261,18 +265,9 @@ def _safe_pr_body(packet: dict[str, Any]) -> str:
             "closeout": {
                 "overall": ((packet.get("checks") or {}).get("closeout") or {}).get("overall")
                 or ((packet.get("checks") or {}).get("closeout") or {}).get("status"),
-                "verification": {
-                    "pytest": _command_summary(
-                        (((packet.get("checks") or {}).get("closeout") or {}).get("verification") or {}).get(
-                            "pytest"
-                        )
-                    ),
-                    "compileall": _command_summary(
-                        (((packet.get("checks") or {}).get("closeout") or {}).get("verification") or {}).get(
-                            "compileall"
-                        )
-                    ),
-                },
+                "verification": _public_verification_for_body(
+                    (((packet.get("checks") or {}).get("closeout") or {}).get("verification") or {})
+                ),
             },
             "public_path_redaction": (packet.get("checks") or {}).get("public_path_redaction")
             or {"status": "unknown"},
@@ -288,6 +283,41 @@ def _safe_pr_body(packet: dict[str, Any]) -> str:
         "external_actions": {"performed": False},
     }
     return render_pr_body_ja(safe_packet)
+
+
+def _public_selected_profiles(selected: Any) -> list[dict[str, str]]:
+    if not isinstance(selected, list):
+        return []
+    out: list[dict[str, str]] = []
+    for item in selected:
+        if not isinstance(item, dict):
+            continue
+        profile_id = str(item.get("id") or "").strip()
+        if not profile_id:
+            continue
+        layer = str(item.get("layer") or "").strip()
+        entry = {"id": profile_id}
+        if layer in {"unit", "integration", "smoke", "e2e"}:
+            entry["layer"] = layer
+        out.append(entry)
+    return out
+
+
+def _public_verification_for_body(verification: dict[str, Any]) -> dict[str, Any]:
+    summary = verification.get("summary") if isinstance(verification.get("summary"), dict) else None
+    return {
+        "status": verification.get("status"),
+        "schema_version": verification.get("schema_version"),
+        "summary": {
+            key: int(summary.get(key, 0) or 0)
+            for key in ("pass", "fail", "not_run", "not_applicable")
+        }
+        if summary is not None
+        else None,
+        "selected_profiles": _public_selected_profiles(verification.get("selected_profiles")),
+        "pytest": _command_summary(verification.get("pytest")),
+        "compileall": _command_summary(verification.get("compileall")),
+    }
 
 
 def _command_summary(result: Any) -> dict[str, Any] | None:
@@ -553,7 +583,9 @@ def _verification_command_lines(closeout: dict[str, Any]) -> list[str]:
     for item in evidence:
         if not isinstance(item, dict):
             continue
-        if item.get("check_id") in {"pytest", "compile_tracked_python"}:
+        if item.get("status") == "not_applicable":
+            continue
+        if item.get("check_id") in {"pytest", "compile_tracked_python", "_profile"}:
             continue
         command = item.get("command") or item.get("check_id")
         lines.append(

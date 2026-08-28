@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import json
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Iterable
 
 from .registry import load_registry
 
@@ -14,6 +15,8 @@ REPO_PROFILES = Path("registry") / "verification-profiles.yaml"
 
 EVIDENCE_STATUSES = ("pass", "fail", "not_run", "not_applicable")
 LAYERS = ("unit", "integration", "smoke", "e2e")
+CHECK_KINDS = ("argv", "compile_tracked_python", "human", "json_status")
+PROFILE_LOAD_MODES = ("extend", "replace")
 
 RunCommand = Callable[[list[str]], dict[str, Any]]
 
@@ -23,6 +26,7 @@ class VerificationCheck:
     id: str
     argv: tuple[str, ...]
     kind: str
+    ok_statuses: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -93,16 +97,22 @@ def _parse_check(raw: dict[str, Any], *, profile_id: str) -> VerificationCheck:
         raise ValueError(f"verification profile {profile_id} has a check without id")
     kind = str(raw.get("kind") or "argv")
     argv = tuple(str(part) for part in _as_str_tuple(raw.get("argv")))
-    if kind == "argv" and not argv:
+    ok_statuses = _as_str_tuple(raw.get("ok_statuses"))
+    if kind in {"argv", "json_status"} and not argv:
         raise ValueError(f"verification profile {profile_id} check {check_id} needs argv")
-    if kind not in {"argv", "compile_tracked_python", "human"}:
+    if kind not in CHECK_KINDS:
         raise ValueError(f"verification profile {profile_id} check {check_id} has invalid kind: {kind}")
-    return VerificationCheck(id=check_id, argv=argv, kind=kind)
+    if kind == "json_status" and not ok_statuses:
+        raise ValueError(
+            f"verification profile {profile_id} check {check_id} needs ok_statuses"
+        )
+    return VerificationCheck(id=check_id, argv=argv, kind=kind, ok_statuses=ok_statuses)
 
 
 def load_verification_profiles(path: Path | None = None) -> list[VerificationProfile]:
     resolved = path or DEFAULT_PROFILES
-    raw_profiles = load_registry(resolved).get("profiles")
+    raw_doc = load_registry(resolved)
+    raw_profiles = raw_doc.get("profiles")
     if not isinstance(raw_profiles, list):
         raise ValueError(f"{resolved} must define a profiles list")
     profiles: list[VerificationProfile] = []
@@ -125,31 +135,47 @@ def load_verification_profiles(path: Path | None = None) -> list[VerificationPro
     return profiles
 
 
-def resolve_profiles_path(repo: Path) -> Path:
+def read_profile_load_mode(path: Path) -> str:
+    raw_doc = load_registry(path)
+    mode = str(raw_doc.get("profile_load_mode") or "extend")
+    if mode not in PROFILE_LOAD_MODES:
+        raise ValueError(
+            f"{path} has invalid profile_load_mode: {mode!r} "
+            f"(expected one of {', '.join(PROFILE_LOAD_MODES)})"
+        )
+    return mode
+
+
+def merge_verification_profiles(
+    packaged: list[VerificationProfile],
+    overlay: list[VerificationProfile],
+) -> list[VerificationProfile]:
+    by_id = {profile.id: profile for profile in packaged}
+    order = [profile.id for profile in packaged]
+    for profile in overlay:
+        if profile.id not in by_id:
+            order.append(profile.id)
+        by_id[profile.id] = profile
+    return [by_id[profile_id] for profile_id in order]
+
+
+def load_profiles_for_repo(repo: Path) -> tuple[list[VerificationProfile], str]:
+    packaged = load_verification_profiles(DEFAULT_PROFILES)
     override = repo / REPO_PROFILES
-    if override.is_file():
-        return override
-    return DEFAULT_PROFILES
+    if not override.is_file():
+        return packaged, "<PACKAGE>/data/verification-profiles.yaml"
+    mode = read_profile_load_mode(override)
+    overlay = load_verification_profiles(override)
+    if mode == "replace":
+        return overlay, "<REPO>/registry/verification-profiles.yaml (replace)"
+    merged = merge_verification_profiles(packaged, overlay)
+    return merged, "<PACKAGE>+<REPO>/registry/verification-profiles.yaml (extend)"
 
 
-def detect_repo_signals(repo: Path) -> set[str]:
+def detect_repo_signals(repo: Path, markers: Iterable[str] | None = None) -> set[str]:
     signals: set[str] = set()
-    markers = (
-        "pyproject.toml",
-        "setup.cfg",
-        "setup.py",
-        "requirements.txt",
-        "package.json",
-        "go.mod",
-        "Dockerfile",
-        "compose.yaml",
-        "docker-compose.yml",
-        "main.tf",
-        "versions.tf",
-        "skills/engineering-autopilot/SKILL.md",
-    )
-    for marker in markers:
-        if (repo / marker).exists():
+    for marker in markers or ():
+        if marker and (repo / marker).exists():
             signals.add(marker)
     return signals
 
@@ -169,6 +195,23 @@ def profile_is_applicable(
     return any(marker in signals for marker in profile.detect_any)
 
 
+def _profile_exclusion_reason(
+    profile: VerificationProfile,
+    *,
+    signals: set[str],
+    requested_ids: set[str] | None,
+) -> str | None:
+    if requested_ids is not None:
+        return None
+    if profile.selection == "opt_in":
+        return "opt_in without explicit --profile"
+    if not profile.detect_any:
+        return "no detect_any markers"
+    if not any(marker in signals for marker in profile.detect_any):
+        return "detect_any unmatched"
+    return None
+
+
 def select_verification_profiles(
     repo: Path,
     *,
@@ -176,11 +219,21 @@ def select_verification_profiles(
     include_candidates: bool = True,
     profiles_path: Path | None = None,
 ) -> dict[str, Any]:
-    path = profiles_path or resolve_profiles_path(repo)
-    profiles = load_verification_profiles(path)
-    signals = detect_repo_signals(repo)
+    if profiles_path is not None:
+        profiles = load_verification_profiles(profiles_path)
+        profiles_label = (
+            "<PACKAGE>/data/verification-profiles.yaml"
+            if profiles_path == DEFAULT_PROFILES
+            else str(profiles_path)
+        )
+    else:
+        profiles, profiles_label = load_profiles_for_repo(repo)
+    markers = {marker for profile in profiles for marker in profile.detect_any}
+    signals = detect_repo_signals(repo, markers)
     requested = set(profile_ids) if profile_ids is not None else None
     selected: list[VerificationProfile] = []
+    not_applicable: list[tuple[VerificationProfile, str]] = []
+    considered_ids = {profile.id for profile in profiles}
     for profile in profiles:
         if profile.status == "candidate" and not include_candidates:
             if requested is None or profile.id not in requested:
@@ -191,16 +244,25 @@ def select_verification_profiles(
             continue
         if profile_is_applicable(profile, signals=signals, requested_ids=requested):
             selected.append(profile)
-    unknown_requested = sorted((requested or set()) - {profile.id for profile in profiles})
+            continue
+        reason = _profile_exclusion_reason(
+            profile, signals=signals, requested_ids=requested
+        )
+        if reason is not None:
+            not_applicable.append((profile, reason))
+    unknown_requested = sorted((requested or set()) - considered_ids)
     return {
-        "profiles_path": "<PACKAGE>/data/verification-profiles.yaml"
-        if path == DEFAULT_PROFILES
-        else "<REPO>/registry/verification-profiles.yaml",
+        "profiles_path": profiles_label,
         "detected_signals": sorted(signals),
         "requested_profile_ids": sorted(requested) if requested is not None else [],
         "unknown_requested_profile_ids": unknown_requested,
         "selected": [serialize_profile(profile) for profile in selected],
         "selected_profiles": selected,
+        "not_applicable": [
+            {**serialize_profile(profile), "reason": reason}
+            for profile, reason in not_applicable
+        ],
+        "not_applicable_profiles": not_applicable,
     }
 
 
@@ -218,10 +280,38 @@ def serialize_profile(profile: VerificationProfile) -> dict[str, Any]:
                 "id": check.id,
                 "kind": check.kind,
                 "argv": list(check.argv),
+                "ok_statuses": list(check.ok_statuses),
             }
             for check in profile.checks
         ],
         "insufficient_if": list(profile.insufficient_if),
+    }
+
+
+def _require_known_profiles(selection: dict[str, Any]) -> None:
+    if selection["unknown_requested_profile_ids"]:
+        unknown = ", ".join(selection["unknown_requested_profile_ids"])
+        raise ValueError(f"unknown verification profile id(s): {unknown}")
+
+
+def _not_applicable_evidence(
+    profile: VerificationProfile,
+    *,
+    reason: str,
+) -> dict[str, Any]:
+    return {
+        "profile_id": profile.id,
+        "layer": profile.layer,
+        "check_id": "_profile",
+        "status": "not_applicable",
+        "required": False,
+        "execute_planned": False,
+        "command": "not applicable",
+        "kind": "applicability",
+        "reason": reason,
+        "returncode": None,
+        "stdout": "",
+        "stderr": reason,
     }
 
 
@@ -231,6 +321,7 @@ def plan_verification(
     profile_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     selection = select_verification_profiles(repo, profile_ids=profile_ids)
+    _require_known_profiles(selection)
     evidence = []
     for profile in selection["selected_profiles"]:
         for check in profile.checks:
@@ -246,12 +337,15 @@ def plan_verification(
                     "kind": check.kind,
                 }
             )
+    for profile, reason in selection["not_applicable_profiles"]:
+        evidence.append(_not_applicable_evidence(profile, reason=reason))
     return {
         "schema_version": 2,
         "mode": "plan",
         "detected_signals": selection["detected_signals"],
         "profiles_path": selection["profiles_path"],
         "selected_profiles": selection["selected"],
+        "not_applicable_profiles": selection["not_applicable"],
         "unknown_requested_profile_ids": selection["unknown_requested_profile_ids"],
         "evidence": evidence,
         "summary": _summarize(evidence),
@@ -266,9 +360,7 @@ def build_closeout_verification(
     run_command: RunCommand,
 ) -> dict[str, Any]:
     selection = select_verification_profiles(repo, profile_ids=profile_ids)
-    if selection["unknown_requested_profile_ids"]:
-        unknown = ", ".join(selection["unknown_requested_profile_ids"])
-        raise ValueError(f"unknown verification profile id(s): {unknown}")
+    _require_known_profiles(selection)
 
     evidence: list[dict[str, Any]] = []
     pytest_result: dict[str, Any] | None = None
@@ -291,6 +383,9 @@ def build_closeout_verification(
             if check.kind == "compile_tracked_python" or check.id == "compile_tracked_python":
                 compile_result = _compat_command_result(item)
 
+    for profile, reason in selection["not_applicable_profiles"]:
+        evidence.append(_not_applicable_evidence(profile, reason=reason))
+
     summary = _summarize(evidence)
     blocked = any(
         item["required"] and item["status"] in {"fail", "not_run"} for item in evidence
@@ -302,6 +397,7 @@ def build_closeout_verification(
         "detected_signals": selection["detected_signals"],
         "profiles_path": selection["profiles_path"],
         "selected_profiles": selection["selected"],
+        "not_applicable_profiles": selection["not_applicable"],
         "evidence": evidence,
         "summary": summary,
     }
@@ -380,14 +476,46 @@ def _run_check(
     else:
         result = run_command(argv)
 
+    status = "pass" if result["returncode"] == 0 else "fail"
+    stderr = result.get("stderr", "")
+    if check.kind == "json_status":
+        status, stderr = _status_from_json_payload(
+            result.get("stdout", ""),
+            ok_statuses=check.ok_statuses,
+            command_returncode=result.get("returncode"),
+            stderr=stderr,
+        )
+
     return {
         **base,
-        "status": "pass" if result["returncode"] == 0 else "fail",
+        "status": status,
         "returncode": result["returncode"],
         "stdout": result.get("stdout", ""),
-        "stderr": result.get("stderr", ""),
+        "stderr": stderr,
         "command": result.get("command", " ".join(argv)),
     }
+
+
+def _status_from_json_payload(
+    stdout: str,
+    *,
+    ok_statuses: tuple[str, ...],
+    command_returncode: Any,
+    stderr: str,
+) -> tuple[str, str]:
+    if command_returncode not in (0, None):
+        return "fail", stderr or "command exited nonzero before JSON status parse"
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError:
+        return "fail", stderr or "json_status check could not parse stdout JSON"
+    if not isinstance(payload, dict):
+        return "fail", stderr or "json_status payload must be an object"
+    status_value = payload.get("status")
+    if status_value in ok_statuses:
+        return "pass", stderr
+    detail = f"json status {status_value!r} not in {list(ok_statuses)}"
+    return "fail", f"{stderr}\n{detail}".strip() if stderr else detail
 
 
 def _command_label(check: VerificationCheck) -> str:
