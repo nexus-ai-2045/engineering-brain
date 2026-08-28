@@ -35,9 +35,31 @@ evidence:
 freshness:
 rights_and_privacy:
 adoption_target: docs|registry|tests|skill|adr|hold
-decision: adopt|candidate|hold|reject
+decision: candidate|field_review|adopted|hold|rejected
 decision_reason:
+field_review: pending|in_progress|passed
+review_trigger:
+assurance_gate:
 ```
+
+`decision` の alias: intake 文言の `adopt` / `reject` はそれぞれ `adopted` / `rejected` として正規化する。
+
+## Field review / adopt gate
+
+SSOT は `registry/local-learnings.yaml`。FDE が decision OS であり、ここは learning packet の ladder だけを扱う。
+
+| stage | decision | field_review | 意味 |
+|---|---|---|---|
+| intake | `candidate` | `pending` | 再利用候補。運用保証ではない |
+| review | `field_review` | `in_progress` | 実地レビュー中 |
+| terminal | `adopted` \| `hold` \| `rejected` | `passed`（adopt 時は必須） | adopt のみ運用保証の候補 |
+
+Fail-closed 規則:
+
+- `field_review: pending` の packet は、decision を `adopted` と書いてあっても **運用保証 / adopted として報告してはならない**。
+- 遷移は `candidate -> field_review -> adopted|hold|rejected` のみ。`candidate -> adopted` は拒否する。
+- `adopt` は plan / evidence のみ。current-turn の人間承認がなければ apply 扱いにしない。
+- CLI: `python -m engineering_brain learnings list|field-review|adopt|assurance`
 
 ## 外部 source の扱い
 
@@ -78,10 +100,11 @@ Web 上の blog、forum、Q&A は candidate として扱う。採用する時は
 
 | decision | 意味 | repo action |
 |---|---|---|
-| `reject` | 誤り、古い、対象外 | 採用しない |
+| `rejected` | 誤り、古い、対象外 | 採用しない |
 | `hold` | 面白いが裏取り不足 | source pointer だけ残す |
 | `candidate` | 再利用可能そう | `registry/local-learnings.yaml` か research packet へ |
-| `adopt` | 検証済みで繰り返し使う | docs / registry / tests / ADR へ |
+| `field_review` | 実地レビュー中 | field review loop で検証 |
+| `adopted` | 検証済みで繰り返し使う | docs / registry / tests / ADR へ。`field_review: passed` 必須 |
 
 ## Safety gates
 
