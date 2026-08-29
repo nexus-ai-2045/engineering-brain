@@ -102,7 +102,7 @@ def test_hook_install_copies_repo_template(tmp_path: Path) -> None:
 # PR checkout のように local main が無い環境では
 # `malformed object name main` で失敗し、run() が returncode を握りつぶす
 # ため「候補ゼロ」= 掃除済みと誤って報告されうる。
-# FDE が ADR-0006 でインシデントとして記録し修正済みの経路だが、
+# FDE ADR-0006 がインシデントとして記録し修正済みの経路だが、
 # その学習がこの repo に届いていなかった。
 
 import subprocess as _subprocess
