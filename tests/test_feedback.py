@@ -33,7 +33,9 @@ def packet() -> dict:
         },
         "act": {
             "decision": "revise",
+            "failure_kind": "latency_regression",
             "update_targets": ["skill", "test"],
+            "regression_test": "tests/test_feedback.py::test_validate_feedback_packet_accepts_fde_contract",
             "rollback_path": "remove the candidate detector",
             "next_plan_input": "capture renderer phase timing",
         },
@@ -272,3 +274,147 @@ def test_human_readable_output_preserves_unicode() -> None:
 
     assert "日本語の実装" in rendered
     assert "\\u65e5" not in rendered
+
+
+# --- FDE 受入 contract -------------------------------------------------------
+#
+# このファイルの schema は fractal-decision-ecosystem の
+# schemas/fde_feedback_packet.v1.schema.json を正本とする複製である
+# ($id と docs/PDCA_FEEDBACK_LOOP.md を参照)。ADR-0004 は人力同期を前提に
+# 置いていたが、実際には drift して非互換になった実績がある:
+#   - act.required が 6 項目 (正本) に対し 4 項目まで減っていた
+#   - update_targets の enum が双方向に非互換だった
+#     (docs/registry/adr は正本が reject、none は複製が reject)
+#   - consumer / ID 3 種の制約が失われていた
+#
+# 以下は「正本が受け付ける形」を複製側に固定するための contract test。
+# 正本を変更したときは、ここも同時に更新すること。ここが落ちたら
+# 「複製が正本から離れた」か「正本が変わった」のどちらかであり、
+# どちらの場合も人間が同期を判断する必要がある。
+# plan/do/act の free-text nonblank pattern も正本へ固定する（第二の
+# feedback OS を作らない）。
+
+FDE_ACT_REQUIRED = [
+    "decision",
+    "failure_kind",
+    "update_targets",
+    "regression_test",
+    "rollback_path",
+    "next_plan_input",
+]
+FDE_UPDATE_TARGET_VALUES = [
+    "route",
+    "skill",
+    "gate",
+    "test",
+    "ssot",
+    "roadmap",
+    "none",
+]
+FDE_ID_PATTERN = "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+FDE_NONBLANK_PATTERN = ".*\\S.*"
+FDE_CANONICAL_SCHEMA_URL = (
+    "https://github.com/nexus-ai-2045/fractal-decision-ecosystem/"
+    "blob/main/schemas/fde_feedback_packet.v1.schema.json"
+)
+
+
+def _schema() -> dict:
+    return json.loads(
+        (ROOT / "engineering_brain" / "fde-feedback-packet.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+
+def test_schema_declares_fde_as_its_canonical_source() -> None:
+    """複製であることを $id が示し続けること。"""
+    assert _schema()["$id"] == FDE_CANONICAL_SCHEMA_URL
+
+
+def test_act_required_matches_the_fde_contract() -> None:
+    """必須項目が減ると、正本が reject する packet を通してしまう。"""
+    assert _schema()["properties"]["act"]["required"] == FDE_ACT_REQUIRED
+
+
+def test_update_targets_enum_matches_the_fde_contract() -> None:
+    """enum が食い違うと、どちらか一方でしか通らない packet が生まれる。"""
+    enum = _schema()["properties"]["act"]["properties"]["update_targets"]["items"]["enum"]
+    assert enum == FDE_UPDATE_TARGET_VALUES
+
+
+def test_consumer_is_pinned_to_fde() -> None:
+    """正本は fde 宛て以外を受け付けない。"""
+    assert _schema()["properties"]["consumer"] == {"const": "fde"}
+
+
+def test_identifier_fields_keep_the_fde_pattern() -> None:
+    """pattern が抜けると、空白や記号入りの ID を通してしまう。"""
+    props = _schema()["properties"]
+    for field in ("feedback_id", "source_run_id", "producer"):
+        assert props[field].get("pattern") == FDE_ID_PATTERN, field
+
+
+def test_plan_and_do_free_text_keep_the_fde_nonblank_pattern() -> None:
+    """正本は plan/do の free-text でも空白のみを reject する。"""
+    props = _schema()["properties"]
+    plan = props["plan"]["properties"]
+    do = props["do"]["properties"]
+    assert plan["hypothesis"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert plan["expected_effect"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert plan["verification_plan"]["items"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert do["actions"]["items"].get("pattern") == FDE_NONBLANK_PATTERN
+    assert do["changed_artifacts"]["items"].get("pattern") == FDE_NONBLANK_PATTERN
+
+
+def test_act_free_text_keep_the_fde_nonblank_pattern() -> None:
+    props = _schema()["properties"]["act"]["properties"]
+    for field in ("failure_kind", "regression_test", "rollback_path", "next_plan_input"):
+        assert props[field].get("pattern") == FDE_NONBLANK_PATTERN, field
+
+
+def test_packet_missing_failure_kind_is_rejected() -> None:
+    """正本が必須にしている項目は、複製側でも落ちること。"""
+    broken = packet()
+    del broken["act"]["failure_kind"]
+    assert validate_feedback_packet(broken) != []
+
+
+def test_packet_missing_regression_test_is_rejected() -> None:
+    broken = packet()
+    del broken["act"]["regression_test"]
+    assert validate_feedback_packet(broken) != []
+
+
+def test_update_target_outside_the_fde_enum_is_rejected() -> None:
+    """docs / registry / adr は正本が受け付けないので、ここでも通さない。"""
+    for value in ("docs", "registry", "adr"):
+        broken = packet()
+        broken["act"]["update_targets"] = [value]
+        assert validate_feedback_packet(broken) != [], value
+
+
+def test_update_target_none_is_accepted() -> None:
+    """逆に none は正本が受け付けるので、ここで弾いてはいけない。"""
+    ok = packet()
+    ok["act"]["update_targets"] = ["none"]
+    assert validate_feedback_packet(ok) == []
+
+
+def test_consumer_other_than_fde_is_rejected() -> None:
+    broken = packet()
+    broken["consumer"] = "someone-else"
+    assert validate_feedback_packet(broken) != []
+
+
+def test_identifier_with_whitespace_is_rejected() -> None:
+    broken = packet()
+    broken["feedback_id"] = "has space"
+    assert validate_feedback_packet(broken) != []
+
+
+def test_plan_hypothesis_whitespace_only_is_rejected() -> None:
+    """正本の nonblank pattern が効いていること。"""
+    broken = packet()
+    broken["plan"]["hypothesis"] = "   "
+    assert validate_feedback_packet(broken) != []

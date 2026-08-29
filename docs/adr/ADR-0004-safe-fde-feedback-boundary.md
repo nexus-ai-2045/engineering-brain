@@ -36,6 +36,9 @@ PDCA結果をFDEの次のPlanへ渡す時、raw historyや入力由来の秘密�
 - feedback境界での人間承認迂回とmetadata漏洩を防げる。
 - 不正入力時の診断情報は意図的に少なくなり、詳細調査は安全なlocal evidenceで行う。
 - schemaと実装の同時更新が必要になる。
+- 同時更新を人力に委ねた結果、複製schemaが正本から乖離し互換性が壊れた。
+  再発防止として、正本が受け付ける形を`tests/test_feedback.py`のcontract testへ
+  固定する。人力同期の前提はここで機械検査へ置き換える。
 
 ## Human Review Gate
 
