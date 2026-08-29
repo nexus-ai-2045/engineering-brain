@@ -154,7 +154,7 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 
 `engineering_brain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
 
-`engineering_brain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。既定は plan-only です。local branch 削除は `--apply-local`、remote branch 削除は別途 current conversation approval が必要です。
+`engineering_brain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。plan と stopline の提示だけを行い、**branch は削除しません**。削除の実行正本は fractal-decision-ecosystem の `scripts/post_merge_cleanup.py` です (ADR-0006)。`--apply-local` は委譲先を示すだけで、この repo は branch を消しません。
 
 repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m engineering_brain hooks install --json` で opt-in install すると、merge 後に `engineering_brain finish --json` の plan だけを表示します。hook は branch を自動削除しません。
 
