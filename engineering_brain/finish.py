@@ -34,7 +34,7 @@ def resolve_base_refs(repo: Path) -> dict[str, str | None]:
 
     bare `main` を決め打ちすると、PR checkout のように local main が無い
     環境で `git branch --merged main` が `malformed object name main` で
-    失敗する。FDE が ADR-0006 でインシデントとして記録し修正済みの経路。
+    失敗する。FDE ADR-0006 がインシデントとして記録し修正済みの経路。
     解決できない側は None を返し、呼び出し側が候補ゼロと区別できるようにする。
     """
     local = next((ref for ref in _LOCAL_BASE_CANDIDATES if _ref_exists(repo, ref)), None)
