@@ -8,7 +8,8 @@ engineering-brain は、開発に入る前の判断、実装中の検証、完�
 
 1. `route`: task から必要な adoption unit と停止線を選ぶ。
 2. `gate`: trigger から実行すべき check と不足条件を返す。
-3. `closeout`: repo 状態、test、compile、外部公開境界を分離して返す。
+3. `verify`: repo 検出に応じた verification profile を plan-only で返す。
+4. `closeout`: profile に基づく evidence（pass / fail / not_run / not_applicable）と外部公開境界を分離して返す。
 
 ## 保証の意味
 

@@ -74,7 +74,10 @@ def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, Any]:
         if indent == 0 and text.startswith("updated_at:"):
             data["updated_at"] = _parse_scalar(text.split(":", 1)[1])
             continue
-        if indent == 0 and text in {"units:", "sources:"}:
+        if indent == 0 and text.startswith("profile_load_mode:"):
+            data["profile_load_mode"] = _parse_scalar(text.split(":", 1)[1])
+            continue
+        if indent == 0 and text in {"units:", "sources:", "profiles:"}:
             current_section = text[:-1]
             data[current_section] = []
             continue

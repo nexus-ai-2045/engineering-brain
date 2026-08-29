@@ -17,6 +17,7 @@ from .feedback import (
 )
 from .gates import closeout_repo, evaluate_triggers, route_task
 from .registry import adoption_units, select_technology_sources
+from .verification import plan_verification
 from .evals import (
     build_blind_review_bundle,
     build_eval_plan,
@@ -59,7 +60,26 @@ def main(argv: list[str] | None = None) -> int:
 
     closeout_parser = sub.add_parser("closeout", help="Run local closeout checks.")
     closeout_parser.add_argument("--repo", default=".")
+    closeout_parser.add_argument(
+        "--profile",
+        action="append",
+        default=[],
+        help="Limit closeout to one or more verification profile ids. Repeatable.",
+    )
     closeout_parser.add_argument("--json", action="store_true")
+
+    verify_parser = sub.add_parser(
+        "verify",
+        help="Plan verification profiles for a repo without executing checks.",
+    )
+    verify_parser.add_argument("--repo", default=".")
+    verify_parser.add_argument(
+        "--profile",
+        action="append",
+        default=[],
+        help="Limit planning to one or more verification profile ids. Repeatable.",
+    )
+    verify_parser.add_argument("--json", action="store_true")
 
     list_parser = sub.add_parser("list", help="List adoption units.")
     list_parser.add_argument("--json", action="store_true")
@@ -195,7 +215,37 @@ def main(argv: list[str] | None = None) -> int:
                 raise ValueError("evidence must be a JSON object")
         return emit(evaluate_triggers(triggers, evidence), as_json=args.json)
     if args.command == "closeout":
-        return emit(closeout_repo(Path(args.repo).resolve()), as_json=args.json)
+        return emit(
+            closeout_repo(
+                Path(args.repo).resolve(),
+                profile_ids=args.profile or None,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "verify":
+        try:
+            payload = plan_verification(
+                Path(args.repo).resolve(),
+                profile_ids=args.profile or None,
+            )
+        except ValueError as error:
+            if args.json:
+                write_stdout(
+                    json.dumps(
+                        {
+                            "status": "blocked",
+                            "error": str(error),
+                            "schema_version": 2,
+                            "mode": "plan",
+                        },
+                        ensure_ascii=False,
+                        indent=2,
+                    )
+                )
+            else:
+                write_stdout(str(error))
+            return 1
+        return emit(payload, as_json=args.json)
     if args.command == "list":
         return emit({"units": [unit.id for unit in adoption_units()]}, as_json=args.json)
     if args.command == "catalog":

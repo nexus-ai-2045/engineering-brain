@@ -24,6 +24,7 @@ def test_algorithm_catalog_is_packaged_inside_engineering_brain() -> None:
     assert (ROOT / "engineering_brain" / "data" / "algorithms.json").is_file()
     assert (ROOT / "engineering_brain" / "data" / "adoption-units.yaml").is_file()
     assert (ROOT / "engineering_brain" / "data" / "technology-sources.yaml").is_file()
+    assert (ROOT / "engineering_brain" / "data" / "verification-profiles.yaml").is_file()
 
 
 def test_feedback_schema_is_packaged_inside_engineering_brain() -> None:

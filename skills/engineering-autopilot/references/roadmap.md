@@ -19,7 +19,7 @@ owner: nexus_ai
 | research packet | source / candidate / decision を packet 化 | done |
 | finish planner | merge 後の cleanup plan と opt-in hook を扱う | done |
 | PR packet generator | 日本語 PR body と stopline を生成 | done |
-| verification profile | task に応じた smoke / preflight 候補を返す | next |
+| verification profile | task に応じた smoke / preflight 候補を返す | done: `engineering_brain verify` + closeout v2 |
 
 ## 採用しないこと
 
