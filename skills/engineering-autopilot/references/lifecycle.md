@@ -64,7 +64,7 @@ repo に含める hook は `tools/hooks/` の template だけです。`python -m
 
 `post-merge` hook は `python -m engineering_brain finish --repo . --json` の plan を表示するだけです。local branch / remote branch / worktree は自動削除しません。
 
-cleanup を実行する場合は、まず `python -m engineering_brain finish --json` で候補を見ます。local branch cleanup は `--apply-local` を明示します。remote branch cleanup は GitHub write なので current-turn approval と GitHub identity probe を通します。
+cleanup を実行する場合は、まず `python -m engineering_brain finish --json` で候補を見ます。この repo は branch を削除しません。削除の実行正本は fractal-decision-ecosystem の `scripts/post_merge_cleanup.py` (ADR-0006) で、plan の `cleanup_ssot` が委譲先を示します。remote branch cleanup は GitHub write なので current-turn approval と GitHub identity probe を通します。
 
 ## roadmap reference
 
