@@ -163,6 +163,10 @@ python -m engineering_brain feedback --input <feedback.json> --json
 
 互換schemaはpackage resourceの`engineering_brain/fde-feedback-packet.schema.json`に置く。正本はFDE repositoryの`schemas/fde_feedback_packet.v1.schema.json`であり、互換性を壊す変更は新しいschema versionで行う。
 
+複製である以上drift しうる。実際に、`act.required`が正本の6項目に対し4項目まで減り、`update_targets`のenumが双方向に非互換（`docs`/`registry`/`adr`は正本がreject、`none`は複製がreject）、`consumer`とID3種の制約も失われた状態まで乖離していた。同じ`schema_version`を名乗りながら、一方が通したpacketをもう一方が弾く。
+
+人力同期では止まらなかったので、正本が受け付ける形を`tests/test_feedback.py`のcontract testへ固定する。必須項目・enum・`consumer`・ID patternが正本から離れたらテストが落ちる。正本を変更したときはcontract testも同時に更新し、人間が同期を判断する。
+
 ## Stoplines
 
 - Check なしに Act しない。
