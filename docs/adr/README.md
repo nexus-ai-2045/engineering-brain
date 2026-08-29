@@ -18,4 +18,6 @@ ADR は作業ログではなく、後続 PR で同じ判断を繰り返さない
 | [ADR-0003 evidence-backed assurance gates](ADR-0003-evidence-backed-assurance-gates.md) | accepted | assurance gateはunit testではなく対象runの明示的evidenceを評価する |
 | [ADR-0004 safe FDE feedback boundary](ADR-0004-safe-fde-feedback-boundary.md) | accepted | feedbackは承認迂回と入力由来metadata漏洩を防ぎ、schemaをwheelへ同梱する |
 | [ADR-0005 先行実装リサーチのconsumer契約](ADR-0005-precedent-research-consumer-contract.md) | accepted | 横断skillを`nexus-ai-skills`正本とし、research packet v2からconsumerとして参照する |
-| [ADR-0006 verification profile / closeout v2](ADR-0006-verification-profile-closeout-v2.md) | accepted | verification profile で unit/integration/smoke/e2e を機械可読にし、closeout evidence を pass/fail/not_run/not_applicable へ分離する |
+| [ADR-0007 verification profile / closeout v2](ADR-0007-verification-profile-closeout-v2.md) | accepted | verification profile で unit/integration/smoke/e2e を機械可読にし、closeout evidence を pass/fail/not_run/not_applicable へ分離する |
+
+注: branch cleanup の実行正本を定めた **FDE ADR-0006**（fractal-decision-ecosystem）は、この repo の `docs/adr/` 台帳外の参照である。本台帳の次番号は ADR-0007 から続ける。

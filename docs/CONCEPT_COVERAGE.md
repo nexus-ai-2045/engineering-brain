@@ -22,9 +22,8 @@
 | GitHub identity gate | partial | local skill + docs | repo-owned identity command を追加する |
 | PR lifecycle | covered | `.github/`, `CONTRIBUTING.md`, `engineering_brain pr` | verification profile 接続済み。release/tag は別承認 |
 | Human visual review | partial | `engineering_brain run`, `engineering_brain pr`, `docs/AUTOPILOT_GOAL_DESIGN.md` | review state を merge gate へ接続する |
-| Merge / branch cleanup | covered | `engineering_brain finish`, `tools/hooks/post-merge`, `docs/AUTOPILOT_GOAL_DESIGN.md` | remote cleanup は approval / identity gate を維持する |
+| Merge / branch cleanup | plan のみ | `engineering_brain finish`, `tools/hooks/post-merge`, `docs/AUTOPILOT_GOAL_DESIGN.md` | 削除の実行正本は FDE `scripts/post_merge_cleanup.py` (FDE ADR-0006)。本 repo は plan と stopline の提示に徹し、branch を削除しない |
 | Operation guarantee | covered | `engineering_brain closeout` v2, `docs/OPERATING_MODEL.md` | evidence status 分離済み。外部 preflight 実行は既存 wrapper を維持 |
-| PDCA / feedback loop | covered | `docs/PDCA_FEEDBACK_LOOP.md` | run packet と local learning registry へ接続する |
 | Runtime skill | covered | `skills/engineering-autopilot/` repo-owned source, Codex / Claude Code runtime copies, `engineering_brain skill-sync --target all` | runtime drift を継続監視する |
 | Best-practice source catalog | covered | `engineering_brain/data/technology-sources.yaml` | adopted / candidate / hold status を強める |
 | Public readiness | covered | `PUBLIC_READY.md`, `docs/PUBLIC_RELEASE_REVIEW_PACKET.md` | release / tag / announcement は別 review packet で再測定する |

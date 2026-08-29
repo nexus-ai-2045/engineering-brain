@@ -24,6 +24,8 @@ checked_at: 2026-07-14 JST
 8. verify: unit / integration / smoke / E2E / security / closeout を実行し、結果を保存する。
 9. review: PR を作り、人間目視レビュー、コメント吸収、再検証を回す。
 10. finish: merge 承認後に merge、main 同期、branch/worktree cleanup、運用証跡更新を行う。
+    ただし branch 削除そのものは実行正本 (FDE `scripts/post_merge_cleanup.py`、FDE ADR-0006) へ
+    委譲する。本 repo が持つのは plan、stopline、hook インストーラであって削除実装ではない。
 
 ## 全体図
 
