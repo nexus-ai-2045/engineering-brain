@@ -127,7 +127,7 @@ Act の原則:
 
 ## Learning Ledger
 
-PDCA の Act は `registry/local-learnings.yaml` へ次の形で畳む。candidate のままなら field_review 前に採用しない。
+PDCA の Act は `engineering_brain/data/local-learnings.yaml` へ次の形で畳む。candidate のままなら field_review 前に採用しない。
 
 ```yaml
 - id:

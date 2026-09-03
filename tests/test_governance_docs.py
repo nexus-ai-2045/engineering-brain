@@ -31,7 +31,7 @@ def test_knowledge_intake_keeps_obsidian_as_intake() -> None:
     assert "Obsidian" in doc
     assert "intake" in doc
     assert "raw chat log" in doc
-    assert "registry/local-learnings.yaml" in doc
+    assert "engineering_brain/data/local-learnings.yaml" in doc
 
 
 def test_concept_coverage_tracks_required_gaps() -> None:
@@ -52,7 +52,7 @@ def test_concept_coverage_tracks_required_gaps() -> None:
         assert concept in doc
 
     assert "engineering_brain run" in doc
-    assert "registry/local-learnings.yaml" in doc
+    assert "engineering_brain/data/local-learnings.yaml" in doc
 
 
 def test_next_goal_design_defines_run_packet_sequence() -> None:
@@ -61,7 +61,7 @@ def test_next_goal_design_defines_run_packet_sequence() -> None:
     assert "run packet" in doc
     assert "reinvention_check" in doc
     assert "research packet" in doc
-    assert "registry/local-learnings.yaml" in doc
+    assert "engineering_brain/data/local-learnings.yaml" in doc
     assert "PR packet generator" in doc
     assert "candidate gate is advisory" in doc
 

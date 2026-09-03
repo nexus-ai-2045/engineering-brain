@@ -41,5 +41,5 @@ visibility は PUBLIC。GitHub Release / tag は未作成。
 remote の merge 済みブランチは回収済み。次はまだ main に載せていない。
 
 - `codex/research-review-eval-20260730`: research review eval harness（6 commit）
-- `codex/runtime-contract-learnings`: 実行経路契約の learnings（現行 `registry/local-learnings.yaml` schema と形が違う）
+- `codex/runtime-contract-learnings`: 実行経路契約の learnings（現行 `engineering_brain/data/local-learnings.yaml` schema と形が違う）
 - `codex/algorithm-catalog-selection-20260728`: 旧 `devbrain/` パス。#21 で `engineering_brain` へ吸収済みの stale 候補

@@ -16,7 +16,20 @@ from .feedback import (
     validate_feedback_packet,
 )
 from .gates import closeout_repo, evaluate_triggers, route_task
-from .registry import adoption_units, select_technology_sources
+from .registry import (
+    DEFAULT_LOCAL_LEARNINGS,
+    FIELD_REVIEW_STATES,
+    LEARNING_DECISIONS,
+    adoption_units,
+    check_learning_assurance,
+    get_local_learning,
+    is_operationally_adopted,
+    list_local_learnings,
+    plan_adopt_learning,
+    select_technology_sources,
+    serialize_local_learning,
+    start_field_review,
+)
 from .evals import (
     build_blind_review_bundle,
     build_eval_plan,
@@ -63,6 +76,51 @@ def main(argv: list[str] | None = None) -> int:
 
     list_parser = sub.add_parser("list", help="List adoption units.")
     list_parser.add_argument("--json", action="store_true")
+
+    learnings_parser = sub.add_parser(
+        "learnings",
+        help="List and gate local learnings (field_review / adopt).",
+    )
+    learnings_sub = learnings_parser.add_subparsers(dest="learnings_command", required=True)
+    learnings_list = learnings_sub.add_parser(
+        "list",
+        help="List local learnings; filter by decision or field_review.",
+    )
+    learnings_list.add_argument("--decision", choices=sorted(LEARNING_DECISIONS))
+    learnings_list.add_argument("--field-review", choices=sorted(FIELD_REVIEW_STATES))
+    learnings_list.add_argument(
+        "--registry",
+        type=Path,
+        default=None,
+        help="Optional path to local-learnings.yaml (defaults to repo SSOT).",
+    )
+    learnings_list.add_argument("--json", action="store_true")
+    learnings_field_review = learnings_sub.add_parser(
+        "field-review",
+        help="Plan candidate -> field_review transition (does not mutate SSOT).",
+    )
+    learnings_field_review.add_argument("--id", required=True)
+    learnings_field_review.add_argument("--registry", type=Path, default=None)
+    learnings_field_review.add_argument("--json", action="store_true")
+    learnings_adopt = learnings_sub.add_parser(
+        "adopt",
+        help="Plan field_review -> adopted transition (approval-gated; does not mutate SSOT).",
+    )
+    learnings_adopt.add_argument("--id", required=True)
+    learnings_adopt.add_argument(
+        "--approve",
+        action="store_true",
+        help="Current-turn human approval for adopt readiness (still does not write SSOT).",
+    )
+    learnings_adopt.add_argument("--registry", type=Path, default=None)
+    learnings_adopt.add_argument("--json", action="store_true")
+    learnings_assurance = learnings_sub.add_parser(
+        "assurance",
+        help="Fail-closed check: pending field_review is never operationally guaranteed.",
+    )
+    learnings_assurance.add_argument("--id", required=True)
+    learnings_assurance.add_argument("--registry", type=Path, default=None)
+    learnings_assurance.add_argument("--json", action="store_true")
 
     catalog_parser = sub.add_parser("catalog", help="List technology best-practice sources.")
     catalog_parser.add_argument("--domain")
@@ -198,6 +256,39 @@ def main(argv: list[str] | None = None) -> int:
         return emit(closeout_repo(Path(args.repo).resolve()), as_json=args.json)
     if args.command == "list":
         return emit({"units": [unit.id for unit in adoption_units()]}, as_json=args.json)
+    if args.command == "learnings":
+        registry_path = Path(args.registry).resolve() if args.registry else DEFAULT_LOCAL_LEARNINGS
+        if args.learnings_command == "list":
+            items = list_local_learnings(
+                registry_path,
+                decision=args.decision,
+                field_review=args.field_review,
+            )
+            payload = {
+                "learnings": [serialize_local_learning(item) for item in items],
+                "counts": {
+                    "total": len(items),
+                    "pending_field_review": sum(1 for item in items if item.field_review == "pending"),
+                    "adopted": sum(1 for item in items if is_operationally_adopted(item)),
+                },
+            }
+            return emit(payload, as_json=args.json)
+        learning = get_local_learning(args.id, registry_path)
+        if args.learnings_command == "field-review":
+            result = start_field_review(learning)
+            emit(result, as_json=args.json)
+            return 0 if result["status"] == "ok" else 1
+        if args.learnings_command == "adopt":
+            result = plan_adopt_learning(
+                learning,
+                current_turn_approval=args.approve,
+            )
+            emit(result, as_json=args.json)
+            return 0 if result["status"] == "ok" else 1
+        if args.learnings_command == "assurance":
+            result = check_learning_assurance(learning)
+            emit(result, as_json=args.json)
+            return 0 if result["status"] == "pass" else 1
     if args.command == "catalog":
         return emit({"sources": [serialize_source(source) for source in select_technology_sources(args.domain)]}, as_json=args.json)
     if args.command == "algorithms":
@@ -431,6 +522,11 @@ def configure_utf8_stdout() -> None:
 def render_text(payload: dict[str, Any]) -> str:
     if "units" in payload and isinstance(payload["units"], list):
         return "\n".join(str(unit) for unit in payload["units"])
+    if "learnings" in payload and isinstance(payload["learnings"], list):
+        return "\n".join(
+            f"{item['id']}\t{item['decision']}\t{item['field_review']}\t{item['adoption_target']}"
+            for item in payload["learnings"]
+        )
     if "algorithms" in payload and isinstance(payload["algorithms"], list):
         return "\n".join(
             f"{item['id']}\t{item['family']}\t{item['title_ja']}\t{item['status']}"

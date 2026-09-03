@@ -23,7 +23,7 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | E | reinvention candidate gate | 毎回 candidate research gate を出す | done: PR #2 |
 | F | run packet MVP | route / gate / closeout / stopline を run packet に統合する | done: MVP |
 | G | research packet | source / candidate / decision を packet 化する | done: PR #16 |
-| H | local learnings registry | local struggle を rule / failure pattern として蓄積 | partial: candidate packets in `registry/local-learnings.yaml` |
+| H | local learnings registry | local struggle を rule / failure pattern として蓄積 | partial: candidate packets + field_review/adopt gates（adopt 実行は human-gated、packet decision は未昇格） |
 | I | PR packet generator | 日本語 PR body、visible scope、checks、stopline を生成 | done: `engineering_brain pr` |
 | J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source |
 | K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | done: runtime copy synced |

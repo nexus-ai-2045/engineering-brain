@@ -190,7 +190,7 @@ units:
     status: candidate
     source_refs:
       - <REPO>/docs/BORIS_CHERNY_AI_ADOPTION_AND_CC_TIPS.md
-      - <REPO>/registry/local-learnings.yaml
+      - <REPO>/engineering_brain/data/local-learnings.yaml
       - https://x.com/bcherny/status/2077929379661844559
     applies_when: [ai_adoption_review, tooling_migration, orchestration_design, team_scaling]
     timing: [before_work, periodic_review]

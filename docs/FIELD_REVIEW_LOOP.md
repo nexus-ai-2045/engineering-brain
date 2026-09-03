@@ -164,7 +164,7 @@ human_field_review:
 
 | result | target |
 |---|---|
-| rule | `registry/local-learnings.yaml` |
+| rule | `engineering_brain/data/local-learnings.yaml` |
 | repeated gate | `engineering_brain/data/adoption-units.yaml` |
 | workflow | `docs/*.md` |
 | irreversible design decision | `docs/adr/ADR-*.md` |

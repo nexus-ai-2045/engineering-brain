@@ -1,7 +1,7 @@
 version: 1
 updated_at: "2026-07-19"
 
-# SSOT: registry/local-learnings.yaml
+# SSOT: engineering_brain/data/local-learnings.yaml (packaged with the wheel)
 # Community Learning Intake の candidate/hold/adopt を格納する registry。
 # packet schema は docs/COMMUNITY_LEARNING_INTAKE.md に準拠(+ growth/assurance 拡張)。
 # X/web lane は source pointer + digest。adopt でも field_review: pending の間は運用保証未達を明示。
