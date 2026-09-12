@@ -9,7 +9,7 @@ from typing import Any
 PROTECTED_BRANCHES = {"main", "master", "develop", "dev"}
 HOOK_NAMES = ["pre-commit", "post-merge"]
 
-# 削除の実行正本。FDE の ADR-0006 が宣言している。
+# 削除の実行正本。FDE ADR-0006 が宣言している。
 # 本 repo は plan と stopline の提示に徹し、削除自体は委譲する。
 # CLEANUP_SSOT_COMMAND は FDE checkout 上で動くテンプレートであり、
 # この repo の cwd から直接実行できるパスではない。
@@ -164,7 +164,7 @@ def apply_local_cleanup(repo: Path) -> dict[str, Any]:
     """削除は実行せず、実行正本への委譲を返す。
 
     branch 削除の実装は FDE の post_merge_cleanup.py を正本とする
-    (ADR-0006)。本 repo が独自に削除すると、正本側で修正済みの学習
+    (FDE ADR-0006)。本 repo が独自に削除すると、正本側で修正済みの学習
     (base ref 解決、remote-tracking の prune、GitHub 設定の確認) が
     届かないまま二重実装が残る。実際に bare `main` 決め打ちという
     正本が既に潰したバグを本 repo は踏んでいた。

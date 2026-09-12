@@ -11,4 +11,4 @@
 - [ADR-0003 実行証拠に基づくassurance gate](../../docs/adr/ADR-0003-evidence-backed-assurance-gates.md)
 - [ADR-0004 安全なFDE feedback境界](../../docs/adr/ADR-0004-safe-fde-feedback-boundary.md)
 - [ADR-0005 先行実装リサーチのconsumer契約](../../docs/adr/ADR-0005-precedent-research-consumer-contract.md)
-- [ADR-0006 verification profile / closeout v2](../../docs/adr/ADR-0006-verification-profile-closeout-v2.md)
+- [ADR-0007 verification profile / closeout v2](../../docs/adr/ADR-0007-verification-profile-closeout-v2.md)

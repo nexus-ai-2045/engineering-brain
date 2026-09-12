@@ -3,10 +3,10 @@ title: verification profile and closeout v2
 type: adr
 status: accepted
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-08-29
 owner: nexus_ai
 schema_version: fact-provenance/v1
-recorded_at: 2026-08-28T22:30:00+09:00
+recorded_at: 2026-08-29T00:40:00+09:00
 recorded_by: cursor-cloud-agent
 related:
   - ../AUTOPILOT_GOAL_DESIGN.md
@@ -16,12 +16,14 @@ related:
   - ../../engineering_brain/data/verification-profiles.yaml
 ---
 
-# ADR-0006 verification profile と closeout v2
+# ADR-0007 verification profile と closeout v2
 
 ## Context
 
 closeout の verification 軸は pytest / compile 固定だった。task や repo stack に応じた
 unit / integration / smoke / e2e の必要十分を機械可読に選べず、未実行を成功と誤読する余地が残っていた。
+
+本 ADR は engineering-brain 台帳の ADR-0007 とする。FDE ADR-0006（cleanup 実行正本）とは別文書であり、番号を共用しない。
 
 ## Decision
 
