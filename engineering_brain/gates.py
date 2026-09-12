@@ -3,13 +3,13 @@ from __future__ import annotations
 import os
 import re
 import subprocess
-import tempfile
 from pathlib import Path
 from typing import Any
 
 from .path_safety import scan_personal_paths
 from .registry import AdoptionUnit, select_units
 from .assurance import evaluate_async_orchestration, evaluate_structured_model
+from .verification import build_closeout_verification
 
 
 PUBLIC_TRIGGERS = {"public_release", "external_send", "github_visibility", "announcement", "publish", "push", "pr"}
@@ -110,36 +110,26 @@ def serialize_unit(unit: AdoptionUnit) -> dict[str, Any]:
     }
 
 
-def closeout_repo(repo: Path) -> dict[str, Any]:
+def closeout_repo(
+    repo: Path,
+    *,
+    profile_ids: list[str] | None = None,
+    execute: bool = True,
+) -> dict[str, Any]:
     git_status = run(["git", "status", "--short", "--branch"], cwd=repo)
-    with tempfile.TemporaryDirectory(prefix="engineering-brain-closeout-") as temp_dir:
-        pytest_result = run(
-            [
-                "python",
-                "-m",
-                "pytest",
-                "-q",
-                "--basetemp",
-                str(Path(temp_dir) / "pytest"),
-            ],
-            cwd=repo,
-        )
-    pytest_result["command"] = "python -m pytest -q --basetemp <TEMP>"
-    tracked = run(["git", "ls-files", "*.py"], cwd=repo)
-    python_files = tracked["stdout"].splitlines() if tracked["returncode"] == 0 else []
-    compile_result = (
-        run(["python", "-m", "py_compile", *python_files], cwd=repo)
-        if python_files
-        else {
-            "command": "git ls-files *.py",
-            "returncode": 1,
-            "stdout": "",
-            "stderr": "tracked Python files could not be resolved",
-        }
+
+    def run_command(command: list[str]) -> dict[str, Any]:
+        return run(command, cwd=repo)
+
+    verification = build_closeout_verification(
+        repo,
+        profile_ids=profile_ids,
+        execute=execute,
+        run_command=run_command,
     )
     personal_path_findings = scan_personal_paths(repo)
 
-    verification_ok = pytest_result["returncode"] == 0 and compile_result["returncode"] == 0
+    verification_ok = verification["status"] == "ok"
     public_path_ok = not personal_path_findings
     git_ok = git_status["returncode"] == 0
     external_public = {
@@ -150,16 +140,13 @@ def closeout_repo(repo: Path) -> dict[str, Any]:
 
     return {
         "overall": "ok" if git_ok and verification_ok and public_path_ok else "blocked",
+        "schema_version": 2,
         "implementation": {
             "status": "present",
             "repo": "<REPO>",
             "git_status": git_status,
         },
-        "verification": {
-            "status": "ok" if verification_ok else "blocked",
-            "pytest": pytest_result,
-            "compileall": compile_result,
-        },
+        "verification": verification,
         "operation": {
             "status": "ok" if verification_ok and public_path_ok else "blocked",
             "required_gates": [
