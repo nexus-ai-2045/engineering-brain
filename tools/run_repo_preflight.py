@@ -33,6 +33,12 @@ def main(argv: list[str] | None = None) -> int:
     scan_cmd = [sys.executable, str(cache / "scripts" / "readiness_scan.py"), "--repo", str(repo)]
     if args.intent:
         scan_cmd.extend(["--intent", args.intent, "--base-ref", args.base_ref])
+    else:
+        # impact_map を持つ repo では plain scan の内蔵 consistency が
+        # change_sensitive_scope_unavailable で tool_error になる。scope だけを
+        # 渡し、repo 全体 scan (secret / personal path / docs) は狭めない。
+        # 上流 repo-preflight 側の受け入れは fix/plain-scan-accepts-consistency-base-ref。
+        scan_cmd.extend(["--consistency-base-ref", args.base_ref])
     consistency_cmd = [
         sys.executable,
         str(cache / "scripts" / "consistency_gate.py"),
@@ -55,21 +61,51 @@ def main(argv: list[str] | None = None) -> int:
     if consistency.stderr:
         print(consistency.stderr, file=sys.stderr)
 
-    # Shadow / readiness findings are human materials, not merge approval.
-    # Fail only when upstream scripts could not be executed at all.
+    # Shadow / readiness findings (rc=1) are human materials, not merge approval.
+    # But "could not run" (rc=2 / tool_error) must not hide behind exit 0:
+    # 実測 (2026-09-19) では readiness_rc=2 のまま wrapper が 0 を返し、
+    # readiness_scan が永久に tool_error なのを gates が隠していた。
+    payload = _parse_json_report(consistency.stdout)
+    mode = payload.get("mode")
+    scan_report = _parse_json_report(scan.stdout)
     if scan.returncode < 0 or consistency.returncode < 0:
         return 1
-    try:
-        payload = json.loads(consistency.stdout.strip().splitlines()[-1]) if consistency.stdout.strip() else {}
-    except json.JSONDecodeError:
-        payload = {}
-    mode = payload.get("mode")
+    # argparse の拒否や crash は rc=1 で JSON を出さない。rc だけ見ると
+    # 「所見あり (shadow)」と区別できず 0 を返してしまう。report が無い時点で
+    # 「実行できなかった」と扱う。
+    if scan.returncode == 2 or not scan_report or scan_report.get("status") == "tool_error":
+        print(
+            f"==> repo-preflight readiness_scan could not run "
+            f"(rc={scan.returncode}, report={'yes' if scan_report else 'none'})",
+            file=sys.stderr,
+        )
+        return 1
+    if consistency.returncode == 2 or payload.get("status") == "tool_error":
+        print("==> repo-preflight consistency_gate could not run (tool_error)", file=sys.stderr)
+        return 1
     print(
         f"==> repo-preflight wrapper done "
         f"(readiness_rc={scan.returncode}, consistency_rc={consistency.returncode}, "
         f"mode={mode!r}; not a merge approval)"
     )
     return 0
+
+
+def _parse_json_report(stdout: str) -> dict:
+    """consistency_gate --json は複数行の pretty JSON を出す。最終行だけ読むと
+    常に `}` で JSONDecodeError になり mode=None になっていた。全文を優先し、
+    1 行 JSON を出す実装向けに最終行 fallback を残す。"""
+    text = stdout.strip()
+    if not text:
+        return {}
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    try:
+        return json.loads(text.splitlines()[-1])
+    except json.JSONDecodeError:
+        return {}
 
 
 def ensure_checkout(cache: Path) -> None:
