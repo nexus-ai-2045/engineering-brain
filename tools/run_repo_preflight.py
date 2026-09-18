@@ -67,10 +67,18 @@ def main(argv: list[str] | None = None) -> int:
     # readiness_scan が永久に tool_error なのを gates が隠していた。
     payload = _parse_json_report(consistency.stdout)
     mode = payload.get("mode")
+    scan_report = _parse_json_report(scan.stdout)
     if scan.returncode < 0 or consistency.returncode < 0:
         return 1
-    if scan.returncode == 2:
-        print("==> repo-preflight readiness_scan could not run (rc=2)", file=sys.stderr)
+    # argparse の拒否や crash は rc=1 で JSON を出さない。rc だけ見ると
+    # 「所見あり (shadow)」と区別できず 0 を返してしまう。report が無い時点で
+    # 「実行できなかった」と扱う。
+    if scan.returncode == 2 or not scan_report or scan_report.get("status") == "tool_error":
+        print(
+            f"==> repo-preflight readiness_scan could not run "
+            f"(rc={scan.returncode}, report={'yes' if scan_report else 'none'})",
+            file=sys.stderr,
+        )
         return 1
     if consistency.returncode == 2 or payload.get("status") == "tool_error":
         print("==> repo-preflight consistency_gate could not run (tool_error)", file=sys.stderr)
