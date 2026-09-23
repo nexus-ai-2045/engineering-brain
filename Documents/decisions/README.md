@@ -12,3 +12,4 @@
 - [ADR-0004 安全なFDE feedback境界](../../docs/adr/ADR-0004-safe-fde-feedback-boundary.md)
 - [ADR-0005 先行実装リサーチのconsumer契約](../../docs/adr/ADR-0005-precedent-research-consumer-contract.md)
 - [ADR-0007 verification profile / closeout v2](../../docs/adr/ADR-0007-verification-profile-closeout-v2.md)
+- [ADR-0008 public GitHub visibility](../../docs/adr/ADR-0008-public-github-visibility.md)

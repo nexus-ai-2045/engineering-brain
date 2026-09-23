@@ -3,7 +3,7 @@ title: engineering-brain private knowledge repo
 type: adr
 status: accepted
 created: 2026-07-15
-updated: 2026-07-15
+updated: 2026-09-24
 owner: nexus_ai
 related:
   - ../LOCAL_SSOT.md
@@ -25,6 +25,7 @@ Obsidian は発見、悩み、仮説、raw note の入口として有用だが�
 
 - `engineering-brain` を private executable SSOT とする。
 - `nexus-ai-2045/engineering-brain` は private GitHub mirror / review surface として扱う。
+  （この項は [ADR-0008](ADR-0008-public-github-visibility.md) で置き換え。2026-08-23 に public 化済み）
 - Obsidian は intake と探索の入口に限定し、採用済み knowledge は repo 内の docs、registry、tests、ADR、skill source に昇格する。
 - local learning は raw chat log ではなく、再利用可能な rule、gate、test、source packet、ADR として取り込む。
 - 旧 `dev-brain` は移行確認後に削除してよい legacy とする。

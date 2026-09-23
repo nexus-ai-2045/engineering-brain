@@ -238,3 +238,18 @@ def test_public_release_review_packet_names_exact_stopline() -> None:
     assert "status: public" in packet
     assert "GitHub visibility 変更は実行済み" in packet
     assert "MIT License" in license_text
+
+
+def test_public_visibility_is_recorded_against_adr_0001() -> None:
+    # ADR-0001 (accepted) は「private GitHub mirror」と宣言したまま、
+    # 2026-08-23 に public 化された (PUBLIC_READY.md)。ADR が正本を名乗る以上、
+    # 実態と食い違う決定は後続 ADR で上書きしたことを台帳から辿れる必要がある。
+    index = read_doc("docs/adr/README.md")
+    adr_0001 = read_doc("docs/adr/ADR-0001-engineering-brain-private-knowledge-repo.md")
+    adr_0008 = read_doc("docs/adr/ADR-0008-public-github-visibility.md")
+    workspace_entrypoint = read_doc("Documents/decisions/README.md")
+    assert "ADR-0008" in index
+    assert "ADR-0008" in adr_0001
+    assert "ADR-0001" in adr_0008
+    assert "PUBLIC_READY.md" in adr_0008
+    assert "ADR-0008-public-github-visibility.md" in workspace_entrypoint
