@@ -22,6 +22,22 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 
 ## クイックスタート
 
+まず editable install（未 install だと `python -m engineering_brain` は起動できない）:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m pip install -e .
+```
+
+動作確認（smoke。全テスト緑を保証しない）:
+
+```bash
+python -m engineering_brain version --json
+```
+
+主な入口の例:
+
 ```bash
 python -m engineering_brain run --task "implement small python CLI feature and prepare PR" --domain python --json
 python -m engineering_brain algorithms select --signal shortest_path --signal weighted_graph --constraint negative_edge --json

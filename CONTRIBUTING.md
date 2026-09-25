@@ -27,7 +27,7 @@ git status --short --branch
 `ai-ratchet-gate` は PyPI 名では入れない。Release wheel を使う:
 
 ```powershell
-python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.1.0/ai_ratchet_gate-0.1.0-py3-none-any.whl
+python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.1.1/ai_ratchet_gate-0.1.1-py3-none-any.whl
 ```
 
 `tools/run_repo_preflight.py` は upstream `repo-preflight` を呼び出す薄いラッパである（検査ロジックはコピーしない）。consistency は当面 `shadow`。
