@@ -74,7 +74,7 @@ def test_readme_visualizes_full_human_gated_lifecycle() -> None:
     assert "`engineering-brain`" in readme
     assert "`engineering-autopilot`" in readme
     assert "`engineering_brain`" in readme
-    assert "Python module 名" in readme
+    assert "Python モジュール名" in readme
 
     for label in (
         "1. 設計",
