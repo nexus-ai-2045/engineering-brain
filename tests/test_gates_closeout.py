@@ -67,3 +67,21 @@ def test_closeout_without_matching_profile_reports_not_applicable_not_fake_pass(
     assert all(
         item["status"] == "not_applicable" for item in result["verification"]["evidence"]
     )
+
+def test_runner_reports_missing_executable(monkeypatch, tmp_path):
+    def missing(*args, **kwargs):
+        raise FileNotFoundError(2, "No such file or directory", "python")
+    monkeypatch.setattr(gates.subprocess, "run", missing)
+    result = gates.run(["python", "-m", "pytest", "-q"], cwd=tmp_path)
+    assert result["returncode"] == 127
+    assert result["stdout"] == ""
+    assert "FileNotFoundError" in result["stderr"]
+
+
+def test_runner_reports_permission_failure(monkeypatch, tmp_path):
+    def denied(*args, **kwargs):
+        raise PermissionError(13, "Permission denied", "python")
+    monkeypatch.setattr(gates.subprocess, "run", denied)
+    result = gates.run(["python", "-m", "pytest", "-q"], cwd=tmp_path)
+    assert result["returncode"] == 126
+    assert "PermissionError" in result["stderr"]
