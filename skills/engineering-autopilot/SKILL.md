@@ -11,8 +11,10 @@ description: engineering-brain を通して開発作業を設計し、定番ア�
 
 1. `references/lifecycle.md` を読む。
 2. 対象 repo と作業範囲を確認する。
-3. canonical `engineering-brain` repo で `python -m engineering_brain --help` を実行し、
-   利用可能commandを実測する。
+3. インストール済みの `engineering-brain --help` を優先し、利用可能commandを実測する。
+   モジュール実行は、正本の作業場所で依存を導入済みの環境から `python -m engineering_brain --help` を使う。
+   完了検査の `python` は対象プロジェクトの依存と `pytest` が入った環境を `PATH` で選ぶ。
+   CLI自身の専用環境を、対象の検査環境として無条件に流用しない。具体例は正本の `README.md` の「検査対象の実行環境」を参照する。
 4. `engineering-brain` repo から、現行 CLI で使える gate だけを実行する。
 5. `wrap`、`extend`、`adopt_oss`、`build`を判断する前に、
    `$implementation-precedent-research`で先行実装を評価する。

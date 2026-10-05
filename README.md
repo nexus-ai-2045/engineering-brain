@@ -91,6 +91,24 @@ engineering-brain closeout --repo . --json
 engineering-brain pr --repo . --json
 ```
 
+### 検査対象の実行環境
+
+インストール済みの `engineering-brain` は、それ自身の専用環境で起動します。
+一方、検査に使う `python` は呼出し元の `PATH` から解決します。
+対象プロジェクトの依存と `pytest` が入った環境を選び、同じ端末で実行してください。
+CLI自身の環境に `pytest` があるとは限りません。
+
+既存の対象環境を一回のコマンドだけ選ぶ例（`POSIX` 系）:
+
+```sh
+PATH="<target-repo>/.venv/bin:$PATH" engineering-brain closeout --repo "<target-repo>" --json
+```
+
+`Windows` では対象環境の `Scripts` ディレクトリを使います。
+既存の環境がない場合や依存が不足する場合は、対象プロジェクトの導入手順を先に確認します。
+このツールは依存の自動インストールやグローバル設定の変更を行いません。
+実行コマンドが見つからない場合も構造化した失敗を返し、未実行を合格と扱いません。
+
 module として実行する場合:
 
 ```powershell

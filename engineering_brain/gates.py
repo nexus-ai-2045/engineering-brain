@@ -6,11 +6,10 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from .assurance import evaluate_async_orchestration, evaluate_structured_model
 from .path_safety import scan_personal_paths
 from .registry import AdoptionUnit, select_units
-from .assurance import evaluate_async_orchestration, evaluate_structured_model
 from .verification import build_closeout_verification
-
 
 PUBLIC_TRIGGERS = {"public_release", "external_send", "github_visibility", "announcement", "publish", "push", "pr"}
 PUBLIC_PATH_TRIGGERS = {"public_path", "path_redaction", "absolute_path", "personal_path"}
@@ -170,17 +169,26 @@ def closeout_repo(
 
 
 def run(command: list[str], *, cwd: Path) -> dict[str, Any]:
-    completed = subprocess.run(
-        command,
-        cwd=cwd,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-        creationflags=(
-            getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
-        ),
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=cwd,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
+            creationflags=(
+                getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+            ),
+        )
+    except OSError as error:
+        return {
+            "command": " ".join(command),
+            "returncode": 127 if isinstance(error, FileNotFoundError) else 126,
+            "stdout": "",
+            "stderr": f"{type(error).__name__}: {error}",
+        }
     return {
         "command": " ".join(command),
         "returncode": completed.returncode,
