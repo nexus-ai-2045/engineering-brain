@@ -23,7 +23,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", type=Path, default=Path("."))
     parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE)
     parser.add_argument("--base-ref", default="origin/main")
-    parser.add_argument("--intent", default=None)
+    parser.add_argument(
+        "--intent", default="open_pr",
+        help="Read-only upstream gate intent (default: open_pr; does not create a PR).",
+    )
     args = parser.parse_args(argv)
 
     repo = args.repo.resolve()
@@ -31,8 +34,11 @@ def main(argv: list[str] | None = None) -> int:
     ensure_checkout(cache)
 
     scan_cmd = [sys.executable, str(cache / "scripts" / "readiness_scan.py"), "--repo", str(repo)]
-    if args.intent:
-        scan_cmd.extend(["--intent", args.intent, "--base-ref", args.base_ref])
+    scan_cmd.extend(["--intent", args.intent])
+    if args.intent in {"push", "open_pr", "merge"}:
+        scan_cmd.extend(["--base-ref", args.base_ref])
+    elif args.intent in {"publish", "release"}:
+        scan_cmd.extend(["--consistency-base-ref", args.base_ref])
     consistency_cmd = [
         sys.executable,
         str(cache / "scripts" / "consistency_gate.py"),
@@ -55,21 +61,61 @@ def main(argv: list[str] | None = None) -> int:
     if consistency.stderr:
         print(consistency.stderr, file=sys.stderr)
 
-    # Shadow / readiness findings are human materials, not merge approval.
-    # Fail only when upstream scripts could not be executed at all.
-    if scan.returncode < 0 or consistency.returncode < 0:
-        return 1
-    try:
-        payload = json.loads(consistency.stdout.strip().splitlines()[-1]) if consistency.stdout.strip() else {}
-    except json.JSONDecodeError:
-        payload = {}
-    mode = payload.get("mode")
+    # Read the complete upstream JSON documents, not the final line of pretty JSON.
+    scan_payload, scan_code = result_status(scan, kind="readiness")
+    consistency_payload, consistency_code = result_status(consistency, kind="consistency")
+    exit_code = max(scan_code, consistency_code)
+    mode = consistency_payload.get("mode")
+    status = {0: "pass", 1: "blocked", 2: "tool_error"}[exit_code]
     print(
         f"==> repo-preflight wrapper done "
         f"(readiness_rc={scan.returncode}, consistency_rc={consistency.returncode}, "
         f"mode={mode!r}; not a merge approval)"
     )
-    return 0
+    print(json.dumps({
+        "schema": "repo-preflight.wrapper/v1",
+        "status": status,
+        "exit_code": exit_code,
+        "readiness_status": scan_payload.get("status"),
+        "consistency_status": consistency_payload.get("status"),
+        "mode": mode,
+        "publication_decision": "blocked_human_review_required",
+    }))
+    return exit_code
+
+
+def result_status(
+    result: subprocess.CompletedProcess[str], *, kind: str,
+) -> tuple[dict, int]:
+    """Preserve upstream holds and distinguish execution/JSON contract errors."""
+    try:
+        payload = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        return {"status": "tool_error"}, 2
+    if not isinstance(payload, dict):
+        return {"status": "tool_error"}, 2
+    success = (
+        {"pass", "ready_after_confirmation"}
+        if kind == "readiness" else {"pass", "not_configured"}
+    )
+    holds = {"blocked", "needs_human_input"} if kind == "readiness" else {"blocked", "shadow_findings", "fail"}
+    status = payload.get("status")
+    if not isinstance(status, str) or status not in success | holds:
+        return payload, 2
+    if result.returncode not in {0, 1}:
+        return payload, 2
+    # Dialogue mode wraps scan errors as top-level blocked with exit code 1.
+    scan = payload.get("scan")
+    if scan is not None:
+        if (
+            not isinstance(scan, dict)
+            or not isinstance(scan.get("status"), str)
+            or scan["status"] not in {"pass", "blocked"}
+        ):
+            return payload, 2
+        if scan["status"] == "blocked":
+            return payload, 1
+    return payload, 1 if result.returncode or status in holds else 0
 
 
 def ensure_checkout(cache: Path) -> None:

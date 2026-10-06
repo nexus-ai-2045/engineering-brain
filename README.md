@@ -1,4 +1,4 @@
-# engineering-brain
+# engineering-brain — 開発保証の入口
 
 engineering-brain は、開発判断・実装・検証・運用保証を「読んで終わり」にせず、作業前後に通せる形へ落とす local-first engineering autopilot です。
 
@@ -18,7 +18,7 @@ Fractal Decision Ecosystem（FDE）が AI ルーティングと意思決定の O
 
 つまり、`engineering-autopilot` skill が `engineering-brain` repo の正本を参照し、実行時は `python -m engineering_brain ...` を呼びます。
 
-## What This Does
+## 何をするものか
 
 | question | answer |
 |---|---|
@@ -66,9 +66,9 @@ flowchart LR
 | 9. マージ | latest head、checks、review、merge可否 | merge commit | current conversation のmerge承認なし |
 | 10. 後片付け | merged proof、dirty state、他者worktree | main同期、cleanup plan | 未merge・dirty・削除承認なし |
 
-現在のCLIはこのうち run packet、research packet、gate、closeout、PR packet、skill drift check、version、merge後cleanup planを実装済みです。verification profileの拡張はロードマップ上の次段階です。
+現在のCLIはこのうち run packet、research packet、gate、closeout v2、verification profile、PR packet、skill drift check、version、merge後cleanup planを実装済みです。
 
-## Quick Start
+## はじめ方
 
 ```powershell
 python -m engineering_brain run --task "implement small python CLI feature and prepare PR" --domain python --json
@@ -76,15 +76,17 @@ python -m engineering_brain algorithms select --signal shortest_path --signal we
 python -m engineering_brain algorithms compare --id dijkstra --id bellman_ford --json
 python -m engineering_brain research --task "choose a Python test approach" --domain python --decision hold --rationale "needs upstream evidence" --precedent-outcome hold --json
 python -m engineering_brain pr --repo . --json
+python -m engineering_brain verify --repo . --json
 python -m engineering_brain closeout --repo . --json
 ```
 
-## Core Commands
+## 主なコマンド
 
 まず使う入口:
 
 ```powershell
 engineering-brain run --task "<task>" --json
+engineering-brain verify --repo . --json
 engineering-brain closeout --repo . --json
 engineering-brain pr --repo . --json
 ```
@@ -93,6 +95,7 @@ module として実行する場合:
 
 ```powershell
 python -m engineering_brain run --task "<task>" --json
+python -m engineering_brain verify --repo . --json
 python -m engineering_brain closeout --repo . --json
 python -m engineering_brain pr --repo . --json
 ```
@@ -106,6 +109,7 @@ python -m engineering_brain pr --repo . --json
 - `python -m engineering_brain algorithms compare --id <id> --id <id> --json`: 候補の前提・計算量・交換条件・検証法を比較する。
 - `python -m engineering_brain research --task "<question>" --domain python --decision hold --json`: 候補 source と採否・保留理由を research packet にする。
 - `python -m engineering_brain pr --repo . --json`: 差分・closeout・stopline から plan-only の日本語 PR packet を作る（PR作成/pushはしない）。
+- `python -m engineering_brain verify --repo . --json`: repo 検出に応じた verification profile を plan-only で返す（実行しない）。
 - `ai-ratchet-gate --repo .`: tracked∧ignored の新規矛盾を fail-closed で止める（Release wheel から導入）。
 - `python tools/run_repo_preflight.py --repo .`: upstream repo-preflight を shadow consistency 付きで実行する。
 
@@ -120,7 +124,7 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 - `python -m engineering_brain finish --json`: merge 後の local / remote branch cleanup 候補を plan する。
 - `python -m engineering_brain hooks install --json`: repo 同梱の opt-in Git hook をローカル `.git/hooks/` へ入れる。
 
-## Current Status
+## 現在の状態
 
 | item | status |
 |---|---|
@@ -128,12 +132,14 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 | visibility | public |
 | license | MIT |
 | runtime skill | `engineering-autopilot` synced projection |
-| GitHub Release / tag | 未作成。別承認 |
-| primary next work | verification profile / closeout v2。未吸収: research-review eval、runtime-contract learnings |
+| GitHub Release / tag | [v0.2.0](https://github.com/nexus-ai-2045/engineering-brain/releases/tag/v0.2.0) 公開済み。追加 release / tag / announcement は別承認 |
+| primary next work | PR #36 の verification profile / closeout v2 をレビュー・統合する。本差分には実装を含むが、配布版への採用は別判断。7件の local learnings は candidate のまま |
 
-## Local SSOT
+実装ブランチ、main、Release、導入済みCLIは別の版になり得ます。`version` の番号だけで最新mainとの一致や各AIでのスキル認識を証明しません。research-review eval（#32）、runtime-contract learnings（#31）、field_review / adopt gate（#35）はmainへ統合済みです。
 
-現行 engineering-brain の local SSOT は `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain` です。`nexus-ai-2045/engineering-brain` は GitHub review surface です。詳しくは [Local SSOT](docs/LOCAL_SSOT.md) を参照します。
+## ローカル正本（SSOT）
+
+コード・docs・tests・data の正本はこの repo、`nexus-ai-2045/engineering-brain` は GitHub review / distribution surface です。ローカル配置の文書と台帳には未解消の不一致があるため、パスを固定して実行する前に [Local SSOT](docs/LOCAL_SSOT.md) の確認事項を照合します。
 
 `dev-brain` からの private recreate については [Migration notes](docs/MIGRATION_NOTES.md)、[engineering-brain cutover plan](docs/ENGINEERING_CUTOVER_PLAN.md)、[private cutover packet](docs/PRIVATE_CUTOVER_PACKET.md) を参照します。
 
@@ -148,13 +154,13 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 | publication/GitHub visibility | 公開、外部送信、repo public 化、push/PR を人間確認まで止める |
 | public path redaction | 実ユーザー名を含むローカル絶対パスを公開候補 artifact に残さない |
 
-## Engineering Autopilot
+## 開発自走の設計
 
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
 `engineering_brain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
 
-`engineering_brain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。plan と stopline の提示だけを行い、**branch は削除しません**。削除の実行正本は fractal-decision-ecosystem の `scripts/post_merge_cleanup.py` です (ADR-0006)。`--apply-local` は委譲先を示すだけで、この repo は branch を消しません。
+`engineering_brain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。plan と stopline の提示だけを行い、**branch は削除しません**。削除の実行正本は fractal-decision-ecosystem の `scripts/post_merge_cleanup.py` です (FDE ADR-0006)。`--apply-local` は委譲先を示すだけで、この repo は branch を消しません。
 
 repo 同梱 hook は `tools/hooks/post-merge` にあります。`python -m engineering_brain hooks install --json` で opt-in install すると、merge 後に `engineering_brain finish --json` の plan だけを表示します。hook は branch を自動削除しません。
 
@@ -168,7 +174,7 @@ Contribution / PR の境界は [Contributing](CONTRIBUTING.md) と `.github/` te
 
 直近の実装順序は [Next goal design](docs/NEXT_GOAL_DESIGN.md) を参照します。
 
-## ADR / knowledge intake
+## 設計判断記録（ADR）と知見の取り込み
 
 設計判断は [ADR](docs/adr/README.md) に残します。Obsidian や local memory は正本ではなく入口として扱い、採用済みの知見だけを [Knowledge intake](docs/KNOWLEDGE_INTAKE.md) の流れで docs / registry / tests / ADR / skill source へ昇格します。
 
@@ -192,13 +198,15 @@ FDEへ学びを返す場合は、`python -m engineering_brain feedback --input <
 
 ## 完了判定
 
-`closeout` は次を分けて返します。
+`closeout` は closeout v2 として次を分けて返します。
 
 - `implementation`: 実装差分や構成があるか
-- `verification`: test / compile / smoke が揃うか
+- `verification`: verification profile に基づく evidence（`pass` / `fail` / `not_run` / `not_applicable`）
 - `operation`: 継続運用に必要な gate が揃うか
 - `external_public`: 公開・外部送信・GitHub visibility などの人間承認境界
 - `public_path_redaction`: `<PROJECTS_ROOT>` / `<USER_HOME>` / `<REPO>` へ置換されているか
+
+verification profile の正本は `engineering_brain/data/verification-profiles.yaml` です。計画だけ見るときは `python -m engineering_brain verify --repo . --json` を使います。
 
 ## 公開境界
 

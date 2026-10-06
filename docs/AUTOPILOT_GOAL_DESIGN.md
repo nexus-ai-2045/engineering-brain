@@ -24,7 +24,7 @@ checked_at: 2026-07-14 JST
 8. verify: unit / integration / smoke / E2E / security / closeout を実行し、結果を保存する。
 9. review: PR を作り、人間目視レビュー、コメント吸収、再検証を回す。
 10. finish: merge 承認後に merge、main 同期、branch/worktree cleanup、運用証跡更新を行う。
-    ただし branch 削除そのものは実行正本 (FDE `scripts/post_merge_cleanup.py`、ADR-0006) へ
+    ただし branch 削除そのものは実行正本 (FDE `scripts/post_merge_cleanup.py`、FDE ADR-0006) へ
     委譲する。本 repo が持つのは plan、stopline、hook インストーラであって削除実装ではない。
 
 ## 全体図
@@ -335,9 +335,9 @@ MVP は Python FSM + SQLite/JSON で十分。Temporal などの workflow engine 
 | 0.5 | migration ledger | [PR #1 migration ledger](PR1_MIGRATION_LEDGER.md) | adopt / rewrite / reject が file 単位で決まる |
 | 1 | lifecycle contract | schema / phase registry / lifecycle tests | 不正遷移が fail-closed |
 | 2 | planner | task から TDD / research / verification plan | unknown / public / credential fixture が通る |
-| 3 | executor | allowlist command + evidence | arbitrary shell が拒否される |
-| 4 | closeout v2 | run evidence based closeout | 未実行 / 失敗 / not-applicable を分離 |
-| 5 | PR packet | 日本語 PR body generator | GitHub 操作なしで packet 生成 |
+| 3 | executor / verification profile | allowlist command + evidence | done: profile registry + plan/execute 分離 |
+| 4 | closeout v2 | run evidence based closeout | done: pass / fail / not_run / not_applicable |
+| 5 | PR packet | 日本語 PR body generator | done: GitHub 操作なしで packet 生成 |
 | 6 | finish planner | merge / sync / cleanup plan | dirty / unmerged / stale が止まる |
 | 7 | skill | repo-owned thin skill | runtime copy なしで CLI 完結 |
 | 8 | cutover | engineering-* migration packet | 実 rename / public 化は別承認 |

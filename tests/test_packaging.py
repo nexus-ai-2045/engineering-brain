@@ -25,6 +25,7 @@ def test_algorithm_catalog_is_packaged_inside_engineering_brain() -> None:
     assert (ROOT / "engineering_brain" / "data" / "adoption-units.yaml").is_file()
     assert (ROOT / "engineering_brain" / "data" / "technology-sources.yaml").is_file()
     assert (ROOT / "engineering_brain" / "data" / "local-learnings.yaml").is_file()
+    assert (ROOT / "engineering_brain" / "data" / "verification-profiles.yaml").is_file()
 
 
 def test_local_learnings_default_path_matches_packaged_data_layout() -> None:

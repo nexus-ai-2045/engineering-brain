@@ -46,7 +46,58 @@ def _public_packet(**overrides):
     return packet
 
 
-def test_public_stdout_keeps_non_catalog_research_unknowns() -> None:
+def test_public_stdout_preserves_verification_profiles_and_summary() -> None:
+    public = public_stdout_packet(
+        _public_packet(
+            checks={
+                "closeout": {
+                    "overall": "ok",
+                    "verification": {
+                        "status": "ok",
+                        "schema_version": 2,
+                        "summary": {
+                            "pass": 2,
+                            "fail": 0,
+                            "not_run": 0,
+                            "not_applicable": 3,
+                        },
+                        "selected_profiles": [
+                            {"id": "python_unit", "layer": "unit", "status": "adopted"},
+                            {"id": "python_smoke_cli", "layer": "smoke"},
+                        ],
+                        "pytest": {
+                            "command": "python -m pytest -q --basetemp <TEMP>",
+                            "returncode": 0,
+                            "stdout": "secret-should-not-leak",
+                        },
+                        "compileall": {
+                            "command": "python -m py_compile <tracked *.py>",
+                            "returncode": 0,
+                        },
+                    },
+                },
+                "public_path_redaction": {"status": "ok"},
+                "attachment_validation": {
+                    "run_packet": "missing",
+                    "research_packet": "ok",
+                    "run_errors": [],
+                    "research_errors": [],
+                },
+            }
+        )
+    )
+
+    verification = public["checks"]["closeout"]["verification"]
+    assert verification["summary"]["not_applicable"] == 3
+    assert [item["id"] for item in verification["selected_profiles"]] == [
+        "python_unit",
+        "python_smoke_cli",
+    ]
+    assert "stdout" not in (verification.get("pytest") or {})
+    body = public["pr_body_ja"]
+    assert "evidence summary: pass=2, fail=0, not_run=0, not_applicable=3" in body
+    assert "verification profiles: `python_unit, python_smoke_cli`" in body
+
     public = public_stdout_packet(
         _public_packet(
             unknowns=[

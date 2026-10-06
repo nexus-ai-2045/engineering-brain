@@ -1,8 +1,8 @@
-# engineering-brain roadmap
+# engineering-brain ロードマップ
 
 status: active
 owner: nexus_ai
-checked_at: 2026-08-24 JST
+checked_at: 2026-09-08 JST
 
 ## 現在地
 
@@ -12,7 +12,7 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 
 直近のゴール設計は [Next goal design](NEXT_GOAL_DESIGN.md) を正本にする。
 
-## PR split
+## PRの分割と進捗
 
 | order | PR | 目的 | 状態 |
 |---:|---|---|---|
@@ -26,28 +26,28 @@ PR #1 は broad / conflicting / stale な draft として close 済み。採用�
 | H | local learnings registry | local struggle を rule / failure pattern として蓄積 | partial: candidate packets + field_review/adopt gates（adopt 実行は human-gated、packet decision は未昇格） |
 | I | PR packet generator | 日本語 PR body、visible scope、checks、stopline を生成 | done: `engineering_brain pr` |
 | J | repo-owned thin skill | runtime skill は CLI を呼ぶ薄い入口にする | done: repo-owned source |
-| K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | done: runtime copy synced |
+| K | runtime sync / drift check | repo-owned skill source と runtime install copy の差分を検出する | done: 同期・差分検出の実装。現runtimeとの差分は別途照合 |
 | L | autopilot run packet MVP | route / gate / catalog / skill-sync / closeout を 1 packet にまとめる | done: MVP |
 | M | public readiness packet | LICENSE / README / SECURITY / scan / exact operation を整理する | done: ready-for-human-review |
 | N | versioning baseline | public seed `0.1.0` と version sync guard を固定する | done: PR #14 |
 | O | finish planner / hook template | merge 後の cleanup 候補を plan し、opt-in hook で見落としを減らす | done: PR #15 |
 | P | README lifecycle visualization / docs drift cleanup | ゴールまでの見取り図と migration/public 状態を現実へ合わせる | done: PR #17 |
-| Q | first GitHub Release packet | tag / GitHub Release / announcement は別承認のまま、version surface と settings を揃える | current |
-| R | verification profile / closeout v2 | task に応じた smoke / preflight / evidence schema を返す | next |
+| Q | first GitHub Release packet | tag / GitHub Release / announcement は別承認のまま、version surface と settings を揃える | done: v0.2.0 Release / tag。追加 release / announcement は別承認 |
+| R | verification profile / closeout v2 | task に応じた smoke / preflight / evidence schema を返す | PR #36: 本差分で実装。main統合・配布版採用は未了 |
 
-## Cutover policy
+## 移行方針
 
 private recreate の履歴は [Migration notes](MIGRATION_NOTES.md)、[engineering-brain cutover plan](ENGINEERING_CUTOVER_PLAN.md)、[private cutover packet](PRIVATE_CUTOVER_PACKET.md) を参照する。
 
 public 化は完了済み。release、tag、announcement、visibility 再変更は別 review packet と current conversation の明示 yes が必要。
 
-## Skill roadmap
+## スキルのロードマップ
 
 `engineering-autopilot` の repo-owned source は `skills/engineering-autopilot/` に置く。skill-facing roadmap は `skills/engineering-autopilot/references/roadmap.md` を参照する。
 
 Codex / Claude Code の runtime install copy は `python -m engineering_brain skill-sync --target all --json` が `status: ok` を返すことを維持条件にする。
 
-## Done for current public seed phase
+## 初期公開段階の完了条件
 
 - `python -m pytest -q` が通る。
 - `python -m engineering_brain closeout --repo . --json` が `overall=ok` を返す。
