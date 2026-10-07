@@ -135,6 +135,8 @@ def public_stdout_packet(
         "overall": closeout.get("overall"),
         "status": closeout.get("status"),
         "reason": closeout.get("reason"),
+        "completion_scope": "local_verification_only",
+        "lifecycle_verified": False,
     }
     if verification:
         selected = verification.get("selected_profiles") or []
@@ -344,6 +346,8 @@ def _attachment_summary(packet: dict[str, Any] | None) -> dict[str, Any] | None:
         "rejected": "rejected",
         "blocked_until_human_review": "blocked_until_human_review",
         "ready_for_local_work": "ready_for_local_work",
+        "local_verification_passed": "local_verification_passed",
+        "local_verification_blocked": "local_verification_blocked",
         "skipped": "skipped",
     }
     status = allowed.get(str(raw_status), "hold")

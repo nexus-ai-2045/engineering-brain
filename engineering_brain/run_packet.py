@@ -46,7 +46,9 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
 
     blocked = set(route["blocked_actions"])
     blocked.update(HUMAN_STOPLINES)
-    status = "blocked_until_human_review" if blocked else "ready_for_local_work"
+    status = "ready_for_local_work"
+    if closeout:
+        status = "local_verification_passed" if closeout_payload.get("overall") == "ok" else "local_verification_blocked"
 
     return {
         "packet_type": "engineering_autopilot_run",
@@ -54,6 +56,8 @@ def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: boo
         "task": task,
         "repo": "<REPO>",
         "status": status,
+        "external_status": "blocked_until_human_review",
+        "completion_scope": "local_only",
         "route": route,
         "gates": gates,
         "catalog": {

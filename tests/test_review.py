@@ -10,6 +10,19 @@ from engineering_brain.review import build_pr_packet, render_pr_body_ja
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_public_pr_keeps_local_verification_result_without_external_authority():
+    for status in ('local_verification_passed', 'local_verification_blocked'):
+        public = review.public_stdout_packet({
+            'run_packet': {'packet_type': 'engineering_autopilot_run', 'status': status},
+            'checks': {'closeout': {'overall': 'ok', 'completion_scope': 'local_verification_only', 'lifecycle_verified': False}},
+        })
+        assert public['run_packet']['status'] == status
+        assert public['merge']['allowed'] is False
+        assert public['external_actions']['performed'] is False
+        assert public['checks']['closeout']['completion_scope'] == 'local_verification_only'
+        assert public['checks']['closeout']['lifecycle_verified'] is False
 SCHEMA = json.loads((ROOT / "schemas" / "pr-packet.schema.json").read_text(encoding="utf-8"))
 
 

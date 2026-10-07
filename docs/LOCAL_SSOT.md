@@ -2,14 +2,14 @@
 
 status: active
 owner: nexus_ai
-checked_at: 2026-07-16 JST
+checked_at: 2026-10-08 JST
 
 ## 結論
 
 現行 engineering-brain の local SSOT は次に固定する。
 
 ```text
-<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain
+<PROJECTS_ROOT>/Documents/.repos/nexus_ai/engineering-brain
 ```
 
 この位置は `<PROJECTS_ROOT>/ssot-registry.yaml` の repo 台帳に登録されている canonical path である。
@@ -26,7 +26,7 @@ checked_at: 2026-07-16 JST
 
 | location | role | SSOT |
 |---|---|---|
-| `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain` | local source of truth / 実装・docs・tests・registry | yes |
+| `<PROJECTS_ROOT>/Documents/.repos/nexus_ai/engineering-brain` | local source of truth / 実装・docs・tests・registry | yes |
 | `https://github.com/nexus-ai-2045/engineering-brain` | public GitHub review / distribution surface | no |
 | `<PROJECTS_ROOT>/Documents/repos/second-brain/dev-brain` | deleted legacy private source | no |
 | `https://github.com/nexus-ai-2045/dev-brain` | deleted legacy private GitHub repo | no |
@@ -42,7 +42,7 @@ checked_at: 2026-07-16 JST
 
 | layer | live surface | role |
 |---|---|---|
-| local repo | `Documents/repos/engineering/engineering-brain` | live local SSOT |
+| local repo | `Documents/.repos/nexus_ai/engineering-brain` | live local SSOT |
 | GitHub repo | `nexus-ai-2045/engineering-brain` | public review / distribution surface |
 | runtime skill source | `skills/engineering-autopilot` repo-owned source | live source |
 | runtime install copy | `.codex/skills/engineering-autopilot` synced projection | live projection |
@@ -60,14 +60,18 @@ Legacy `dev-brain` repo、stale clone、runtime skill copy は削除済みであ
 
 ## Placement decision
 
-`engineering-brain` は `second-brain` 配下へ置かない。開発判断・実装保証・運用保証を扱う engineering 系 repo として `Documents/repos/engineering/engineering-brain` に置く。
+`engineering-brain` は `second-brain` 配下へ置かない。開発判断・実装保証・運用保証を扱う engineering 系 repo として `Documents/.repos/nexus_ai/engineering-brain` に置く。
 
 private recreate の履歴は [Migration notes](MIGRATION_NOTES.md) と [private cutover packet](PRIVATE_CUTOVER_PACKET.md) を参照する。
 
 `ssot-registry.yaml` の `repos:` 節は次の現行形で管理する。
 
 ```yaml
-- {path: Documents/repos/engineering/engineering-brain, remote: nexus-ai-2045/engineering-brain, visibility: public, repo_class: own_public, case: engineering, identity: 273569186+nexus-ai-2045@users.noreply.github.com, wave: keep, note: dev-brain clean cutover completed; release/tag/announcement は別承認}
+- {path: Documents/.repos/nexus_ai/engineering-brain, remote: nexus-ai-2045/engineering-brain, visibility: public, repo_class: own_public, case: engineering, identity: 273569186+nexus-ai-2045@users.noreply.github.com, wave: keep, note: dev-brain clean cutover completed; release/tag/announcement は別承認}
 ```
 
 GitHub visibility は public 済み。今後の visibility 変更、release、tag、外部告知は別 review packet と current conversation の明示 yes で扱う。
+
+## 現在値の照合
+
+配置は workspace の `ssot-registry.yaml`、公開範囲は GitHub の現在値を操作前に確認する。台帳の古い private 記載だけで認証や公開範囲を判断しない。runtime copy の存在と実際の発見・呼出し・内容一致も分けて確認する。

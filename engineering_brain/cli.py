@@ -47,6 +47,7 @@ from .research import (
 )
 from .review import build_pr_packet, load_packet_file, public_stdout_packet
 from .run_packet import build_run_packet
+from .orchestration_bridge import bind_lifecycle
 from .skill_sync import (
     RUNTIME_TARGETS,
     compare_skill,
@@ -173,6 +174,9 @@ def main(argv: list[str] | None = None) -> int:
     run_parser.add_argument("--repo", default=".")
     run_parser.add_argument("--domain")
     run_parser.add_argument("--closeout", action="store_true")
+    run_parser.add_argument("--lifecycle-state", type=Path, help="Create or resume a local state owned by pr-lifecycle-orchestrator.")
+    run_parser.add_argument("--orchestrator-root", type=Path, help="Explicit trusted Projects checkout containing the existing lifecycle owner.")
+    run_parser.add_argument("--run-id", help="Stable identity for the local lifecycle handoff.")
     run_parser.add_argument("--json", action="store_true")
 
     research_parser = sub.add_parser("research", help="Build a candidate research and decision packet.")
@@ -411,15 +415,28 @@ def main(argv: list[str] | None = None) -> int:
             payload = results[0]
         return emit(payload, as_json=args.json)
     if args.command == "run":
-        return emit(
-            build_run_packet(
-                task=args.task,
-                repo=Path(args.repo).resolve(),
-                domain=args.domain,
-                closeout=args.closeout,
-            ),
-            as_json=args.json,
+        bridge_args = [args.lifecycle_state, args.orchestrator_root, args.run_id]
+        if any(bridge_args) and not all(bridge_args):
+            parser.error("--lifecycle-state, --orchestrator-root and --run-id must be supplied together")
+        payload = build_run_packet(
+            task=args.task,
+            repo=Path(args.repo).resolve(),
+            domain=args.domain,
+            closeout=args.closeout,
         )
+        if args.lifecycle_state:
+            try:
+                payload["lifecycle"] = bind_lifecycle(
+                    Path(args.repo), args.task, args.run_id,
+                    args.lifecycle_state, args.orchestrator_root,
+                )
+            except (ValueError, OSError, subprocess.SubprocessError):
+                emit(
+                    {"status": "blocked", "reason": "lifecycle_binding_failed", "external_actions_performed": False},
+                    as_json=args.json,
+                )
+                return 2
+        return emit(payload, as_json=args.json)
     if args.command == "research":
         return emit(
             build_research_packet(
