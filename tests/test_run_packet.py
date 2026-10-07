@@ -32,7 +32,9 @@ def test_build_run_packet_combines_route_gates_catalog_skill_sync_and_closeout(
 
     assert packet["packet_type"] == "engineering_autopilot_run"
     assert packet["task"] == "implement small python CLI feature and prepare PR"
-    assert packet["status"] == "blocked_until_human_review"
+    assert packet["status"] == "ready_for_local_work"
+    assert packet["external_status"] == "blocked_until_human_review"
+    assert packet["completion_scope"] == "local_only"
     assert packet["route"]["mode"] == "implement"
     assert "human_publication_review_gate" in packet["route"]["selected_units"]
     assert packet["gates"]["overall"] == "blocked"
@@ -67,7 +69,16 @@ def test_build_run_packet_can_include_closeout(monkeypatch) -> None:
     )
 
     assert packet["closeout"]["overall"] == "ok"
+    assert packet["status"] == "local_verification_passed"
+    assert packet["external_status"] == "blocked_until_human_review"
     assert packet["verification"]["closeout_status"] == "ok"
+
+
+def test_failed_closeout_is_local_blocker_and_not_completion(monkeypatch):
+    monkeypatch.setattr(run_packet, 'closeout_repo', lambda repo: {'overall': 'blocked'})
+    packet = build_run_packet(task='repair', repo=ROOT, domain=None, closeout=True)
+    assert packet['status'] == 'local_verification_blocked'
+    assert packet['completion_scope'] == 'local_only'
 
 
 def test_build_run_packet_reports_claude_runtime_drift(monkeypatch) -> None:

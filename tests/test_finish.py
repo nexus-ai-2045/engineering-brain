@@ -35,6 +35,10 @@ def test_finish_plan_reports_merged_local_and_remote_candidates(monkeypatch) -> 
                 "stdout": "origin/main\norigin/codex/done-one",
                 "stderr": "",
             }
+        if joined == "git branch --format %(refname:short)":
+            return {"command": joined, "returncode": 0, "stdout": "main\ncodex/done-one\ncodex/done-two", "stderr": ""}
+        if joined == "git branch -r --format %(refname:short)":
+            return {"command": joined, "returncode": 0, "stdout": "origin/main\norigin/codex/done-one", "stderr": ""}
         raise AssertionError(f"unexpected command: {joined}")
 
     monkeypatch.setattr(finish, "run", fake_run)
@@ -193,6 +197,48 @@ def test_apply_local_never_deletes_and_names_the_ssot(tmp_path: Path) -> None:
 def test_plan_names_the_cleanup_ssot(tmp_path: Path) -> None:
     repo = _make_repo(tmp_path)
     assert "post_merge_cleanup.py" in finish.finish_plan(repo)["cleanup_ssot"]
+
+
+def test_finish_plan_delegates_nonancestor_squash_branch(tmp_path: Path) -> None:
+    """同じ tree でも squash 前の branch は ancestry 候補から漏れる。"""
+    repo = _make_repo(tmp_path)
+    _git(repo, "checkout", "-qb", "codex/squashed")
+    (repo / "f.txt").write_text("adopted\n", encoding="utf-8")
+    _git(repo, "commit", "-qam", "feature")
+    _git(repo, "checkout", "-q", "main")
+    _git(repo, "merge", "--squash", "codex/squashed")
+    _git(repo, "commit", "-qm", "adopt feature")
+    _git(repo, "update-ref", "refs/remotes/origin/main", "HEAD")
+    _git(repo, "update-ref", "refs/remotes/origin/codex/squashed", "codex/squashed")
+    _git(repo, "diff", "--exit-code", "main", "codex/squashed")
+    ancestry = _subprocess.run(
+        ["git", "merge-base", "--is-ancestor", "codex/squashed", "main"], cwd=repo
+    )
+    assert ancestry.returncode == 1
+
+    plan = finish.apply_local_cleanup(repo)
+
+    assert plan["status"] == "delegation_required"
+    assert plan["reason"] == "nonancestor_branches_unverified"
+    assert plan["local_merged_branches"] == []
+    assert plan["remote_merged_branches"] == []
+    assert plan["unverified_local_branches"] == ["codex/squashed"]
+    assert plan["unverified_remote_branches"] == ["origin/codex/squashed"]
+    assert plan["plan_scope"] == "ancestry_only"
+    assert plan["cleanup_verified"] is False
+    assert plan["applied"] is False
+    _git(repo, "rev-parse", "--verify", "codex/squashed")
+
+
+def test_finish_plan_only_default_is_limited_plan(tmp_path: Path) -> None:
+    plan = finish.finish_plan(_make_repo(tmp_path))
+
+    assert plan["status"] == "ok"
+    assert plan["reason"] == "nothing_to_clean"
+    assert plan["unverified_local_branches"] == []
+    assert plan["unverified_remote_branches"] == []
+    assert plan["plan_scope"] == "ancestry_only"
+    assert plan["cleanup_verified"] is False
 
 
 def test_finish_plan_excludes_resolved_remote_base_master(tmp_path: Path) -> None:

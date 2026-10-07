@@ -155,7 +155,7 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 
 ## Local SSOT
 
-現行 engineering-brain の local SSOT は `<PROJECTS_ROOT>/Documents/repos/engineering/engineering-brain` です。`nexus-ai-2045/engineering-brain` は GitHub review surface です。詳しくは [Local SSOT](docs/LOCAL_SSOT.md) を参照します。
+現行 engineering-brain の local SSOT は `<PROJECTS_ROOT>/Documents/.repos/nexus_ai/engineering-brain` です。`nexus-ai-2045/engineering-brain` は GitHub review surface です。詳しくは [Local SSOT](docs/LOCAL_SSOT.md) を参照します。
 
 `dev-brain` からの private recreate については [Migration notes](docs/MIGRATION_NOTES.md)、[engineering-brain cutover plan](docs/ENGINEERING_CUTOVER_PLAN.md)、[private cutover packet](docs/PRIVATE_CUTOVER_PACKET.md) を参照します。
 
@@ -175,6 +175,30 @@ skill本体を複製せず、`wrap / extend / adopt_oss / build`の前に先行�
 `engineering-brain / engineering-autopilot` の発展形は [Autopilot goal design](docs/AUTOPILOT_GOAL_DESIGN.md) にまとめています。設計、リサーチ、TDD、実装、検証、PR、人間レビュー、merge、branch/worktree cleanup までを 1 つの run packet として扱うための状態機械です。
 
 `engineering_brain run` は、route / gate / catalog / skill-sync / closeout stopline を 1 つの run packet にまとめる MVP です。既定では計画 packet を返し、local verification は `--closeout` 指定時だけ実行します。
+
+ローカル工程の `status` と外部操作の `external_status` は別々に返します。
+`local_verification_passed` は対象のローカル検証だけの成功であり、PR・マージ・掃除の完了ではありません。
+
+### 同じ作業を既存の進行管理へ接続する
+
+GitHubへの提出と後片付けまで扱う場合、既存の `pr-lifecycle-orchestrator` を進行管理の正本として使います。
+信頼する Projects checkout を明示した次の呼出しは、既存 `autopilot_state.py` の `init` と `evaluate` を実際に実行します。
+新しい状態機械・マージ処理・削除処理は実装しません。
+
+```sh
+engineering-brain run --task "対象の変更を検証して提出準備する" --repo "<REPO>" \
+  --orchestrator-root "<PROJECTS_ROOT>" --run-id "<RUN_ID>" \
+  --lifecycle-state "<PRIVATE_RUN_DIR>/lifecycle.json" --json
+```
+
+stateはローカル専用で、公開差分へ追加しません。初回は証拠も承認も空です。
+作業中はこのstateを既存の進行管理へ渡し、設計・テスト・レビュー・承認・マージ・掃除の証拠を同じ作業に集めます。
+この接続自体は証拠を合格へ昇格させず、能力分類が未確認なら進行管理は `SECURITY_CLASSIFICATION_REQUIRED` を返します。
+進行管理のスキルがruntime一覧に見つからない場合も、新設せず Projects正本の `shared/skills/pr-lifecycle-orchestrator/SKILL.md` を確認します。
+
+既存stateはrepository・HEAD・task・run IDが一致する場合だけ再利用し、上書きしません。
+commit後などHEADが変わった場合は古い証拠・承認を引き継がず、新しいHEAD用のstateを明示して作り直します。
+GitHub操作と削除は、既存の進行管理の操作別承認・直前照合を通します。
 
 `engineering_brain finish` は、merge 後に残った local / remote branch cleanup 候補を返します。plan と stopline の提示だけを行い、**branch は削除しません**。削除の実行正本は fractal-decision-ecosystem の `scripts/post_merge_cleanup.py` です (FDE ADR-0006)。`--apply-local` は委譲先を示すだけで、この repo は branch を消しません。
 

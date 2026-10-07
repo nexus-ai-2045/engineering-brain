@@ -139,6 +139,8 @@ def closeout_repo(
 
     return {
         "overall": "ok" if git_ok and verification_ok and public_path_ok else "blocked",
+        "completion_scope": "local_verification_only",
+        "lifecycle_verified": False,
         "schema_version": 2,
         "implementation": {
             "status": "present",

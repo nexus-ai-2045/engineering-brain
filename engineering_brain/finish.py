@@ -15,6 +15,7 @@ HOOK_NAMES = ["pre-commit", "post-merge"]
 # この repo の cwd から直接実行できるパスではない。
 CLEANUP_SSOT = "fractal-decision-ecosystem scripts/post_merge_cleanup.py"
 CLEANUP_SSOT_COMMAND = "python scripts/post_merge_cleanup.py --apply --cwd <REPO>"
+CLEANUP_SSOT_CHECK_COMMAND = "python scripts/post_merge_cleanup.py --json --cwd <REPO>"
 CLEANUP_SSOT_COMMAND_NOTE = (
     "Run from a fractal-decision-ecosystem checkout. "
     "Replace <REPO> with the absolute path of the target git root. "
@@ -139,18 +140,59 @@ def finish_plan(repo: Path) -> dict[str, Any]:
         )
     suggested = _suggested_commands(local_branches, remote_branches)
 
+    # ancestry では squash 採用を判定できない。全 ref を照合して漏れを
+    # 明示し、意味上の採用判定は削除の実行正本へ委譲する。
+    unverified: dict[str, list[str]] = {}
+    for scope, command, merged in (
+        ("local", ["git", "branch", "--format", "%(refname:short)"], local_branches),
+        ("remote", ["git", "branch", "-r", "--format", "%(refname:short)"], remote_branches),
+    ):
+        inventory = run(command, cwd=resolved_repo)
+        if inventory["returncode"] != 0:
+            return {
+                "status": "blocked",
+                "reason": f"{scope}_branch_inventory_failed",
+                "repo": "<REPO>",
+                "current_branch": current_branch,
+                "base_refs": base_refs,
+                "git_result": inventory,
+                "local_merged_branches": local_branches,
+                "remote_merged_branches": remote_branches,
+                "human_stoplines": _human_stoplines(),
+                "suggested_commands": [],
+                "cleanup_ssot": CLEANUP_SSOT,
+            }
+        eligible = (
+            _cleanup_local_branches(inventory["stdout"], current_branch=current_branch)
+            if scope == "local"
+            else _cleanup_remote_branches(inventory["stdout"], remote_base=base_refs["remote"])
+        )
+        unverified[scope] = sorted(set(eligible) - set(merged))
+    has_candidates = bool(local_branches or remote_branches)
+    has_unverified = bool(unverified["local"] or unverified["remote"])
+
     return {
-        "status": "action_available" if local_branches or remote_branches else "ok",
-        "reason": "merged_cleanup_candidates" if local_branches or remote_branches else "nothing_to_clean",
+        "status": (
+            "action_available" if has_candidates else "delegation_required" if has_unverified else "ok"
+        ),
+        "reason": (
+            "merged_cleanup_candidates" if has_candidates
+            else "nonancestor_branches_unverified" if has_unverified else "nothing_to_clean"
+        ),
         "repo": "<REPO>",
         "current_branch": current_branch,
         "base_refs": base_refs,
         "local_merged_branches": local_branches,
         "remote_merged_branches": remote_branches,
+        "unverified_local_branches": unverified["local"],
+        "unverified_remote_branches": unverified["remote"],
+        "plan_scope": "ancestry_only",
+        "cleanup_verified": False,
         "human_stoplines": _human_stoplines(),
         "suggested_commands": suggested,
         "cleanup_ssot": CLEANUP_SSOT,
         "cleanup_ssot_command": CLEANUP_SSOT_COMMAND,
+        "cleanup_ssot_check_command": CLEANUP_SSOT_CHECK_COMMAND,
         "cleanup_ssot_command_note": CLEANUP_SSOT_COMMAND_NOTE,
         "apply_policy": {
             "default": "plan_only",

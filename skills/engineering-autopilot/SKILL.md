@@ -58,6 +58,8 @@ python -m engineering_brain closeout --repo . --json
 - runtime install copy は repo-owned source から同期する projection として扱う。
 - Codex / Claude Code の runtime install copy との差分確認は `python -m engineering_brain skill-sync --target all --json` で行う。
 - `engineering_brain run` は既定では計画 packet を返す。verification を実行する時は `--closeout` を明示する。
+- PR・マージ・後片付けまで依頼された場合、既存の `pr-lifecycle-orchestrator` を進行管理の正本として使う。`run --orchestrator-root <PROJECTS_ROOT> --run-id <RUN_ID> --lifecycle-state <PRIVATE_RUN_DIR>/lifecycle.json` で同じrepo・HEAD・taskへ接続し、返されたstateを既存の進行管理へ渡して作業を続ける。runtime一覧に入口がない時も、Projects正本の `shared/skills/pr-lifecycle-orchestrator/SKILL.md` を確認し、新しい実行器を作らない。
+- `status` はローカル工程、`external_status` は外部操作の停止線である。計画だけ・ローカル検証成功だけで依頼全体を完了扱いにしない。接続時に証拠や承認は生成されないため、既存の進行管理へ実測証拠を段階ごとに集め、操作別承認を確認する。
 - GCP/Vertex/Cloud Run/Workflowsでは `async_orchestration_evidence_gate`、OCR/蒸留/量子化では `structured_model_evaluation_gate` を実行証拠付きで確認する。
 
 ## 現在の範囲
