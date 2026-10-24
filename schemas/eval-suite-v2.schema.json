@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/eval-suite-v2.schema.json",
+  "title": "Engineering Brain Evaluation Runner Suite v2",
+  "description": "実行者へ渡す評価設定。正解、採点基準、期待出力は含めない。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "suite_id",
+    "suite_version",
+    "baseline_arm_id",
+    "arms",
+    "cases"
+  ],
+  "properties": {
+    "schema_version": {"const": "eval-suite-v2"},
+    "suite_id": {"$ref": "#/$defs/id"},
+    "suite_version": {"type": "integer", "minimum": 1},
+    "description": {"type": "string"},
+    "baseline_arm_id": {"$ref": "#/$defs/id"},
+    "random_seed": {"type": "integer", "minimum": 0},
+    "arms": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/arm"}
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/case"}
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "arm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "model",
+        "workflow",
+        "tool_profile",
+        "system_prompt_binding_status"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "model": {"type": "string", "minLength": 1},
+        "model_revision": {"type": "string", "minLength": 1},
+        "workflow": {"type": "string", "minLength": 1},
+        "tool_profile": {"type": "string", "minLength": 1},
+        "system_prompt_binding_status": {"enum": ["verified", "unresolved"]},
+        "system_prompt_hash": {"$ref": "#/$defs/sha256"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "integer", "boolean", "null"]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"system_prompt_binding_status": {"const": "verified"}},
+            "required": ["system_prompt_binding_status"]
+          },
+          "then": {"required": ["system_prompt_hash"]}
+        }
+      ]
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "split",
+        "domain",
+        "prompt",
+        "evidence_bundle",
+        "response_contract",
+        "rubric_labels"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "split": {"enum": ["development", "validation", "held_out"]},
+        "domain": {"type": "string", "minLength": 1},
+        "prompt": {"type": "string", "minLength": 1},
+        "prompt_hash": {"$ref": "#/$defs/sha256"},
+        "evidence_bundle": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/evidence"}
+        },
+        "response_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required_sections", "prohibited_actions"],
+          "properties": {
+            "required_sections": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            },
+            "prohibited_actions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "rubric_labels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "allowed_tools": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "time_limit_seconds": {"type": "integer", "minimum": 1},
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "content"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "content": {"type": "string", "minLength": 1},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "source": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

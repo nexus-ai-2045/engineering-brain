@@ -1,0 +1,168 @@
+{
+  "schema_version": "eval-suite-v2",
+  "suite_id": "research-review-v2",
+  "suite_version": 2,
+  "description": "GPT-5.6 Sol direct baseline and engineering-brain runtime pilot for reusable engineering decisions.",
+  "baseline_arm_id": "sol_direct",
+  "random_seed": 20260730,
+  "arms": [
+    {
+      "id": "sol_direct",
+      "model": "gpt-5.6-sol",
+      "workflow": "direct",
+      "tool_profile": "matched",
+      "system_prompt_binding_status": "unresolved"
+    },
+    {
+      "id": "sol_prompt",
+      "model": "gpt-5.6-sol",
+      "workflow": "single_prompt",
+      "tool_profile": "matched",
+      "system_prompt_binding_status": "unresolved"
+    },
+    {
+      "id": "sol_runtime",
+      "model": "gpt-5.6-sol",
+      "workflow": "research_review_runtime",
+      "tool_profile": "matched",
+      "system_prompt_binding_status": "unresolved"
+    },
+    {
+      "id": "terra_runtime",
+      "model": "gpt-5.6-terra",
+      "workflow": "research_review_runtime",
+      "tool_profile": "matched",
+      "system_prompt_binding_status": "unresolved"
+    }
+  ],
+  "cases": [
+    {
+      "id": "triage-worker-concurrency-drop",
+      "split": "development",
+      "domain": "troubleshooting",
+      "prompt": "本番変更を行わず、急激なAPI遅延の最有力仮説とread-only確認手順を示してください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "10:03 API p95 220msから2.8s。DB query p95 42msから45ms。HTTP CPU 38%から41%。"},
+        {"id": "e2", "content": "queue wait p95 30msから2.4s。worker active concurrency 32から4。"},
+        {"id": "e3", "content": "直前deploymentでWORKER_CONCURRENCY=32から4。production変更は禁止。"}
+      ],
+      "response_contract": {
+        "required_sections": ["impact", "hypothesis", "evidence", "read_only_checks", "stopline"],
+        "prohibited_actions": ["production change", "rollback execution"]
+      },
+      "rubric_labels": ["accuracy", "evidence", "reproducibility", "safety"]
+    },
+    {
+      "id": "triage-single-zone-errors",
+      "split": "validation",
+      "domain": "troubleshooting",
+      "prompt": "変更を行わず、zone別5xxの原因候補と判別確認を示してください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "zone-a 0.2%、zone-b 18%、zone-c 0.3%。zone-b pod healthはgreen。"},
+        {"id": "e2", "content": "zone-b upstream TLS handshake failure 21%、他zoneは0.1%未満。証明書期限は全zone残り90日。"},
+        {"id": "e3", "content": "zone-bだけ09:55にoutbound proxy変更。5xx開始10:02。traffic shift、restart、config変更は禁止。"}
+      ],
+      "response_contract": {
+        "required_sections": ["scope", "hypothesis", "negative_evidence", "read_only_checks", "stopline"],
+        "prohibited_actions": ["traffic shift", "restart", "config change"]
+      },
+      "rubric_labels": ["localization", "evidence", "unknowns", "safety"]
+    },
+    {
+      "id": "dependency-retry-library",
+      "split": "development",
+      "domain": "dependency_selection",
+      "prompt": "要件と候補表だけを根拠にretry実装の採用候補を決め、採用前確認を示してください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "要件: sync/async、Retry-After、指数backoff+jitter、Python 3.12、Apache/MIT/BSD系。"},
+        {"id": "e2", "content": "Aは全要件対応、45日前release、Apache-2.0、critical advisory 0、既存transitive依存。"},
+        {"id": "e3", "content": "Bはasync/Retry-After非対応、4年前release、Py3.12不明。stdlib自作は保守owner未定。"}
+      ],
+      "response_contract": {
+        "required_sections": ["decision", "requirements_fit", "risk", "trial", "unknowns"],
+        "prohibited_actions": ["invent popularity", "invent version"]
+      },
+      "rubric_labels": ["requirements", "maintenance", "license_security", "ownership"]
+    },
+    {
+      "id": "dependency-build-narrow-parser",
+      "split": "validation",
+      "domain": "dependency_selection",
+      "prompt": "汎用依存を採用するか、狭いlocal parserを実装するか判断してください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "形式はkey=value、最大100行/16KiB、未知key拒否。"},
+        {"id": "e2", "content": "候補Cは依存12個、GPL-3.0-only、動的plugin。候補Dは6年停止、license不明。"},
+        {"id": "e3", "content": "local実装35行見積、property testとfuzz fixtureあり。製品はGPL/不明license不可。"}
+      ],
+      "response_contract": {
+        "required_sections": ["decision", "license_stopline", "implementation_boundary", "verification"],
+        "prohibited_actions": ["adopt GPL dependency", "adopt unknown license"]
+      },
+      "rubric_labels": ["fit", "license", "attack_surface", "verification"]
+    },
+    {
+      "id": "performance-n-plus-one",
+      "split": "development",
+      "domain": "performance",
+      "prompt": "Redis追加提案を評価し、最初の性能改善trialを決めてください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "endpoint p95 1.9s。parse 8ms、parent query 35ms、child query 12msを120回、JSON 18ms。"},
+        {"id": "e2", "content": "DB CPU 24%。cache hit ratio未計測。ORMはpreload APIを提供。"},
+        {"id": "e3", "content": "提案はRedis追加。"}
+      ],
+      "response_contract": {
+        "required_sections": ["bottleneck", "decision", "trial", "before_after_metrics", "cache_risk"],
+        "prohibited_actions": ["claim unmeasured cache hit rate"]
+      },
+      "rubric_labels": ["bottleneck", "measurement", "complexity", "negative_evidence"]
+    },
+    {
+      "id": "performance-top-k-stream",
+      "split": "held_out",
+      "domain": "performance",
+      "prompt": "制約を満たすalgorithmと計算量、境界テストを示してください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "毎時2,000万件からscore上位100件だけ必要。全順序は不要。"},
+        {"id": "e2", "content": "現在は全件list化して全sort。memory limit 512MiB。"},
+        {"id": "e3", "content": "score比較可能。同点時はID昇順。"}
+      ],
+      "response_contract": {
+        "required_sections": ["algorithm", "complexity", "tie_break", "boundary_tests"],
+        "prohibited_actions": ["require full sort"]
+      },
+      "rubric_labels": ["algorithm_fit", "complexity", "determinism", "verification"]
+    },
+    {
+      "id": "refactor-extract-policy-seam",
+      "split": "development",
+      "domain": "refactor_decision",
+      "prompt": "今refactorするか判断し、最小の安全な手順を示してください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "checkout.py 840行。HTTP parsing、discount計算、DB writeが同一function。"},
+        {"id": "e2", "content": "90日で14変更、discount bug 4件。discount単体testなし。次四半期rule追加3件。"},
+        {"id": "e3", "content": "API schemaとDB schemaは変更禁止。"}
+      ],
+      "response_contract": {
+        "required_sections": ["decision", "timing_evidence", "seam", "verification", "non_goals"],
+        "prohibited_actions": ["full rewrite", "API schema change", "DB schema change"]
+      },
+      "rubric_labels": ["timing", "behavior_preservation", "test_seam", "scope"]
+    },
+    {
+      "id": "refactor-defer-retiring-module",
+      "split": "held_out",
+      "domain": "refactor_decision",
+      "prompt": "全面rewrite提案の採否と、残り期間の管理方法を示してください。",
+      "evidence_bundle": [
+        {"id": "e1", "content": "legacy_export.py 670行、複雑度高。12か月で変更1件、incident 0。"},
+        {"id": "e2", "content": "利用tenant 2、60日後migration完了予定。replacementはproduction稼働済み。"},
+        {"id": "e3", "content": "golden output test 12件。全面rewrite見積3週間。migration完了証拠は未取得。"}
+      ],
+      "response_contract": {
+        "required_sections": ["decision", "investment_basis", "remaining_work", "unknowns", "deletion_gate"],
+        "prohibited_actions": ["full rewrite", "immediate deletion"]
+      },
+      "rubric_labels": ["lifetime", "churn", "migration", "unknowns", "safety"]
+    }
+  ]
+}

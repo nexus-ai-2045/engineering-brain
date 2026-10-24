@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from .algorithms import infer_algorithm_inputs, select_algorithms
+from .gates import closeout_repo, evaluate_triggers, route_task
+from .registry import select_technology_sources
+from .skill_sync import compare_skill_targets, default_skill_source
+from .verification import plan_verification
+
+
+HUMAN_STOPLINES = [
+    "push",
+    "pr_create",
+    "merge",
+    "remote_branch_delete",
+    "visibility_change",
+    "credential_change",
+    "runtime_copy_direct_edit",
+]
+
+
+def build_run_packet(*, task: str, repo: Path, domain: str | None, closeout: bool) -> dict[str, Any]:
+    resolved_repo = repo.resolve()
+    route = route_task(task)
+    gates = evaluate_triggers(route["inferred_triggers"])
+    catalog_domain = domain or _infer_catalog_domain(task)
+    sources = select_technology_sources(catalog_domain) if catalog_domain else []
+    algorithm_signals, algorithm_constraints = infer_algorithm_inputs(task)
+    selected_algorithms = select_algorithms(
+        signals=algorithm_signals,
+        constraints=algorithm_constraints,
+    )
+    skill_source = default_skill_source()
+    skill_sync = compare_skill_targets(source_dir=skill_source)
+    verification_plan = plan_verification(resolved_repo)
+    closeout_payload: dict[str, Any]
+    if closeout:
+        closeout_payload = closeout_repo(resolved_repo)
+    else:
+        closeout_payload = {
+            "status": "skipped",
+            "reason": "run packet MVP defaults to planning; pass --closeout to execute local verification",
+        }
+
+    blocked = set(route["blocked_actions"])
+    blocked.update(HUMAN_STOPLINES)
+    status = "ready_for_local_work"
+    if closeout:
+        status = "local_verification_passed" if closeout_payload.get("overall") == "ok" else "local_verification_blocked"
+
+    return {
+        "packet_type": "engineering_autopilot_run",
+        "version": 1,
+        "task": task,
+        "repo": "<REPO>",
+        "status": status,
+        "external_status": "blocked_until_human_review",
+        "completion_scope": "local_only",
+        "route": route,
+        "gates": gates,
+        "catalog": {
+            "domain": catalog_domain,
+            "sources": [_serialize_source(source) for source in sources],
+            "adoption_rule": "candidate sources are advisory until adopted by test/docs/ADR",
+        },
+        "algorithms": {
+            "signals": algorithm_signals,
+            "constraints": algorithm_constraints,
+            "selection": selected_algorithms,
+            "selection_rule": "一致シグナルを加点し、avoid_when と candidate 状態を減点する。0点以下は提示しない。",
+            "unknown_rule": "シグナルを抽出できない場合は自動採用せず、algorithms select の入力を人間が補う。",
+        },
+        "skill_sync": skill_sync,
+        "closeout": closeout_payload,
+        "verification": {
+            "closeout_status": closeout_payload.get("overall", closeout_payload.get("status")),
+            "skill_sync_status": skill_sync["status"],
+            "profile_plan": {
+                "schema_version": verification_plan["schema_version"],
+                "detected_signals": verification_plan["detected_signals"],
+                "selected_profile_ids": [
+                    profile["id"] for profile in verification_plan["selected_profiles"]
+                ],
+                "summary": verification_plan["summary"],
+            },
+        },
+        "human_stoplines": sorted(blocked),
+        "next_actions": [
+            "review run packet",
+            "add or confirm targeted tests before implementation",
+            "keep push, PR, merge, cleanup, visibility, and credential actions behind current-turn approval",
+        ],
+    }
+
+
+def _infer_catalog_domain(task: str) -> str | None:
+    normalized = task.lower()
+    if any(token in normalized for token in ("python", "pytest", "cli")):
+        return "python"
+    if any(token in normalized for token in ("go", "golang")):
+        return "go"
+    if any(token in normalized for token in ("frontend", "react", "ui")):
+        return "frontend"
+    if any(token in normalized for token in ("azure", "az", "cloud")):
+        return "azure"
+    return None
+
+
+def _serialize_source(source: Any) -> dict[str, Any]:
+    return {
+        "id": source.id,
+        "domain": source.domain,
+        "status": source.status,
+        "source_refs": list(source.source_refs),
+        "use_when": list(source.use_when),
+        "adoption_route": source.adoption_route,
+        "gate_hint": source.gate_hint,
+        "insufficient_if": list(source.insufficient_if),
+    }

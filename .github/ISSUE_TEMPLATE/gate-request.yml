@@ -1,0 +1,49 @@
+name: Gate request
+description: source や運用知見を smoke / TDD / operation gate へ変換する
+title: "[gate] "
+labels: ["gate", "verification"]
+body:
+  - type: textarea
+    id: source
+    attributes:
+      label: Source / context
+      description: source catalog id、公式 docs、repo-local file、review comment など。
+    validations:
+      required: true
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Lane
+      options:
+        - design
+        - research
+        - preflight
+        - TDD
+        - implementation
+        - security
+        - operation
+        - PR readiness
+        - finish / cleanup
+    validations:
+      required: true
+  - type: textarea
+    id: check
+    attributes:
+      label: Proposed check
+      description: smoke / test / dry-run / review checklist / human acceptance の形で書く。
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Boundary
+      description: 外部送信、GitHub、cloud、DB、public endpoint、hook/settings/auth、credential、production への影響を書く。
+    validations:
+      required: true
+  - type: textarea
+    id: insufficient
+    attributes:
+      label: insufficient_if
+      description: 何が欠けたら gate として不十分かを書く。
+    validations:
+      required: true

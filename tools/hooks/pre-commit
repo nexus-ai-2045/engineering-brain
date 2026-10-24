@@ -1,0 +1,19 @@
+#!/bin/sh
+# Opt-in pre-commit hook: fail-closed on new tracked∧ignored contradictions.
+# Install: python -m engineering_brain hooks install --json
+# Wheel (do not use PyPI name): 
+#   python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.1.0/ai_ratchet_gate-0.1.0-py3-none-any.whl
+
+set -eu
+
+if ! command -v ai-ratchet-gate >/dev/null 2>&1 && ! python -m ai_ratchet_gate --help >/dev/null 2>&1; then
+  echo "[engineering-brain] ai-ratchet-gate が見つかりません。"
+  echo "  python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.1.0/ai_ratchet_gate-0.1.0-py3-none-any.whl"
+  exit 1
+fi
+
+if command -v ai-ratchet-gate >/dev/null 2>&1; then
+  ai-ratchet-gate --repo .
+else
+  python -m ai_ratchet_gate --repo .
+fi

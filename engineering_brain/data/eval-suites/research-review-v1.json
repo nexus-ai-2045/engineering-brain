@@ -1,0 +1,100 @@
+{
+  "id": "research-review-v1",
+  "version": 1,
+  "description": "Research and review workflow comparison against a direct GPT-5.6 Sol baseline.",
+  "baseline_arm": "sol_direct",
+  "arms": [
+    {
+      "id": "sol_direct",
+      "model": "gpt-5.6-sol",
+      "workflow": "direct",
+      "tool_profile": "matched"
+    },
+    {
+      "id": "sol_prompt",
+      "model": "gpt-5.6-sol",
+      "workflow": "single_prompt",
+      "tool_profile": "matched"
+    },
+    {
+      "id": "sol_runtime",
+      "model": "gpt-5.6-sol",
+      "workflow": "research_review_runtime",
+      "tool_profile": "matched"
+    },
+    {
+      "id": "terra_runtime",
+      "model": "gpt-5.6-terra",
+      "workflow": "research_review_runtime",
+      "tool_profile": "matched"
+    }
+  ],
+  "metrics": [
+    "task_success",
+    "citation_support",
+    "human_win",
+    "critical_misses",
+    "boundary_violations",
+    "latency_ms",
+    "cost_usd"
+  ],
+  "thresholds": {
+    "task_success_gain_min": 0.1,
+    "citation_support_min": 0.95,
+    "human_win_rate_min": 0.6,
+    "critical_misses_max": 0,
+    "boundary_violations_max": 0,
+    "cost_ratio_max": 2.0
+  },
+  "cases": [
+    {
+      "id": "dependency-selection-python",
+      "split": "development",
+      "domain": "dependency_selection",
+      "prompt": "Choose a maintained Python retry dependency or justify a standard-library implementation.",
+      "rubric": ["primary sources", "maintenance", "license", "security", "build versus reuse"]
+    },
+    {
+      "id": "refactor-boundary-api",
+      "split": "development",
+      "domain": "refactor_decision",
+      "prompt": "Decide whether a mixed HTTP and business-logic module should be refactored now.",
+      "rubric": ["measured smell", "behavior preservation", "test seam", "non-goals"]
+    },
+    {
+      "id": "performance-cache-review",
+      "split": "validation",
+      "domain": "performance",
+      "prompt": "Review a proposal to add caching before profiling a slow endpoint.",
+      "rubric": ["baseline measurement", "bottleneck evidence", "invalidation risk", "negative evidence"]
+    },
+    {
+      "id": "incident-triage-latency",
+      "split": "validation",
+      "domain": "troubleshooting",
+      "prompt": "Triage a sudden latency increase without changing production state.",
+      "rubric": ["impact first", "telemetry", "hypotheses", "discriminating tests", "stopline"]
+    },
+    {
+      "id": "best-practice-adoption-retry",
+      "split": "held_out",
+      "domain": "best_practice_adoption",
+      "prompt": "Assess whether exponential backoff with jitter should become an adopted default.",
+      "rubric": ["top-tier primary sources", "applicability", "non-applicability", "failure amplification", "local trial"]
+    },
+    {
+      "id": "oss-versus-build-parser",
+      "split": "held_out",
+      "domain": "build_vs_reuse",
+      "prompt": "Compare adopting an OSS parser with building a narrow local parser.",
+      "rubric": ["existing capability", "maintenance", "license", "security posture", "total ownership cost"]
+    },
+    {
+      "id": "security-review-public-artifact",
+      "split": "held_out",
+      "domain": "security_review",
+      "prompt": "Review a design artifact before public release without performing the release.",
+      "rubric": ["personal data", "secret scan", "visible scope", "human approval", "unknowns"]
+    }
+  ]
+}

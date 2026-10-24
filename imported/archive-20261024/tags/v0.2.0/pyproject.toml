@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "engineering-brain"
+version = "0.2.0"
+description = "Local-first development decision and assurance gates."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "jsonschema[format]>=4.20,<5",
+]
+
+[project.scripts]
+engineering-brain = "engineering_brain.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["engineering_brain*"]
+
+[tool.setuptools.package-data]
+engineering_brain = ["data/*.json", "data/*.yaml", "*.schema.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

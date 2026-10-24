@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/research-packet.schema.json",
+  "title": "Engineering Brain Research Packet",
+  "type": "object",
+  "required": ["packet_type", "version", "task", "repo", "domain", "candidates", "precedent_research", "decision", "human_stoplines", "unknowns"],
+  "properties": {
+    "packet_type": {"const": "engineering_brain_research"},
+    "version": {"const": 2},
+    "task": {"type": "string", "minLength": 1},
+    "repo": {"const": "<REPO>"},
+    "domain": {"type": "string", "minLength": 1},
+    "candidates": {"type": "array", "items": {"type": "object"}},
+    "precedent_research": {
+      "type": "object",
+      "required": ["skill", "source_owner", "role", "required_before", "decision_contract", "outcome", "evidence"],
+      "properties": {
+        "skill": {"const": "implementation-precedent-research"},
+        "source_owner": {"const": "nexus-ai-skills"},
+        "role": {"const": "consumer"},
+        "required_before": {
+          "type": "array",
+          "minItems": 4,
+          "prefixItems": [
+            {"const": "wrap"},
+            {"const": "extend"},
+            {"const": "adopt_oss"},
+            {"const": "build"}
+          ],
+          "items": false
+        },
+        "decision_contract": {
+          "type": "array",
+          "minItems": 4,
+          "prefixItems": [
+            {"const": "adopt"},
+            {"const": "revise"},
+            {"const": "reject"},
+            {"const": "hold"}
+          ],
+          "items": false
+        },
+        "outcome": {"enum": ["adopt", "revise", "reject", "hold", null]},
+        "evidence": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      },
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "required": ["status", "rationale", "rule"],
+      "properties": {
+        "status": {"enum": ["reuse", "wrap", "extend", "adopt_oss", "build", "hold", "rejected"]},
+        "rationale": {"type": "string"},
+        "rule": {"type": "string"}
+      }
+    },
+    "human_stoplines": {"type": "array", "items": {"type": "string"}},
+    "unknowns": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,28 @@
+name: engineering-autopilot
+version: 0.2.0
+status: repo-owned-source
+owner: nexus_ai
+language: ja
+runtime_install: synced
+entrypoint: SKILL.md
+description: engineering-brain CLI と docs/registry を使う approval-gated development lifecycle skill。
+commands:
+  - python -m engineering_brain route --task "<task>" --json
+  - python -m engineering_brain gate --trigger implementation --json
+  - python -m engineering_brain catalog --domain <domain> --json
+  - python -m engineering_brain algorithms list --json
+  - python -m engineering_brain algorithms select --signal <problem-signal> --json
+  - python -m engineering_brain algorithms compare --id <candidate-a> --id <candidate-b> --json
+  - python -m engineering_brain finish --json
+  - python -m engineering_brain hooks install --json
+  - python -m engineering_brain closeout --repo . --json
+stoplines:
+  - push
+  - pr_create
+  - merge
+  - remote_branch_delete
+  - local_branch_delete
+  - hook_install
+  - visibility_change
+  - credential_change
+  - runtime_install

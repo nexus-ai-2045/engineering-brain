@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "engineering-brain decision packet",
+  "type": "object",
+  "required": [
+    "task",
+    "mode",
+    "scope",
+    "selected_units",
+    "blocked_actions",
+    "done_when"
+  ],
+  "properties": {
+    "task": { "type": "string" },
+    "mode": { "enum": ["search", "implement", "review", "operate", "ideate", "decide"] },
+    "scope": { "type": "string" },
+    "selected_units": { "type": "array", "items": { "type": "string" } },
+    "blocked_actions": { "type": "array", "items": { "type": "string" } },
+    "done_when": { "type": "array", "items": { "type": "string" } }
+  }
+}

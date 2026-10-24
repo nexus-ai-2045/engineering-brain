@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexus-ai-2045.github.io/engineering-brain/schemas/pr-packet.schema.json",
+  "title": "Engineering Brain PR Packet",
+  "type": "object",
+  "required": [
+    "packet_type",
+    "version",
+    "repo",
+    "status",
+    "purpose",
+    "visible_scope",
+    "changes",
+    "checks",
+    "reinvention_check",
+    "unknowns",
+    "human_stoplines",
+    "merge",
+    "external_actions",
+    "pr_body_ja"
+  ],
+  "properties": {
+    "packet_type": {"const": "engineering_brain_pr"},
+    "version": {"const": 1},
+    "repo": {"const": "<REPO>"},
+    "status": {"const": "plan_only"},
+    "purpose": {"type": "string"},
+    "base_branch": {"type": ["string", "null"]},
+    "current_branch": {"type": ["string", "null"]},
+    "visible_scope": {
+      "type": "object",
+      "required": ["source", "files", "summary", "file_count"],
+      "properties": {
+        "source": {"type": "string"},
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["status", "path"],
+            "properties": {
+              "status": {"type": "string"},
+              "path": {"type": "string"},
+              "old_path": {"type": "string"},
+              "new_path": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "summary": {"type": "string"},
+        "file_count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "changes": {"type": "array", "items": {"type": "object"}},
+    "checks": {"type": "object"},
+    "run_packet": {"type": ["object", "null"]},
+    "research_packet": {"type": ["object", "null"]},
+    "reinvention_check": {
+      "type": "object",
+      "required": ["required", "decision", "reason"],
+      "properties": {
+        "required": {"type": "boolean"},
+        "decision": {"type": "string"},
+        "reason": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "unknowns": {"type": "array", "items": {"type": "string"}},
+    "human_stoplines": {"type": "array", "items": {"type": "string"}},
+    "merge": {
+      "type": "object",
+      "required": ["status", "allowed"],
+      "properties": {
+        "status": {"const": "承認待ち"},
+        "allowed": {"const": false},
+        "reason": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "external_actions": {
+      "type": "object",
+      "required": ["allowed", "performed", "reason"],
+      "properties": {
+        "allowed": {"const": false},
+        "performed": {"const": false},
+        "reason": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "pr_body_ja": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}
