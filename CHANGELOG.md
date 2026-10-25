@@ -13,6 +13,7 @@ public seed.
 
 ## Unreleased
 
+- `ai-ratchet-gate` の取得先を再構築後の Release `v0.2.0` の wheel に変え、CI で SHA-256 を固定した（旧 `v0.1.0` の URL は 404）。
 - Codex review on verification profile / closeout v2 を吸収。smoke を engineering-brain surface に限定、`json_status` で skill-sync drift を評価、repo profile は defaults へ extend、verify の未知 id を fail-closed、detect 信号を profile 由来にし、`not_applicable` evidence と PR packet の profile 投影を追加。
 - verification profile / closeout v2 を追加。`engineering_brain verify` と profile 駆動の evidence（pass / fail / not_run / not_applicable）を closeout に載せた。
 
