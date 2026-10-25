@@ -37,10 +37,10 @@ git diff --check
 git status --short --branch
 ```
 
-`ai-ratchet-gate` は PyPI 名では入れない。Release wheel を、venv を有効にした状態で入れます:
+`ai-ratchet-gate` は PyPI 名では入れない。Release wheel を、venv を有効にした状態で入れます（CI は URL と SHA-256 `95ebac0afbf91e1d4b3634b011680eeae58a85dc32e801b3bcbb7cfc41a0d4a8` の両方で固定）:
 
 ```bash
-python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.1.0/ai_ratchet_gate-0.1.0-py3-none-any.whl
+python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.2.0/ai_ratchet_gate-0.2.0-py3-none-any.whl
 ```
 
 `tools/run_repo_preflight.py` は upstream `repo-preflight` を呼び出す薄いラッパである（検査ロジックはコピーしない）。consistency は当面 `shadow`。

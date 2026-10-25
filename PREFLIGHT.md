@@ -22,12 +22,12 @@
 CONTRIBUTING.md の開発環境（venv）を先に作ります。
 
 ```bash
-python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.1.0/ai_ratchet_gate-0.1.0-py3-none-any.whl
+python -m pip install https://github.com/nexus-ai-2045/ai-ratchet-gate/releases/download/v0.2.0/ai_ratchet_gate-0.2.0-py3-none-any.whl
 ai-ratchet-gate --repo .
 python tools/run_repo_preflight.py --repo .
 ```
 
-- `ai-ratchet-gate` は PyPI 名では入れない（Release wheel URL のみ）。
+- `ai-ratchet-gate` は PyPI 名では入れない（Release wheel URL のみ。CI は SHA-256 `95ebac0afbf91e1d4b3634b011680eeae58a85dc32e801b3bcbb7cfc41a0d4a8` で固定）。
 - `tools/run_repo_preflight.py` は upstream `nexus-ai-2045/repo-preflight` を `.tools/repo-preflight` へ clone して実行する。検査ロジックはコピーしない。
 - consistency は当面 `shadow`。所見は観測し、merge 承認には使わない。
 - readiness_scan の `pass` / `blocked` は機械範囲のみ。push / PR / merge / visibility 変更の承認ではない。
