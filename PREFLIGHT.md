@@ -47,3 +47,5 @@ python tools/run_repo_preflight.py --repo .
 CI の `.github/workflows/preflight.yml` は、共通ゲート `nexus-ai-2045/repo-preflight` の `preflight-gate.yml` を SHA 固定で呼びます。このゲートは全 commit の作成者と記録者を公開名義の許可リスト（repo-preflight の `references/public-commit-identities.json`）と照合し、リストに無い名義があれば失敗します。名義の値は出力しません。
 
 固定版は v0.10.0（`5b7c774`）です（2026-10-25 に `44fdece` から上げた）。`44fdece` は GitHub の記録者（committer_only）を役割ごとに見ないため、PR の合成 merge commit と dependabot の branch を名義違いとして数えていました。
+
+`gates.yml` の「Checkout repo-preflight」も同じ v0.10.0（`5b7c774`）に固定します（2026-10-26 に `44fdece` から上げた）。preflight-gate・base-guard・gates の3か所は、同じタグ付きの SHA にそろえます。
