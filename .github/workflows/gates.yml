@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: nexus-ai-2045/repo-preflight
-          ref: 44fdece1634d4afb355639ad465375dca5e5c868
+          ref: fe2e90f91615a5e5ed3f9b2b497c99f5786e5847
           path: .tools/repo-preflight
           persist-credentials: false
       - name: pytest
