@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import engineering_brain.review as review
 from engineering_brain.cli import main
@@ -166,7 +166,7 @@ def test_pr_body_contains_japanese_sections() -> None:
 
 
 def test_pr_packet_redacts_personal_paths(monkeypatch) -> None:
-    personal = "/".join(["", "Users", "fixture"]) + "/Projects/demo/file.py"
+    personal = PurePosixPath("/", "Users", "fixture", "Projects", "demo", "file.py").as_posix()
     monkeypatch.setattr(review, "closeout_repo", lambda repo: {"overall": "ok"})
     monkeypatch.setattr(review, "scan_personal_paths", lambda repo: [])
     monkeypatch.setattr(review, "detect_default_branch", lambda repo: "main")
@@ -190,7 +190,7 @@ def test_pr_packet_redacts_personal_paths(monkeypatch) -> None:
     )
 
     blob = json.dumps(packet, ensure_ascii=False)
-    assert "/".join(["", "Users", "fixture"]) not in blob
+    assert PurePosixPath("/", "Users", "fixture").as_posix() not in blob
     assert "alice" not in blob
     assert "<USER_HOME>" in packet["purpose"]
 
@@ -492,7 +492,7 @@ def test_cli_pr_accepts_explicit_base(monkeypatch, capfd) -> None:
 
 
 def test_redact_personal_paths_helper() -> None:
-    raw = "see " + "/".join(["", "home", "fixture"]) + "/work/repo"
+    raw = "see " + PurePosixPath("/", "home", "fixture", "work", "repo").as_posix()
     assert redact_personal_paths(raw) == "see <USER_HOME>/work/repo"
 
 
